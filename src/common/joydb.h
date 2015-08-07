@@ -1,0 +1,220 @@
+#ifndef JOYDB_H
+#define JOYDB_H
+
+
+#define JOYDB_END_TOKEN 65536
+#define JOYDB_STICK_AXES (JOYDB_END_TOKEN+1)
+#define JOYDB_WHEEL_AXES (JOYDB_END_TOKEN+2)
+#define JOYDB_FOOT_PADDLE_AXES (JOYDB_END_TOKEN+3)
+#define JOYDB_SHIFT_PADDLE_BUTTONS (JOYDB_END_TOKEN+4)
+#define JOYDB_SHOULDER_AXES (JOYDB_END_TOKEN+5)
+#define JOYDB_SHOULDER_BUTTONS (JOYDB_END_TOKEN+6)
+#define JOYDB_GENERIC_BUTTONS (JOYDB_END_TOKEN+7)
+#define JOYDB_DPAD_AXES (JOYDB_END_TOKEN+8)
+#define JOYDB_DPAD_BUTTONS (JOYDB_END_TOKEN+9)
+#define JOYDB_STICK_PRESS (JOYDB_END_TOKEN+10)
+
+
+
+const char *name0000 = "Logitech WingMan Formula Force";
+int desc0000[] =
+{
+  JOYDB_STICK_AXES,
+  JOYDB_WHEEL_AXES, 0,
+  JOYDB_FOOT_PADDLE_AXES, 2, 1,
+  JOYDB_SHIFT_PADDLE_BUTTONS, 0, 2,
+  JOYDB_SHOULDER_AXES,
+  JOYDB_SHOULDER_BUTTONS,
+  JOYDB_GENERIC_BUTTONS, 1,3,4,5,
+  JOYDB_DPAD_AXES,
+  JOYDB_DPAD_BUTTONS,
+  JOYDB_STICK_PRESS,
+  JOYDB_END_TOKEN
+};
+
+const char *name0001 = "GreenAsia Inc.    USB Joystick     ";
+int desc0001[] =
+{
+  JOYDB_STICK_AXES, 0, 1, 3, 2,
+  JOYDB_WHEEL_AXES,
+  JOYDB_FOOT_PADDLE_AXES,
+  JOYDB_SHIFT_PADDLE_BUTTONS,
+  JOYDB_SHOULDER_AXES,
+  JOYDB_SHOULDER_BUTTONS, 4, 6, 5, 7,
+  JOYDB_GENERIC_BUTTONS, 0, 1, 2, 3,
+  JOYDB_DPAD_AXES, 4, 5,
+  JOYDB_DPAD_BUTTONS,
+  JOYDB_STICK_PRESS, 10, 11,
+  JOYDB_END_TOKEN
+};
+
+const char *name0002 = "Logitech WingMan RumblePad";
+int desc0002[] =
+{
+  JOYDB_STICK_AXES, 0, 1, 3, 4,
+  JOYDB_WHEEL_AXES,
+  JOYDB_FOOT_PADDLE_AXES,
+  JOYDB_SHIFT_PADDLE_BUTTONS,
+  JOYDB_SHOULDER_AXES,
+  JOYDB_SHOULDER_BUTTONS, 6, 7,
+  JOYDB_GENERIC_BUTTONS, 0, 1, 2, 3,
+  JOYDB_DPAD_AXES, 5, 6,
+  JOYDB_DPAD_BUTTONS,
+  JOYDB_STICK_PRESS,
+  JOYDB_END_TOKEN
+};
+
+const char *name0003 = "ThrustMaster Dual Power GamePad      ";
+int desc0003[] =
+{
+  JOYDB_STICK_AXES, 0, 1, 3, 4,
+  JOYDB_WHEEL_AXES,
+  JOYDB_FOOT_PADDLE_AXES,
+  JOYDB_SHIFT_PADDLE_BUTTONS,
+  JOYDB_SHOULDER_AXES,
+  JOYDB_SHOULDER_BUTTONS, 14, 15,
+  JOYDB_GENERIC_BUTTONS, 8, 9, 10, 11, 12, 13, 
+  JOYDB_DPAD_AXES,
+  JOYDB_DPAD_BUTTONS, 2, 3, 0, 1,
+  JOYDB_STICK_PRESS, 6, 7,
+  JOYDB_END_TOKEN
+};
+
+const char *name0004 = "Microsoft X-Box pad (US)";
+int desc0004[] =
+{
+  JOYDB_STICK_AXES, 0, 1, 3, 4,
+  JOYDB_WHEEL_AXES,
+  JOYDB_FOOT_PADDLE_AXES,
+  JOYDB_SHIFT_PADDLE_BUTTONS,
+  JOYDB_SHOULDER_AXES, 2, 5,
+  JOYDB_SHOULDER_BUTTONS,
+  JOYDB_GENERIC_BUTTONS, 8, 9, 10, 11, 12, 13,
+  JOYDB_DPAD_AXES, 6, 7,
+  JOYDB_DPAD_BUTTONS,
+  JOYDB_STICK_PRESS, 7, 8,
+  JOYDB_END_TOKEN
+};
+
+const char *name0005  = "Saitek Saitek P3000 RF Game-Pad";
+const char *name0005b = "Saitek P3000 Wireless Gamepad";
+int desc0005[] =
+{
+  JOYDB_STICK_AXES, 0, 1, 2, 3,
+  JOYDB_WHEEL_AXES,
+  JOYDB_FOOT_PADDLE_AXES,
+  JOYDB_SHIFT_PADDLE_BUTTONS,
+  JOYDB_SHOULDER_AXES, 
+  JOYDB_GENERIC_BUTTONS, 0,1,2,3,4,5,
+  JOYDB_SHOULDER_BUTTONS, 6, 7,
+  JOYDB_DPAD_AXES, 4, 5,
+  JOYDB_DPAD_BUTTONS,
+  JOYDB_STICK_PRESS, 8, 9,
+  JOYDB_END_TOKEN
+};
+
+const char *name0006 = "Sony PLAYSTATION(R)3 Controller";
+int desc0006[] =
+{
+  JOYDB_STICK_AXES, 0, 1, 2, 3,
+  JOYDB_WHEEL_AXES,
+  JOYDB_FOOT_PADDLE_AXES,
+  JOYDB_SHIFT_PADDLE_BUTTONS,
+  JOYDB_SHOULDER_AXES, 12, 14, 13, 15,
+  JOYDB_SHOULDER_BUTTONS, 8, 10, 9, 11,
+  JOYDB_GENERIC_BUTTONS, 12, 13, 14, 15,
+  JOYDB_DPAD_AXES, 9, 8,
+  JOYDB_DPAD_BUTTONS, 7, 5, 6, 4,
+  JOYDB_STICK_PRESS, 1, 2,
+  JOYDB_END_TOKEN
+};
+
+const char *name0007  = "Microsoft\xae Microsoft\xae SideWinder\xae Plug & Play Game Pad";
+int desc0007[] =
+{
+ JOYDB_STICK_AXES,
+ JOYDB_WHEEL_AXES,
+ JOYDB_FOOT_PADDLE_AXES,
+ JOYDB_SHIFT_PADDLE_BUTTONS,
+ JOYDB_SHOULDER_AXES,
+ JOYDB_GENERIC_BUTTONS, 0,1,2,3,
+ JOYDB_SHOULDER_BUTTONS, 4, 5,
+ JOYDB_DPAD_AXES, 0, 1,
+ JOYDB_DPAD_BUTTONS,
+ JOYDB_STICK_PRESS,
+ JOYDB_END_TOKEN
+};
+
+const char *name0008 = "Logitech WingMan Formula GP";
+int desc0008[] =
+{
+  JOYDB_STICK_AXES,
+  JOYDB_WHEEL_AXES, 0,
+  JOYDB_FOOT_PADDLE_AXES, 1,
+  JOYDB_SHIFT_PADDLE_BUTTONS, 0, 1,
+  JOYDB_SHOULDER_AXES,
+  JOYDB_SHOULDER_BUTTONS,
+  JOYDB_GENERIC_BUTTONS, 2,3,4,5,
+  JOYDB_DPAD_AXES,
+  JOYDB_DPAD_BUTTONS,
+  JOYDB_STICK_PRESS,
+  JOYDB_END_TOKEN
+};
+
+
+const char *joydb_names[] =
+{
+  name0000,
+  name0001,
+  name0002,
+  name0003,
+  name0004,
+  name0005,
+  name0005b,
+  name0006,
+  name0007,
+  name0008,
+  0
+};
+
+int *joydb_descs[] =
+{
+  desc0000,
+  desc0001,
+  desc0002,
+  desc0003,
+  desc0004,
+  desc0005,
+  desc0005,
+  desc0006,
+  desc0007,
+  desc0008,
+  0
+};
+
+
+inline const int *joydb_search_cmd(int cmd, const int *desc)
+{
+  const int *i=desc;
+  while (*i != JOYDB_END_TOKEN && *i != cmd)
+    i++;
+  if (*i == JOYDB_END_TOKEN) return 0;
+  return i;
+}
+
+
+inline const int *joydb_get(int cmd, const int *desc, int *cnt)
+{
+  const int *retval = joydb_search_cmd(cmd, desc);
+  assert(retval);
+  retval++;
+
+  const int *i=retval;
+  while (*i < JOYDB_END_TOKEN) i++;
+  *cnt = (i-retval);
+  return retval;
+};
+
+
+#endif
+

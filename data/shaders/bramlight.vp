@@ -1,0 +1,40 @@
+varying vec4 diffuseColor, ambientColor, specularColor;
+varying vec3 surfaceNormal, lightDir, halfVector;
+
+void main (void)
+{
+  gl_Position = ftransform();
+  gl_FrontColor = vec4(1.0,1.0,1.0,1.0);
+  gl_TexCoord[0] = gl_MultiTexCoord0;
+
+  vec4 ecPosition = gl_ModelViewMatrix*gl_Vertex;
+
+  gl_TexCoord[1].s = dot(ecPosition, gl_EyePlaneS[1]);
+  gl_TexCoord[1].t = dot(ecPosition, gl_EyePlaneT[1]);
+  gl_TexCoord[1].p = dot(ecPosition, gl_EyePlaneR[1]);
+  gl_TexCoord[1].q = dot(ecPosition, gl_EyePlaneQ[1]);
+
+  gl_TexCoord[2].s = dot(ecPosition, gl_EyePlaneS[1]);
+  gl_TexCoord[2].t = dot(ecPosition, gl_EyePlaneT[1]);
+  gl_TexCoord[2].p = dot(ecPosition, gl_EyePlaneR[1]);
+  gl_TexCoord[2].q = dot(ecPosition, gl_EyePlaneQ[1]);
+
+  gl_TexCoord[1] = gl_TextureMatrix[1] * gl_TexCoord[1];
+  gl_TexCoord[2] = gl_TextureMatrix[2] * gl_TexCoord[2];
+
+  surfaceNormal = normalize(gl_NormalMatrix * gl_Normal);
+  vec3 aux = vec3(gl_LightSource[0].position - ecPosition);
+  lightDir = normalize(aux);
+  halfVector = normalize(gl_LightSource[0].halfVector.xyz);
+
+  diffuseColor = gl_FrontMaterial.diffuse * gl_LightSource[0].diffuse;
+  ambientColor = gl_FrontMaterial.ambient * gl_LightSource[0].ambient;
+
+  float NdotL = max(dot(surfaceNormal,lightDir), 0.0);
+  if (NdotL > 0.0)
+  {
+    float NdotHV = max(dot(surfaceNormal,halfVector), 0.0);
+//    specularColor = gl_FrontMaterial.specular * gl_LightSource[0].specular * pow(NdotHV, gl_FrontMaterial.shininess);
+  }
+}
+ 

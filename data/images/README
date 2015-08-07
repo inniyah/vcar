@@ -1,0 +1,4 @@
+
+To blur the alpha channel of a sgi rgba file, use ImageMagick like this:
+convert -channel Alpha -gaussian 2 test.rgb new.rgb
+
