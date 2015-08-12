@@ -1,0 +1,23 @@
+SocketCAN provides a virtual CAN port driver:
+
+sudo modprobe vcan
+sudo ip link add dev vcan0 type vcan
+sudo ip link set up vcan0
+
+SocketCAN is available on modern Linux distributions
+You can use can-utils for testing purposes.
+
+You can check that the CAN Bus is working by doing:
+
+In one terminal:
+$ candump vcan0
+
+In another terminal:
+$ cansend vcan0 "5A1#11.2233.44556677.88 / 123#DEADBEEF / 5AA# / 123##1 / 213##311"
+
+You should read the following in the first terminal:
+
+$ candump vcan0
+  vcan0  5A1   [8]  11 22 33 44 55 66 77 88
+
+More Info: http://elinux.org/CAN_Bus
