@@ -8,26 +8,26 @@
 #include "dynamicobject.h"
 #include "carobject.h"
 
-#define CLENGTH 1.50		// chassis length
-//#define CWIDTH 0.34		// chassis width
-#define CWIDTH 0.68		// chassis width
-#define CHEIGHT 0.05		// chassis height
-#define CMASS 4			// chassis mass
+#define CLENGTH 1.50        // chassis length
+//#define CWIDTH 0.34         // chassis width
+#define CWIDTH 0.68         // chassis width
+#define CHEIGHT 0.05        // chassis height
+#define CMASS 4             // chassis mass
 
-#define WMASS 0.20		// wheel mass
-#define WHEELW 0.2		// wheel width
-#define WHEELRAD 0.2		// wheel radius
-#define WHEELDROP 0.07		// dist from axle to chassis
-#define HWHEELBASE 0.6		// half the wheelbase
-#define HTRACK 0.45	 	// half the track (distance L/R wheels)
+#define WMASS 0.20          // wheel mass
+#define WHEELW 0.2          // wheel width
+#define WHEELRAD 0.2        // wheel radius
+#define WHEELDROP 0.07      // dist from axle to chassis
+#define HWHEELBASE 0.6      // half the wheelbase
+#define HTRACK 0.45         // half the track (distance L/R wheels)
 
-#define WISHBONEY 0.15		// how far outward is wishbone from chassis axis
-#define WISHBONEZ 0.06		// how far up/dn is wishbone from chassis axis
-#define WISHBONELEN 0.195	// how far tip of wishbone from pivot (spindle to chassis)
-#define SPINDLEY 0.35		// how far outward is wheel spindle from chassis axis
-#define AXLELEN 0.76		// length of rear axle
-#define AXLERADIUS 0.03		// radius of rear axle, at thick end
-#define COILLEN 0.22		// length of coil sping
+#define WISHBONEY 0.15      // how far outward is wishbone from chassis axis
+#define WISHBONEZ 0.06      // how far up/dn is wishbone from chassis axis
+#define WISHBONELEN 0.195   // how far tip of wishbone from pivot (spindle to chassis)
+#define SPINDLEY 0.35       // how far outward is wheel spindle from chassis axis
+#define AXLELEN 0.76        // length of rear axle
+#define AXLERADIUS 0.03     // radius of rear axle, at thick end
+#define COILLEN 0.22        // length of coil sping
 
 
 CarObject::CarObject
@@ -67,14 +67,12 @@ snapshot_available(false)
   branch->addKid(chassis_trf);
   chassis_trf->addKid(bodymodel);
   int i;
-  for (i=0; i<4; i++)
-  {
+  for (i=0; i<4; i++) {
     wheel_trfs[i] = new ssgTransform();
     branch->addKid(wheel_trfs[i]);
     wheel_trfs[i]->addKid(wheelmodel);
   }
-  for (i=0; i<4; i++)
-  {
+  for (i=0; i<4; i++) {
     wishbone_trfs[i] = new ssgTransform();
     wishbone_trfs[i]->setName("wishbone_trf");
     wishbone_trfs[i]->addKid(wishbonemodel);
@@ -143,8 +141,7 @@ snapshot_available(false)
 #endif
 
   // wheel bodies
-  for (i=0; i<4; i++)
-  {
+  for (i=0; i<4; i++) {
     wheel_bodies[i] = dBodyCreate(world);
     dBodySetAutoDisableFlag(wheel_bodies[i], false);
     dQuaternion q;
@@ -153,8 +150,7 @@ snapshot_available(false)
     dMassSetSphere (&m,1,WHEELRAD);
     dMassAdjust (&m,WMASS);
     dBodySetMass (wheel_bodies[i],&m);
-    if (i<=2 && 0) 
-    {
+    if (i<=2 && 0) {
       dBodySetFiniteRotationMode(wheel_bodies[i], true); // Improve accuracy for fast spinning bodies
       dBodySetFiniteRotationAxis(wheel_bodies[i], 0,0,0);
     }
@@ -168,8 +164,7 @@ snapshot_available(false)
   dBodySetPosition (wheel_bodies[3],initialpos[0]-HWHEELBASE,initialpos[1]-HTRACK,initialpos[2]-WHEELDROP); // right rear
 
   // front and back wheel hinges
-  for (i=0; i<4; i++)
-  {
+  for (i=0; i<4; i++) {
     joint[i] = dJointCreateHinge2 (world,0);
     dJointAttach (joint[i],chassis_body,wheel_bodies[i]);
     const dReal *a = dBodyGetPosition (wheel_bodies[i]);
@@ -180,8 +175,7 @@ snapshot_available(false)
   }
 
   // set joint suspension
-  for (i=0; i<4; i++)
-  {
+  for (i=0; i<4; i++) {
 //    dJointSetHinge2Param (joint[i],dParamSuspensionERP,0.35);
 //    dJointSetHinge2Param (joint[i],dParamSuspensionCFM,0.02);
     dJointSetHinge2Param (joint[i],dParamSuspensionERP,0.22);
@@ -189,8 +183,7 @@ snapshot_available(false)
   }
 
   // lock back wheels along the steering axis
-  for (i=2; i<=3; i++)
-  {
+  for (i=2; i<=3; i++) {
     // set stops to make sure wheels always stay in alignment
     dJointSetHinge2Param (joint[i],dParamLoStop,0);
     dJointSetHinge2Param (joint[i],dParamHiStop,0);
@@ -206,8 +199,9 @@ snapshot_available(false)
   dSpaceAdd (space,chassis_geom);
   dSpaceAdd (space,axle_geom);
 //  dSpaceAdd (space,frontend_geom);
-  for (i=0; i<4; i++)
+  for (i=0; i<4; i++) {
     dSpaceAdd (space,wheel_geoms[i]);
+  }
 }
 
 
@@ -253,8 +247,7 @@ bool CarObject::IsStationary(void) const
 }
 
 
-void CarObject::Simulate(float dt)
-{
+void CarObject::Simulate(float dt) {
   // Get velocity of rear wheels.
   dReal v0 = -dJointGetHinge2Param (joint[2],dParamVel2);
   dReal v1 = -dJointGetHinge2Param (joint[2],dParamVel2);
@@ -265,51 +258,41 @@ void CarObject::Simulate(float dt)
   dReal fmax   = 0.0;
 
   // Are we in reverse gear?
-  if (IsStationary())
-  {
+  if (IsStationary()) {
     stationarytime += dt;
     if (!ebrake && (accelerator > 0.7f || brake > 0.7))
       wheelspintime += dt;
     else
       wheelspintime = 0;
-  }
-  else
-  {
+  } else {
     stationarytime = 0;
     wheelspintime = 0;
   }
   // HACK: Turn Table has rotational velocity, which is hard to interpret.
   // We simply assume we are stationary, so reverse gear is not blocked.
   bool hack = (ground_object && ground_object->name == "turntablewheel");
-  if ((stationarytime>0.15||hack) && brake>0)
+  if ((stationarytime>0.15||hack) && brake>0) {
     reversegear=true;
-  if (brake==0)
+  }
+  if (brake==0) {
     reversegear=false;
+  }
 
   // Are we free rolling?
-  if (brake==0 && accelerator==0 && ebrake==false)
-  { 
+  if (brake==0 && accelerator==0 && ebrake==false) { 
     // apply a little engine braking
     speedv = 0.90 * currentv;
     fmax = 0.5;
-  }
-  else
-  {
+  } else {
     // Are we braking?
-    if ((brake>0 && !reversegear) || (accelerator>0 && reversegear) || ebrake)
-    {
+    if ((brake>0 && !reversegear) || (accelerator>0 && reversegear) || ebrake) {
       speedv = 0;
       fmax = 50;
-    }
-    else
-    {
-      if (reversegear)
-      {
+    } else {
+      if (reversegear) {
         speedv = -70.0 * brake;
         fmax = 1.0 + 3.0 * brake;
-      }
-      else
-      {
+      } else {
         speedv =  70.0 * accelerator;
         fmax = 1.0 + 3.0 * accelerator;
       }
@@ -317,8 +300,7 @@ void CarObject::Simulate(float dt)
   }
 
   // motor: drive rear wheels.
-  for (int jnr=2; jnr<=3; jnr++)
-  {
+  for (int jnr=2; jnr<=3; jnr++) {
     dJointSetHinge2Param (joint[jnr],dParamVel2,-speedv);
     dJointSetHinge2Param (joint[jnr],dParamFMax2,fmax);
   }
@@ -328,11 +310,19 @@ void CarObject::Simulate(float dt)
   dReal curr1 = dJointGetHinge2Angle1(joint[1]);
   v0 = steerv - curr0;
   v1 = steerv - curr1;
-  if (v0 > 0.1) v0 = 0.1;
-  if (v0 < -0.1) v0 = -0.1;
+  if (v0 > 0.1) {
+    v0 = 0.1;
+  }
+  if (v0 < -0.1) {
+    v0 = -0.1;
+  }
   v0 *= 30.0;
-  if (v1 > 0.1) v1 = 0.1;
-  if (v1 < -0.1) v1 = -0.1;
+  if (v1 > 0.1) {
+    v1 = 0.1;
+  }
+  if (v1 < -0.1) {
+    v1 = -0.1;
+  }
   v1 *= 30.0;
   dJointSetHinge2Param (joint[0],dParamVel,v0);
   dJointSetHinge2Param (joint[0],dParamFMax,195);
@@ -350,22 +340,17 @@ void CarObject::Simulate(float dt)
 }
 
 
-void CarObject::Recover(float dt)
-{
+void CarObject::Recover(float dt) {
   sgVec3 carz;
   sgMat4 mat;
   chassis_trf->getTransform(mat);
   sgCopyVec3(carz, mat[2]);
-  if (carz[2]<0.3)
-  {
+  if (carz[2]<0.3) {
     downtime += dt;
-  }
-  else
-  {
+  } else {
     downtime = 0.0;
   }
-  if (downtime>2.8)
-  {
+  if (downtime>2.8) {
     static float sign=1.0;
     float magnitude = 4.0 / dt;
     sgVec3 f;
@@ -379,8 +364,7 @@ void CarObject::Recover(float dt)
     sign=-sign;
   }
 
-  if (wheelspintime > 1.0f)
-  {
+  if (wheelspintime > 1.0f) {
     wheelspintime = 0.0f;
     float x = ((rand()&255)-128) / 64.0f / dt;
     float y = ((rand()&255)-128) / 64.0f / dt;
@@ -390,8 +374,7 @@ void CarObject::Recover(float dt)
 }
 
 
-void CarObject::UpdateSpindles(float travel_l, float travel_r)
-{
+void CarObject::UpdateSpindles(float travel_l, float travel_r) {
   sgMat4 m;
   sgVec3 axis;
 
@@ -409,8 +392,7 @@ void CarObject::UpdateSpindles(float travel_l, float travel_r)
 }
 
 
-void CarObject::UpdateCoilSprings(float travel_l, float travel_r)
-{
+void CarObject::UpdateCoilSprings(float travel_l, float travel_r) {
   float angle_l = atan((-travel_l - 0.12) / WISHBONELEN);
   float angle_r = M_PI - atan((-travel_r - 0.12) / WISHBONELEN);
 
@@ -442,8 +424,7 @@ void CarObject::UpdateCoilSprings(float travel_l, float travel_r)
 }
 
 
-void CarObject::UpdateWishBones(float travel_l, float travel_r)
-{
+void CarObject::UpdateWishBones(float travel_l, float travel_r) {
   float angle_l = -atan(travel_l / WISHBONELEN);
   float angle_r = M_PI + atan(travel_r / WISHBONELEN);
 
@@ -472,8 +453,7 @@ void CarObject::UpdateWishBones(float travel_l, float travel_r)
 }
 
 
-void CarObject::UpdateRearSuspension(float travel_l, float travel_r)
-{
+void CarObject::UpdateRearSuspension(float travel_l, float travel_r) {
   float t_l = travel_l + WHEELDROP;
   float t_r = travel_r + WHEELDROP;
   float t_avg = (travel_l + travel_r)/2.0;
@@ -511,8 +491,7 @@ void CarObject::UpdateRearSuspension(float travel_l, float travel_r)
 }
 
 
-void CarObject::Sustain(float dt)
-{
+void CarObject::Sustain(float dt) {
   Simulate(dt);
   Recover(dt);
   SetTransformFromBody(chassis_trf, chassis_body);
@@ -523,8 +502,7 @@ void CarObject::Sustain(float dt)
 
   float travel[4];
 
-  for (int i=0; i<4; i++)
-  {
+  for (int i=0; i<4; i++) {
     dVector3 a,b;
     dJointGetHinge2Anchor (joint[i], a);
     dJointGetHinge2Anchor2(joint[i], b);
@@ -543,21 +521,17 @@ void CarObject::Sustain(float dt)
 }
 
 
-ssgSimpleState *CarObject::FindState(const std::string &statename, ssgEntity *ent)
-{
+ssgSimpleState *CarObject::FindState(const std::string &statename, ssgEntity *ent) {
   if (!ent) return 0;
-  if (ent->isAKindOf(ssgTypeLeaf()))
-  {
+  if (ent->isAKindOf(ssgTypeLeaf())) {
     ssgLeaf *leaf = (ssgLeaf*) ent;
     ssgState *st = leaf->getState();
     if (st->getName() == statename && st->isAKindOf(ssgTypeSimpleState()))
       return (ssgSimpleState*) st;
   }
-  if (ent->isAKindOf(ssgTypeBranch()))
-  {
+  if (ent->isAKindOf(ssgTypeBranch())) {
     ssgBranch *branch = (ssgBranch*) ent;
-    for (int i=0; i<branch->getNumKids(); i++)
-    {
+    for (int i=0; i<branch->getNumKids(); i++) {
       ssgEntity *kid = branch->getKid(i);
       assert(kid);
       ssgSimpleState *state = FindState(statename, kid);
@@ -568,54 +542,46 @@ ssgSimpleState *CarObject::FindState(const std::string &statename, ssgEntity *en
 }
 
 
-void CarObject::SetBrakeLight(void)
-{
-  if (!brakelightstate) return;
-  if (reversegear)
-  {
+void CarObject::SetBrakeLight(void) {
+  if (!brakelightstate) {
+    return;
+  }
+  if (reversegear) {
     brakelightstate->setMaterial(GL_EMISSION, 1,1,1,1);
     return;
   }
-  if (ebrake || brake>0.0f)
-  {
+  if (ebrake || brake>0.0f) {
     brakelightstate->setMaterial(GL_EMISSION, 1,0,0,1);
     return;
   }
-  if (!reversegear && !ebrake && !brake)
-  {
+  if (!reversegear && !ebrake && !brake) {
     brakelightstate->setMaterial(GL_EMISSION, 0,0,0,1);
   }
 }
 
 
-bool CarObject::SnapShot(bool revert)
-{
+bool CarObject::SnapShot(bool revert) {
   static dVector3 cpos;
   static dQuaternion crot;
   static dVector3 wpos[4];
   static dQuaternion wrot[4];
 
-  if (revert)
-  {
+  if (revert) {
     if (!snapshot_available) return false;
     dBodySetPosition (chassis_body, cpos[0], cpos[1], cpos[2]);
     dBodySetQuaternion (chassis_body, crot);
     dBodySetLinearVel (chassis_body, 0,0,0);
     dBodySetAngularVel (chassis_body, 0,0,0);
-    for (int i=0; i<4; i++)
-    {
+    for (int i=0; i<4; i++) {
       dBodySetPosition (wheel_bodies[i], wpos[i][0], wpos[i][1], wpos[i][2]);
       dBodySetQuaternion (wheel_bodies[i], wrot[i]);
       dBodySetLinearVel (wheel_bodies[i], 0,0,0);
       dBodySetAngularVel (wheel_bodies[i], 0,0,0);
     }
-  }
-  else
-  {
+  } else {
     memcpy(cpos, dBodyGetPosition(chassis_body), sizeof(cpos));
     memcpy(crot, dBodyGetQuaternion(chassis_body), sizeof(crot));
-    for (int i=0; i<4; i++)
-    {
+    for (int i=0; i<4; i++) {
       memcpy(wpos[i], dBodyGetPosition(wheel_bodies[i]), sizeof(wpos[i]));
       memcpy(wrot[i], dBodyGetQuaternion(wheel_bodies[i]), sizeof(wrot[i]));
     }
@@ -625,12 +591,23 @@ bool CarObject::SnapShot(bool revert)
 }
 
 
-bool CarObject::IsWheelGeometry(dGeomID id, float &velocity) const
-{
-  if (id == wheel_geoms[0]) { velocity = GetWheelVelocity(0); return true; }
-  if (id == wheel_geoms[1]) { velocity = GetWheelVelocity(1); return true; }
-  if (id == wheel_geoms[2]) { velocity = GetWheelVelocity(2); return true; }
-  if (id == wheel_geoms[3]) { velocity = GetWheelVelocity(3); return true; }
+bool CarObject::IsWheelGeometry(dGeomID id, float &velocity) const {
+  if (id == wheel_geoms[0]) {
+    velocity = GetWheelVelocity(0);
+    return true;
+  }
+  if (id == wheel_geoms[1]) {
+    velocity = GetWheelVelocity(1);
+    return true;
+  }
+  if (id == wheel_geoms[2]) {
+    velocity = GetWheelVelocity(2);
+    return true;
+  }
+  if (id == wheel_geoms[3]) {
+    velocity = GetWheelVelocity(3);
+    return true;
+  }
   return false;
 }
 
