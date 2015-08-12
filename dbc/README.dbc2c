@@ -1,0 +1,84 @@
+Web: http://sourceforge.net/projects/hsk/
+
+dbc2c is a parser for .dbc files that can use a set of templates to output a subset of contained information into arbitrary formats.
+
+The information it is currently able to output:
+
+    Databases (multiple .dbc files can be combined)
+    ECUs
+    Signal Groups
+    Messages
+    Signals
+    Timeouts (an ECU → Signal relation)
+
+
+The possible output contains all the relations between databases, ECUs, Signal Groups, Messages, Signals etc.; this is very useful to generate documentation.
+
+The (well documented) script can be found here:
+https://sourceforge.net/p/hsk/libs/ci/default/tree/scripts/dbc2c.awk
+Download link: https://sourceforge.net/p/hsk/libs/ci/default/tree/scripts/dbc2c.awk?format=raw
+
+The set of templates to use can be found here:
+https://sourceforge.net/p/hsk/libs/ci/default/tree/scripts/templates.dbc2c/
+
+It contains templates to generate static code to read and write signals from and to character arrays (useful for 8-bit platforms). The generated code looks like this:
+
+12290 /**
+12291  * Get signal FCU_BRAKE_BALANCE from buffer.
+12292  *
+12293  * @param buf
+12294  *      The can message buffer containing the signal
+12295  * @return
+12296  *      The raw signal
+12297  */
+12298 #define GET_FCU_BRAKE_BALANCE(buf) (0 \
+12299         | ((-((buf[2] >> 1) & 0x01)) << 18) \
+12300         | ((+((buf[0] >> 0) & 0xff)) << 0) \
+12301         | ((+((buf[1] >> 0) & 0xff)) << 8) \
+12302         | ((+((buf[2] >> 0) & 0x03)) << 16) \
+12303 )
+12304 
+12305 /**
+12306  * Set signal FCU_BRAKE_BALANCE in buffer.
+12307  *
+12308  * @param buf
+12309  *      The can message buffer to add the signal to
+12310  * @param val
+12311  *      The raw value to set the signal to
+12312  */
+12313 #define SET_FCU_BRAKE_BALANCE(buf, val) { \
+12314         buf[0] &= ~(0xff << 0); \
+12315         buf[0] |= (((val) >> 0) & 0xff) << 0; \
+12316         buf[1] &= ~(0xff << 0); \
+12317         buf[1] |= (((val) >> 8) & 0xff) << 0; \
+12318         buf[2] &= ~(0x03 << 0); \
+12319         buf[2] |= (((val) >> 16) & 0x03) << 0; \
+12320 }
+
+It can handle Intel and Motorola style signals as well as signed and unsigned signals.
+
+In order to run the script an AWK interpreter is required. GNU AWK (default in many GNU/Linux distributions, very slow!), nawk (default on OS-X and BSDs) and mawk (default on Ubuntu GNU/Linux, very fast, available for Windows) are supported.
+
+The AWK scripts have been tested with the following interpreters:
+- <tt>awk version 20121220 (FreeBSD)</tt>
+  - Default AWK interpreter in BSD systems and OS-X
+  - Also known as New AWK (NAWK)
+  - This is a version of Brian Kernighan's AWK, one of the authors of
+    <i>The AWK Programming Language</i>
+- <tt>mawk 1.3.3</tt>
+  - Default AWK interpreter in Ubuntu GNU/Linux and derivatives
+  - This is Mike's AWK
+- <tt>GNU Awk 4.1.0, API: 1.0</tt>
+  - Default AWK interpreter in many GNU/Linux distributions
+
+The script is released under the beerware do-anything-you-please license.
+https://sourceforge.net/p/hsk/libs/ci/tip/tree/LICENSE
+
+What I'd like to see in return are any of your .dbc's that cause problems with the script. If so desired I can guarantee confidential treatment.
+
+kamikaze@bsdforen.de
+GPG fingerprint: FDCD7B3A84C0FE21E21FF1E767BD05D6DCBF78A6
+
+See also:
+http://www.infineonforums.com/threads/1166-Generating-C-Code-from-Vector-CANdb-.dbc-files
+
