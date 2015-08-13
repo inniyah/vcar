@@ -31,6 +31,8 @@ CarSvgBox::CarSvgBox(int x, int y, int w, int h, const char * l) :
 	GError **crap = NULL;
 	rsvg_handle = rsvg_handle_new_from_file(filename, crap);
 	flags |= FlagBrakeLights;
+	flags |= FlagLeftHazardLights;
+	flags |= FlagRightHazardLights;
 }
 
 CarSvgBox::~CarSvgBox() {
@@ -188,6 +190,12 @@ void CarSvgBox::graphic(cairo_t * cr, double x, double y, double w, double h) {
 			}
 			if (flags & FlagBrakeLights) {
 				rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_brake_lights");
+			}
+			if (flags & FlagLeftHazardLights) {
+				rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_hazard_left");
+			}
+			if (flags & FlagRightHazardLights) {
+				rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_hazard_right");
 			}
 		}
 	}
