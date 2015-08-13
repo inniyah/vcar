@@ -34,6 +34,12 @@ private:
 	cairo_t         * cr;
 	cairo_surface_t * surface;
 	RsvgHandle      * rsvg_handle;
+
+	static const long int FlagRoofClosed      = 1 << 0;
+	static const long int FlagLeftDoorClosed  = 1 << 1;
+	static const long int FlagRightDoorClosed = 1 << 2;
+
+	unsigned long flags;
 };
 
 #endif // CARSVGBOX_H_
