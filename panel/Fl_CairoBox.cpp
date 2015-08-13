@@ -32,6 +32,10 @@ Fl_CairoBox::Fl_CairoBox(int x, int y, int w, int h, const char * l) :
 }
 
 Fl_CairoBox::~Fl_CairoBox() {
+	if (rsvg_handle) {
+		g_object_unref(rsvg_handle);
+		rsvg_handle = NULL;
+	}
 }
 
 cairo_surface_t * Fl_CairoBox::set_surface(int wo, int ho) {
@@ -164,6 +168,14 @@ void Fl_CairoBox::graphic(cairo_t * cr, double x, double y, double w, double h) 
 			y + h/2.0 - dimension_data.height * scale / 2.0
 		);
 		cairo_scale(cr, scale, scale);
-		rsvg_handle_render_cairo(rsvg_handle, cr);
+		if (!rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_car")) {
+			rsvg_handle_render_cairo(rsvg_handle, cr);
+		} else {
+			rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_leftdoor_open");
+			//rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_leftdoor_closed");
+			//rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_rightdoor_open");
+			rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_rightdoor_closed");
+			//rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_top");
+		}
 	}
 }
