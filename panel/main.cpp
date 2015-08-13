@@ -1,5 +1,5 @@
 #include "panel.h"
-#include "Fl_CairoBox.h"
+#include "CarSvgBox.h"
 
 #include <stdlib.h>
 #include <stdio.h>

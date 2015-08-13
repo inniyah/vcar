@@ -1,5 +1,5 @@
-#ifndef FL_CAIROBOX_H_
-#define FL_CAIROBOX_H_
+#ifndef CARSVGBOX_H_
+#define CARSVGBOX_H_
 
 #include <FL/Fl_Box.H>
 
@@ -15,10 +15,10 @@
 
 #include <librsvg/rsvg.h>
 
-class Fl_CairoBox : public Fl_Box  {
+class CarSvgBox : public Fl_Box  {
 public:
-	Fl_CairoBox(int x, int y, int w, int h, const char * l = NULL);
-	virtual ~Fl_CairoBox();
+	CarSvgBox(int x, int y, int w, int h, const char * l = NULL);
+	virtual ~CarSvgBox();
 
 	virtual void graphic(cairo_t * cr, double, double, double, double);
 
@@ -36,5 +36,5 @@ private:
 	RsvgHandle      * rsvg_handle;
 };
 
-#endif // FL_CAIROBOX_H_
+#endif // CARSVGBOX_H_
 

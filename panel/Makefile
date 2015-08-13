@@ -3,7 +3,7 @@ PROGRAM=panel
 all: $(PROGRAM)
 
 OBJS = \
-	Fl_CairoBox.o \
+	CarSvgBox.o \
 	panel.o \
 	panel_cb.o \
 	main.o

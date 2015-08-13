@@ -1,4 +1,4 @@
-#include "Fl_CairoBox.h"
+#include "CarSvgBox.h"
 
 #include <FL/fl_draw.H>
 
@@ -20,7 +20,7 @@
 
 #include <cmath>
 
-Fl_CairoBox::Fl_CairoBox(int x, int y, int w, int h, const char * l) :
+CarSvgBox::CarSvgBox(int x, int y, int w, int h, const char * l) :
 	Fl_Box(x,y,w,h,l),
 	cr(NULL),
 	surface(NULL),
@@ -31,14 +31,14 @@ Fl_CairoBox::Fl_CairoBox(int x, int y, int w, int h, const char * l) :
 	rsvg_handle = rsvg_handle_new_from_file(filename, crap);
 }
 
-Fl_CairoBox::~Fl_CairoBox() {
+CarSvgBox::~CarSvgBox() {
 	if (rsvg_handle) {
 		g_object_unref(rsvg_handle);
 		rsvg_handle = NULL;
 	}
 }
 
-cairo_surface_t * Fl_CairoBox::set_surface(int wo, int ho) {
+cairo_surface_t * CarSvgBox::set_surface(int wo, int ho) {
 #ifdef WIN32
 #warning win32 mode
 	/* Get a Cairo surface for the current DC */
@@ -55,7 +55,7 @@ cairo_surface_t * Fl_CairoBox::set_surface(int wo, int ho) {
 #endif
 }
 
-void Fl_CairoBox::exportToPNG(const char* filename, int wpix, int hpix) {
+void CarSvgBox::exportToPNG(const char* filename, int wpix, int hpix) {
 	cairo_surface_t * surface;
 	cairo_t         * cr;
 
@@ -73,7 +73,7 @@ void Fl_CairoBox::exportToPNG(const char* filename, int wpix, int hpix) {
 	cairo_surface_destroy (surface);
 }
 
-void Fl_CairoBox::exportToSVG(const char* filename, int wpts, int hpts) {
+void CarSvgBox::exportToSVG(const char* filename, int wpts, int hpts) {
 	cairo_surface_t * surface;
 	cairo_t         * cr;
 
@@ -87,7 +87,7 @@ void Fl_CairoBox::exportToSVG(const char* filename, int wpts, int hpts) {
 	cairo_surface_destroy (surface);
 }
 
-void Fl_CairoBox::exportToEPS(const char* filename, int wpts, int hpts) {
+void CarSvgBox::exportToEPS(const char* filename, int wpts, int hpts) {
 	cairo_surface_t * surface;
 	cairo_t         * cr;
 
@@ -104,7 +104,7 @@ void Fl_CairoBox::exportToEPS(const char* filename, int wpts, int hpts) {
 	return;
 }
   
-void Fl_CairoBox::exportToPDF(const char* filename, int wpts, int hpts) {
+void CarSvgBox::exportToPDF(const char* filename, int wpts, int hpts) {
 	cairo_surface_t * surface;
 	cairo_t         * cr;
 
@@ -120,7 +120,7 @@ void Fl_CairoBox::exportToPDF(const char* filename, int wpts, int hpts) {
 	return;
 }
 
-void Fl_CairoBox::draw(void) {
+void CarSvgBox::draw(void) {
 	// using fltk functions, set up white background with thin black frame
 	fl_push_no_clip(); /* remove any clipping region set by the expose events... */
 	fl_push_clip(x(), y(), w(), h());
@@ -151,7 +151,7 @@ void Fl_CairoBox::draw(void) {
 	fl_pop_clip(); // "no_clip" region
 }
 
-void Fl_CairoBox::graphic(cairo_t * cr, double x, double y, double w, double h) {
+void CarSvgBox::graphic(cairo_t * cr, double x, double y, double w, double h) {
 	if (rsvg_handle) {
 		RsvgDimensionData dimension_data;
 		rsvg_handle_get_dimensions (rsvg_handle, &dimension_data);
