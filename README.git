@@ -1,0 +1,9 @@
+Note to self:
+
+git subtree pull --prefix dbc/canmatrix https://github.com/ebroecker/canmatrix.git master --
+
+See:
+http://codehero.co/git-desde-cero-utilizando-git-subtree/
+https://hpc.uni.lu/blog/2014/understanding-git-subtree/
+http://git-scm.com/book/en/v1/Git-Tools-Subtree-Merging
+
