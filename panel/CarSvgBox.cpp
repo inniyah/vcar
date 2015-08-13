@@ -24,11 +24,13 @@ CarSvgBox::CarSvgBox(int x, int y, int w, int h, const char * l) :
 	Fl_Box(x,y,w,h,l),
 	cr(NULL),
 	surface(NULL),
-	rsvg_handle(NULL)
+	rsvg_handle(NULL),
+	flags(0)
 {
 	const gchar * filename = "svg/BMW_Z4.svg";
 	GError **crap = NULL;
 	rsvg_handle = rsvg_handle_new_from_file(filename, crap);
+	flags |= FlagBrakeLights;
 }
 
 CarSvgBox::~CarSvgBox() {
@@ -183,6 +185,9 @@ void CarSvgBox::graphic(cairo_t * cr, double x, double y, double w, double h) {
 			}
 			if (flags & FlagRoofClosed) {
 				rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_top");
+			}
+			if (flags & FlagBrakeLights) {
+				rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_brake_lights");
 			}
 		}
 	}

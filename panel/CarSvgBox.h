@@ -38,6 +38,7 @@ private:
 	static const long int FlagRoofClosed      = 1 << 0;
 	static const long int FlagLeftDoorClosed  = 1 << 1;
 	static const long int FlagRightDoorClosed = 1 << 2;
+	static const long int FlagBrakeLights     = 1 << 3;
 
 	unsigned long flags;
 };
