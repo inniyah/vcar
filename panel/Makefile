@@ -8,7 +8,7 @@ OBJS = \
 	panel_cb.o \
 	main.o
 
-PKG_CONFIG=cairo
+PKG_CONFIG=cairo librsvg-2.0
 PKG_CONFIG_CFLAGS=`pkg-config --cflags $(PKG_CONFIG) 2>/dev/null` `fltk-config --cflags`
 PKG_CONFIG_LIBS=`pkg-config --libs $(PKG_CONFIG) 2>/dev/null` `fltk-config --ldflags --libs`
 

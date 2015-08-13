@@ -2,6 +2,7 @@
 #define FL_CAIROBOX_H_
 
 #include <FL/Fl_Box.H>
+
 #include <cairo.h>
 
 #ifdef WIN32
@@ -12,9 +13,12 @@
 #  include <cairo-xlib.h>
 #endif
 
+#include <librsvg/rsvg.h>
+
 class Fl_CairoBox : public Fl_Box  {
 public:
 	Fl_CairoBox(int x, int y, int w, int h, const char * l = NULL);
+	virtual ~Fl_CairoBox();
 
 	virtual void graphic(cairo_t * cr, double, double, double, double);
 
@@ -25,10 +29,11 @@ public:
 
 private:
 	void draw(void);
+	cairo_surface_t * set_surface(int wo, int ho);
 
 	cairo_t         * cr;
 	cairo_surface_t * surface;
-	cairo_surface_t * set_surface(int wo, int ho);
+	RsvgHandle      * rsvg_handle;
 };
 
 #endif // FL_CAIROBOX_H_
