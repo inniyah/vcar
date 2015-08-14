@@ -3,7 +3,7 @@ PROGRAM=test
 all: $(PROGRAM)
 
 OBJS = \
-	TinyThread++-1.1/source/tinythread.o \
+	tinythread.o \
 	main.o \
 	tasks.o
 
@@ -25,6 +25,12 @@ $(PROGRAM): $(OBJS)
 	g++ -o $@ -c $+ $(DEFS) $(INCS) $(CFLAGS) $(PKG_CONFIG_CFLAGS)
 
 %.o: %.c
+	gcc -o $@ -c $+ $(DEFS) $(INCS) $(CFLAGS) $(PKG_CONFIG_CFLAGS)
+
+%.o: ../tinythreadpp/source/%.cpp
+	g++ -o $@ -c $+ $(DEFS) $(INCS) $(CFLAGS) $(PKG_CONFIG_CFLAGS)
+
+%.o: ../tinythreadpp/source/%.c
 	gcc -o $@ -c $+ $(DEFS) $(INCS) $(CFLAGS) $(PKG_CONFIG_CFLAGS)
 
 clean:
