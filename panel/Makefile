@@ -32,6 +32,8 @@ $(PROGRAM): $(OBJS)
 	fluid -c $<
 
 clean:
-	rm -f $(OBJS)
-	rm -f $(PROGRAM)
-	rm -f *.o *.a *~
+	rm -fv $(OBJS)
+	rm -fv $(PROGRAM)
+	rm -fv $(addsuffix .h,$(basename $(shell find . -maxdepth 1 -name "*.fl")))
+	rm -fv $(addsuffix .cpp,$(basename $(shell find . -maxdepth 1 -name "*.fl")))
+	rm -fv *.o *.a *~
