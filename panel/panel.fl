@@ -1,12 +1,13 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0303 
+version 1.0302 
 header_name {.h} 
 code_name {.cpp}
 Function {makePanelWindow()} {open
 } {
   Fl_Window {} {open
-    xywh {1011 298 500 375} type Double
-    code0 {\#include "panel_cb.h"} visible
+    xywh {5 231 750 550} type Double hide
+    code0 {\#include "config.h"}
+    code1 {\#include "panel_cb.h"}
   } {
     Fl_Light_Button wKeyOn {
       label {Key On}
@@ -18,13 +19,26 @@ Function {makePanelWindow()} {open
     }
     Fl_Choice wKeyState {
       label {Key State} open
-      xywh {380 10 110 20} down_box BORDER_BOX
+      xywh {255 15 110 20} down_box BORDER_BOX
     } {}
     Fl_Box wCarBox {
-      label Car selected
-      xywh {300 64 185 273}
+      label Car
+      xywh {480 7 265 401}
       code0 {\#include "CarSvgBox.h"}
       class CarSvgBox
+    }
+    Fl_Tree wCarCmdTree {
+      xywh {480 415 265 130}
+      code0 {\#include "CmdTree.h"}
+      class CmdTree
+    }
+    Fl_Slider wBrakeSlider {
+      label Brake
+      xywh {15 425 25 90} type {Vert Knob}
+    }
+    Fl_Slider wAccelSlider {
+      label Accel selected
+      xywh {60 425 25 90} type {Vert Knob}
     }
   }
 } 

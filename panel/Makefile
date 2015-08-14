@@ -13,8 +13,8 @@ PKG_CONFIG_CFLAGS=`pkg-config --cflags $(PKG_CONFIG) 2>/dev/null` `fltk-config -
 PKG_CONFIG_LIBS=`pkg-config --libs $(PKG_CONFIG) 2>/dev/null` `fltk-config --ldflags --libs`
 
 CFLAGS= -O2 -g -Wall
-DEFS=
-INCS= -Iimago/
+DEFS= 
+INCS= 
 
 LDFLAGS= -Wl,-z,defs -Wl,--as-needed -Wl,--no-undefined
 LIBS=

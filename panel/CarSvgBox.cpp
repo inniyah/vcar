@@ -30,15 +30,27 @@ CarSvgBox::CarSvgBox(int x, int y, int w, int h, const char * l) :
 	const gchar * filename = "svg/BMW_Z4.svg";
 	GError **crap = NULL;
 	rsvg_handle = rsvg_handle_new_from_file(filename, crap);
-	flags |= FlagBrakeLights;
-	flags |= FlagLeftHazardLights;
-	flags |= FlagRightHazardLights;
+	flags |= FlagLeftDoorClosed;
+	flags |= FlagRightDoorClosed;
 }
 
 CarSvgBox::~CarSvgBox() {
 	if (rsvg_handle) {
 		g_object_unref(rsvg_handle);
 		rsvg_handle = NULL;
+	}
+}
+
+void CarSvgBox::setFLag(unsigned long f, bool v) {
+	bool p = (0 != (flags & f));
+	if (v) {
+		flags |= f;
+	} else {
+		flags &= ~f;
+	}
+
+	if (p != v) {
+		redraw();
 	}
 }
 
@@ -129,10 +141,10 @@ void CarSvgBox::draw(void) {
 	fl_push_no_clip(); /* remove any clipping region set by the expose events... */
 	fl_push_clip(x(), y(), w(), h());
 
-	//fl_color(FL_WHITE);
-	//fl_rectf(x(), y(), w(), h());
-	//fl_color(FL_BLACK);
-	//fl_rect(x(), y(), w(), h());
+	fl_color(FL_WHITE);
+	fl_rectf(x(), y(), w(), h());
+	fl_color(FL_BLACK);
+	fl_rect(x(), y(), w(), h());
 
 	// set up cairo structures
 	surface = set_surface(window()->w(), window()->h());

@@ -1,3 +1,4 @@
+#include "config.h"
 #include <FL/Fl.H>
 
 extern void cbKeyOff   (Fl_Widget *, void *);
