@@ -1,6 +1,7 @@
 Note to self:
 
 git subtree pull --prefix dbc/canmatrix https://github.com/ebroecker/canmatrix.git master --
+git subtree pull --prefix tinythreadpp  https://github.com/teragonaudio/tinythreadpp.git master --
 
 See:
 http://codehero.co/git-desde-cero-utilizando-git-subtree/
