@@ -9,6 +9,7 @@
 #include <FL/Fl.H>
 #include <FL/Fl_Tree.H>
 #include <FL/Fl_Slider.H>
+#include <FL/Fl_Dial.H>
 
 typedef void (*CarCmdFunction)(void);
 
@@ -35,6 +36,11 @@ void ChangeBrake(Fl_Widget *w, void *data) {
 	} else {
 		wCarBox->BrakeLights(false);
 	}
+};
+
+void ChangeSteeringWheel(Fl_Widget *w, void *data) {
+	Fl_Dial * dial = reinterpret_cast<Fl_Dial *>(w);
+	fprintf(stderr, "Steering Wheel %lf\n", dial->value() / dial->maximum());
 };
 
 void CarCmdOpenRightDoor(Fl_Widget *w, void *data) {
@@ -111,6 +117,10 @@ int main(int argc, char * argv[]) {
 	wBrakeSlider->scrollvalue(0 /*pos*/, 1 /*size*/, 0 /*first*/, 11 /*total*/);
 	wBrakeSlider->value(wBrakeSlider->maximum());
 	wBrakeSlider->callback(ChangeBrake);
+
+	wSteeringWheel->angles(0, 360);
+	wSteeringWheel->callback(ChangeSteeringWheel);
+	wSteeringWheel->value(0.5f);
 
 	panel_window->show(argc, argv);
 	return Fl::run();

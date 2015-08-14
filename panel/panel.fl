@@ -5,9 +5,9 @@ code_name {.cpp}
 Function {makePanelWindow()} {open
 } {
   Fl_Window {} {open
-    xywh {5 231 750 550} type Double hide
+    xywh {101 297 750 550} type Double
     code0 {\#include "config.h"}
-    code1 {\#include "panel_cb.h"}
+    code1 {\#include "panel_cb.h"} visible
   } {
     Fl_Light_Button wKeyOn {
       label {Key On}
@@ -37,8 +37,11 @@ Function {makePanelWindow()} {open
       xywh {15 425 25 90} type {Vert Knob}
     }
     Fl_Slider wAccelSlider {
-      label Accel selected
+      label Accel
       xywh {60 425 25 90} type {Vert Knob}
+    }
+    Fl_Dial wSteeringWheel {selected
+      xywh {15 345 70 70}
     }
   }
 } 

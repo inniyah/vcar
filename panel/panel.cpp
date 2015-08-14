@@ -16,6 +16,8 @@ Fl_Slider *wBrakeSlider=(Fl_Slider *)0;
 
 Fl_Slider *wAccelSlider=(Fl_Slider *)0;
 
+Fl_Dial *wSteeringWheel=(Fl_Dial *)0;
+
 Fl_Double_Window* makePanelWindow() {
   Fl_Double_Window* w;
   { Fl_Double_Window* o = new Fl_Double_Window(750, 550);
@@ -55,6 +57,8 @@ Fl_Double_Window* makePanelWindow() {
     { wAccelSlider = new Fl_Slider(60, 425, 25, 90, "Accel");
       wAccelSlider->type(4);
     } // Fl_Slider* wAccelSlider
+    { wSteeringWheel = new Fl_Dial(15, 345, 70, 70);
+    } // Fl_Dial* wSteeringWheel
     o->end();
   } // Fl_Double_Window* o
   return w;

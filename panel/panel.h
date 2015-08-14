@@ -18,5 +18,7 @@ extern CmdTree *wCarCmdTree;
 #include <FL/Fl_Slider.H>
 extern Fl_Slider *wBrakeSlider;
 extern Fl_Slider *wAccelSlider;
+#include <FL/Fl_Dial.H>
+extern Fl_Dial *wSteeringWheel;
 Fl_Double_Window* makePanelWindow();
 #endif
