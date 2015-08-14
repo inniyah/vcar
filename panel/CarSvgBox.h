@@ -22,10 +22,11 @@ public:
 
 	virtual void graphic(cairo_t * cr, double, double, double, double);
 
-	void exportToPNG(const char * filename, int, int);
-	void exportToSVG(const char * filename, int, int);
-	void exportToEPS(const char * filename, int, int);
-	void exportToPDF(const char * filename, int, int);
+	void exportToPNG (const char * filename, int, int);
+	void exportToSVG (const char * filename, int, int);
+	void exportToEPS (const char * filename, int, int);
+	void exportToPDF (const char * filename, int, int);
+	void exportToCS  (const char * filename, int, int);
 
 	bool RoofClosed()              { return (0 != (flags & FlagRoofClosed)); }
 	void RoofClosed(bool v)        { setFLag(FlagRoofClosed, v);             }

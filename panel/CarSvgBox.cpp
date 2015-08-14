@@ -15,6 +15,7 @@
 #include <cairo-svg.h>
 #include <cairo-ps.h>
 #include <cairo-pdf.h>
+#include <cairo-script.h>
 
 #include <librsvg/rsvg.h>
 
@@ -71,69 +72,57 @@ cairo_surface_t * CarSvgBox::set_surface(int wo, int ho) {
 #endif
 }
 
-void CarSvgBox::exportToPNG(const char* filename, int wpix, int hpix) {
-	cairo_surface_t * surface;
-	cairo_t         * cr;
-
-	// setup, see cairo_format_t for discussion of first argument 
-	surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, wpix, hpix);
-	cr      = cairo_create (surface);
-
-	cairo_translate(cr, 0.5, 0.5);       // for anti-aliasing
-	cairo_set_source_rgb (cr, 0, 0, 0);  // drawing color set to black
-
-	graphic(cr, 0, 0, wpix, hpix); 
-
-	cairo_surface_write_to_png (surface, filename);
-	cairo_destroy (cr);
-	cairo_surface_destroy (surface);
+void CarSvgBox::exportToPNG (const char* filename, int wpix, int hpix) {
+  cairo_surface_t * tmp_surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, wpix, hpix);
+  cairo_t         * tmp_cr      = cairo_create (tmp_surface);
+  cairo_translate(tmp_cr, 0.5, 0.5);       // for anti-aliasing
+  cairo_set_source_rgb (tmp_cr, 0, 0, 0);  // drawing color set to black
+  graphic(tmp_cr, 0, 0, wpix, hpix); 
+  cairo_surface_write_to_png (tmp_surface, filename);
+  cairo_destroy (tmp_cr);
+  cairo_surface_destroy (tmp_surface);
 }
 
-void CarSvgBox::exportToSVG(const char* filename, int wpts, int hpts) {
-	cairo_surface_t * surface;
-	cairo_t         * cr;
-
-	surface = cairo_svg_surface_create (filename, wpts, hpts);
-	cr      = cairo_create (surface);
-	cairo_set_source_rgb (cr, 0, 0, 0);
-
-	graphic(cr, 0, 0, wpts, hpts);
-
-	cairo_destroy (cr);
-	cairo_surface_destroy (surface);
+void CarSvgBox::exportToSVG (const char* filename, int wpts, int hpts) {
+  cairo_surface_t * tmp_surface = cairo_svg_surface_create (filename, wpts, hpts);
+  cairo_t         * tmp_cr      = cairo_create (tmp_surface);
+  cairo_set_source_rgb (tmp_cr, 0, 0, 0);
+  graphic(tmp_cr, 0, 0, wpts, hpts);
+  cairo_destroy (tmp_cr);
+  cairo_surface_destroy (tmp_surface);
 }
 
-void CarSvgBox::exportToEPS(const char* filename, int wpts, int hpts) {
-	cairo_surface_t * surface;
-	cairo_t         * cr;
-
-	surface = cairo_ps_surface_create (filename, wpts, hpts);
-	cairo_ps_surface_set_eps(surface, 1);
-	cr      = cairo_create (surface);
-	cairo_set_source_rgb (cr, 0, 0, 0);
-
-	graphic(cr, 0, 0, wpts, hpts);          
-
-	cairo_show_page (cr);
-	cairo_destroy (cr);
-	cairo_surface_destroy (surface);
-	return;
+void CarSvgBox::exportToEPS (const char* filename, int wpts, int hpts) {
+	cairo_surface_t * tmp_surface = cairo_ps_surface_create (filename, wpts, hpts);
+	cairo_ps_surface_set_eps(tmp_surface, 1);
+	cairo_t         * tmp_cr      = cairo_create (tmp_surface);
+	cairo_set_source_rgb (tmp_cr, 0, 0, 0);
+	graphic(tmp_cr, 0, 0, wpts, hpts);
+	cairo_show_page (tmp_cr);
+	cairo_destroy (tmp_cr);
+	cairo_surface_destroy (tmp_surface);
 }
-  
-void CarSvgBox::exportToPDF(const char* filename, int wpts, int hpts) {
-	cairo_surface_t * surface;
-	cairo_t         * cr;
 
-	surface = cairo_pdf_surface_create(filename, wpts, hpts);
-	cr      = cairo_create (surface);
-	cairo_set_source_rgb (cr, 0, 0, 0);
+void CarSvgBox::exportToPDF (const char* filename, int wpts, int hpts) {
+	cairo_surface_t * tmp_surface = cairo_pdf_surface_create(filename, wpts, hpts);
+	cairo_t         * tmp_cr      = cairo_create (tmp_surface);
+	cairo_set_source_rgb (tmp_cr, 0, 0, 0);
+	graphic(tmp_cr, 0, 0, wpts, hpts);
+	cairo_show_page(tmp_cr);
+	cairo_destroy (tmp_cr);
+	cairo_surface_destroy(tmp_surface);
+}
 
-	graphic(cr, 0, 0, wpts, hpts);
-
-	cairo_show_page(cr);
-	cairo_destroy (cr);
-	cairo_surface_destroy(surface);
-	return;
+void CarSvgBox::exportToCS (const char * filename, int wpts, int hpts) {
+	cairo_device_t  * tmp_device  = cairo_script_create(filename);
+	cairo_surface_t * tmp_surface = cairo_script_surface_create(tmp_device, cairo_surface_get_content (surface), wpts, hpts);
+	cairo_t         * tmp_cr      = cairo_create (tmp_surface);
+	cairo_set_source_rgb (tmp_cr, 0, 0, 0);
+	graphic(tmp_cr, 0, 0, wpts, hpts);
+	cairo_show_page(tmp_cr);
+	cairo_destroy (tmp_cr);
+	cairo_surface_destroy(tmp_surface);
+	cairo_device_destroy(tmp_device);
 }
 
 void CarSvgBox::draw(void) {
