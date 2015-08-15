@@ -1,7 +1,10 @@
 PROGRAM=vcar
 DATADIR=./data
 
-all: $(PROGRAM)
+all: obj $(PROGRAM)
+
+obj:
+	mkdir -p $@
 
 #SOURCES = $(shell find . -name "*.c") $(shell find . -name "*.cpp")
 
