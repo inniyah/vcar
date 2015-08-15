@@ -79,10 +79,16 @@ Function {makePanelWindow()} {open
       class DialSvgBox
     }
     Fl_Box wRG1Dial {
-      label {Dial RG1} selected
+      label {Dial RG1}
       xywh {280 445 100 100}
       code0 {\#include "DialSvgBox.h"}
       class DialSvgBox
+    }
+    Fl_Box wOilWaterDial {
+      label {Dial OW} selected
+      xywh {165 445 100 100}
+      code0 {\#include "OilWaterSvgBox.h"}
+      class OilWaterSvgBox
     }
   }
 } 

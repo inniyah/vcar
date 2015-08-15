@@ -6,6 +6,7 @@ OBJS = \
 	AbstractSvgBox.o \
 	CarSvgBox.o \
 	DialSvgBox.o \
+	OilWaterSvgBox.o \
 	panel.o \
 	panel_cb.o \
 	main.o

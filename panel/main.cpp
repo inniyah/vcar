@@ -128,6 +128,7 @@ int main(int argc, char * argv[]) {
 
 	wRpmDial->setSvgFilename("svg/dial_rpm.svg");
 	wRG1Dial->setSvgFilename("svg/dial_rg1.svg");
+	wOilWaterDial->setSvgFilename("svg/dial_ow.svg");
 
 	panel_window->show(argc, argv);
 	return Fl::run();

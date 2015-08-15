@@ -82,30 +82,26 @@ void DialSvgBox::graphic(cairo_t * cr, double x, double y, double w, double h) {
 		cairo_scale(cr, scale, scale);
 
 		rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_low");
-		cairo_save(cr);
 
+		cairo_save(cr);
 		RsvgPositionData pointer_position;
 		if (rsvg_handle_get_position_sub(rsvg_handle, &pointer_position, "#pointer")) {
 			double angle = max_angle * dial_value;
-
 			cairo_identity_matrix(cr);
 			cairo_scale(cr, scale, scale);
 			cairo_translate(cr,
-				pointer_position.x,
-				pointer_position.y
+				x / scale + pointer_position.x,
+				y / scale + pointer_position.y
 			);
 			cairo_rotate(cr, angle);
-			double dx = x / scale;
-			double dy = y / scale;
 			cairo_translate(cr,
-				dx * cos(angle) + dy * sin(angle) - pointer_position.x,
-				-dx * sin(angle) + dy * cos(angle) - pointer_position.y
+				- pointer_position.x,
+				- pointer_position.y
 			);
-
 			rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_main");
 		}
-
 		cairo_restore(cr);
+
 		rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_high");
 	}
 }
