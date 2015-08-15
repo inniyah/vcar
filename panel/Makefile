@@ -3,6 +3,7 @@ PROGRAM=panel
 all: $(PROGRAM)
 
 OBJS = \
+	AbstractSvgBox.o \
 	CarSvgBox.o \
 	DialSvgBox.o \
 	panel.o \

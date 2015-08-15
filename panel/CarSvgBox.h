@@ -1,32 +1,14 @@
 #ifndef CARSVGBOX_H_
 #define CARSVGBOX_H_
 
-#include <FL/Fl_Box.H>
+#include "AbstractSvgBox.h"
 
-#include <cairo.h>
-
-#ifdef WIN32
-#  include <cairo-win32.h>
-#elif defined (__APPLE__)
-#  include <cairo-quartz.h>
-#else
-#  include <cairo-xlib.h>
-#endif
-
-#include <librsvg/rsvg.h>
-
-class CarSvgBox : public Fl_Box  {
+class CarSvgBox : public AbstractSvgBox  {
 public:
 	CarSvgBox(int x, int y, int w, int h, const char * l = NULL);
 	virtual ~CarSvgBox();
 
 	virtual void graphic(cairo_t * cr, double, double, double, double);
-
-	void exportToPNG (const char * filename, int, int);
-	void exportToSVG (const char * filename, int, int);
-	void exportToEPS (const char * filename, int, int);
-	void exportToPDF (const char * filename, int, int);
-	void exportToCS  (const char * filename, int, int);
 
 	bool RoofClosed()              { return (0 != (flags & FlagRoofClosed)); }
 	void RoofClosed(bool v)        { setFLag(FlagRoofClosed, v);             }
@@ -42,13 +24,7 @@ public:
 	void RightHazardLights(bool v) { setFLag(FlagRightHazardLights, v);             }
 
 private:
-	void draw(void);
-	cairo_surface_t * set_surface(int wo, int ho);
 	void setFLag(unsigned long f, bool v = true);
-
-	cairo_t         * cr;
-	cairo_surface_t * surface;
-	RsvgHandle      * rsvg_handle;
 
 	static const long int FlagRoofClosed        = 1 << 0;
 	static const long int FlagLeftDoorClosed    = 1 << 1;
