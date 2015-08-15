@@ -5,9 +5,9 @@ code_name {.cpp}
 Function {makePanelWindow()} {open
 } {
   Fl_Window {} {open
-    xywh {1084 397 750 550} type Double hide
+    xywh {2624 286 750 550} type Double
     code0 {\#include "config.h"}
-    code1 {\#include "panel_cb.h"}
+    code1 {\#include "panel_cb.h"} visible
   } {
     Fl_Light_Button wKeyOn {
       label {Key On}
@@ -68,13 +68,19 @@ Function {makePanelWindow()} {open
       }
       Fl_Button wToScriptButton {
         label CS
-        callback {cbCarBoxToCairoScript (o, v);} selected
+        callback {cbCarBoxToCairoScript (o, v);}
         xywh {695 392 50 20}
       }
     }
     Fl_Box wRpmDial {
       label {Dial RPM}
       xywh {390 444 100 100}
+      code0 {\#include "DialSvgBox.h"}
+      class DialSvgBox
+    }
+    Fl_Box wRG1Dial {
+      label {Dial RG1} selected
+      xywh {280 445 100 100}
       code0 {\#include "DialSvgBox.h"}
       class DialSvgBox
     }

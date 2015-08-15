@@ -130,10 +130,10 @@ void CarSvgBox::draw(void) {
 	fl_push_no_clip(); /* remove any clipping region set by the expose events... */
 	fl_push_clip(x(), y(), w(), h());
 
-	fl_color(FL_WHITE);
+	fl_color(parent()->color());
 	fl_rectf(x(), y(), w(), h());
-	fl_color(FL_BLACK);
-	fl_rect(x(), y(), w(), h());
+	//fl_color(FL_BLACK);
+	//fl_rect(x(), y(), w(), h());
 
 	// set up cairo structures
 	surface = set_surface(window()->w(), window()->h());

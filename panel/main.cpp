@@ -127,6 +127,7 @@ int main(int argc, char * argv[]) {
 	wSteeringWheel->value(0.5f);
 
 	wRpmDial->setSvgFilename("svg/dial_rpm.svg");
+	wRG1Dial->setSvgFilename("svg/dial_rg1.svg");
 
 	panel_window->show(argc, argv);
 	return Fl::run();
