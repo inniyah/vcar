@@ -42,6 +42,20 @@ void ChangeBrake(Fl_Widget *w, void *data) {
 	}
 };
 
+void ChangeGear(Fl_Widget *w, void *data) {
+	Fl_Slider * slider = reinterpret_cast<Fl_Slider *>(w);
+}
+
+void ChangeBackGear(Fl_Widget *w, void *data) {
+	Fl_Slider * slider = reinterpret_cast<Fl_Slider *>(w);
+	double value = (slider->maximum() - slider->value()) / slider->maximum();
+	if (slider->maximum() != slider->value()) {
+		wCarBox->BackwardsLights(false);
+	} else {
+		wCarBox->BackwardsLights(true);
+	}
+}
+
 void ChangeSteeringWheel(Fl_Widget *w, void *data) {
 	Fl_Dial * dial = reinterpret_cast<Fl_Dial *>(w);
 	fprintf(stderr, "Steering Wheel %lf\n", dial->value() / dial->maximum());
@@ -121,6 +135,13 @@ int main(int argc, char * argv[]) {
 	wBrakeSlider->scrollvalue(0 /*pos*/, 1 /*size*/, 0 /*first*/, 11 /*total*/);
 	wBrakeSlider->value(wBrakeSlider->maximum());
 	wBrakeSlider->callback(ChangeBrake);
+
+	wGearSlider->scrollvalue(0 /*pos*/, 1 /*size*/, 0 /*first*/, 6 /*total*/); /* 5 Gears */
+	wGearSlider->value(wGearSlider->maximum());
+	wGearSlider->callback(ChangeGear);
+	wGearBackSlider->scrollvalue(0 /*pos*/, 1 /*size*/, 0 /*first*/, 2 /*total*/);
+	wGearBackSlider->value(0);
+	wGearBackSlider->callback(ChangeBackGear);
 
 	wSteeringWheel->angles(0, 360);
 	wSteeringWheel->callback(ChangeSteeringWheel);

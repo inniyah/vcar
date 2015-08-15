@@ -5,9 +5,9 @@ code_name {.cpp}
 Function {makePanelWindow()} {open
 } {
   Fl_Window {} {open
-    xywh {2624 286 750 550} type Double
+    xywh {2624 286 750 550} type Double hide
     code0 {\#include "config.h"}
-    code1 {\#include "panel_cb.h"} visible
+    code1 {\#include "panel_cb.h"}
   } {
     Fl_Light_Button wKeyOn {
       label {Key On}
@@ -85,10 +85,17 @@ Function {makePanelWindow()} {open
       class DialSvgBox
     }
     Fl_Box wOilWaterDial {
-      label {Dial OW} selected
+      label {Dial OW}
       xywh {165 445 100 100}
       code0 {\#include "OilWaterSvgBox.h"}
       class OilWaterSvgBox
+    }
+    Fl_Slider wGearBackSlider {
+      label Gears
+      xywh {105 485 35 30} type {Vert Knob}
+    }
+    Fl_Slider wGearSlider {selected
+      xywh {105 425 35 55} type {Vert Knob}
     }
   }
 } 
