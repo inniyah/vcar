@@ -4,6 +4,7 @@ all: $(PROGRAM)
 
 OBJS = \
 	CarSvgBox.o \
+	DialSvgBox.o \
 	panel.o \
 	panel_cb.o \
 	main.o
@@ -36,4 +37,5 @@ clean:
 	rm -fv $(PROGRAM)
 	rm -fv $(addsuffix .h,$(basename $(shell find . -maxdepth 1 -name "*.fl")))
 	rm -fv $(addsuffix .cpp,$(basename $(shell find . -maxdepth 1 -name "*.fl")))
+	rm -fv svgtest.svg pngtest.png epstest.eps pdftest.pdf cstest.cs
 	rm -fv *.o *.a *~

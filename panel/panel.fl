@@ -4,10 +4,10 @@ header_name {.h}
 code_name {.cpp}
 Function {makePanelWindow()} {open
 } {
-  Fl_Window {} {open selected
-    xywh {2036 337 750 550} type Double
+  Fl_Window {} {open
+    xywh {1084 397 750 550} type Double hide
     code0 {\#include "config.h"}
-    code1 {\#include "panel_cb.h"} visible
+    code1 {\#include "panel_cb.h"}
   } {
     Fl_Light_Button wKeyOn {
       label {Key On}
@@ -48,24 +48,35 @@ Function {makePanelWindow()} {open
     } {
       Fl_Button wToPngButton {
         label PNG
+        callback {cbCarBoxToPng (o, v);}
         xywh {545 392 50 20}
       }
       Fl_Button wToSvgButton {
         label SVG
+        callback {cbCarBoxToSvg (o, v);}
         xywh {495 392 50 20}
       }
       Fl_Button wToEpsButton {
         label EPS
+        callback {cbCarBoxToEps (o, v);}
         xywh {595 392 50 20}
       }
       Fl_Button wToPdfButton {
         label PDF
+        callback {cbCarBoxToPdf (o, v);}
         xywh {645 392 50 20}
       }
       Fl_Button wToScriptButton {
         label CS
+        callback {cbCarBoxToCairoScript (o, v);} selected
         xywh {695 392 50 20}
       }
+    }
+    Fl_Box wRpmDial {
+      label {Dial RPM}
+      xywh {390 444 100 100}
+      code0 {\#include "DialSvgBox.h"}
+      class DialSvgBox
     }
   }
 } 
