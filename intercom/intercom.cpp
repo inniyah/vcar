@@ -34,9 +34,11 @@ void DataMessage::createTextMsg(const char * message, unsigned int length) {
 	m_Message.Header.Type = MsgText;
 }
 
-void DataMessage::createCanMsg(const uint8_t payload[8]) {
+void DataMessage::createCanMsg(CanId id, uint8_t dlc, const uint8_t * payload) {
 	destroyMsg();
-	memcpy(m_Message.Data.Can.Payload, payload, sizeof(CanMsg::Payload));
+	m_Message.Data.Can.Id = htonl(id);
+	m_Message.Data.Can.Dlc = dlc;
+	memcpy(m_Message.Data.Can.Payload, payload, dlc);
 	m_Message.Header.Type = MsgCan;
 }
 
@@ -46,11 +48,11 @@ void DataMessage::fprint(FILE *stream) const {
 			fprintf(stream, "[Text: \"%s\" (%lu)]", m_Message.Data.Text.Message, (unsigned long)ntohs(m_Message.Data.Text.Length));
 			break;
 		case MsgCan:
-			fputs("[CAN: {", stream);
-			for (int i = 0; i < 8; ++i) {
+			fprintf(stream, "[CAN: 0x%lX: {", static_cast<unsigned long>(ntohl(m_Message.Data.Can.Id)));
+			for (int i = 0; i < m_Message.Data.Can.Dlc; ++i) {
 				fprintf(stream, " 0x%02X", m_Message.Data.Can.Payload[i]);
 			}
-			fprintf(stream, " } (%lu)]", (unsigned long)8);
+			fprintf(stream, " } (%u)]", m_Message.Data.Can.Dlc);
 			break;
 		default:
 			break;

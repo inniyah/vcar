@@ -4,6 +4,7 @@
 #define INTERCOM_PORT         12345
 #define INTERCOM_GROUP        "225.0.0.37"
 #define INTERCOM_MAXMSGSIZE   256
+#define INTERCOM_MAXCANDLEN   8
 
 #include <stdint.h>
 #include <stdio.h>
@@ -34,8 +35,12 @@ public:
 		uint8_t  Message[INTERCOM_MAXMSGSIZE - sizeof(MsgHeader)];
 	} __attribute__((packed)) TextMsg;
 
+	typedef uint32_t CanId;
+
 	typedef struct CanMsgStruct {
-		uint8_t Payload[8];
+		CanId   Id;  /* 32 bit CAN_ID + EFF/RTR/ERR flags */
+		uint8_t Dlc; /* frame payload length in byte (0 .. CAN_MAX_DLEN) */
+		uint8_t Payload[INTERCOM_MAXCANDLEN];
 	} __attribute__((packed)) CanMsg;
 
 	typedef struct FullMsgStruct {
@@ -47,7 +52,7 @@ public:
 	} __attribute__((packed)) FullMsg;
 
 	void createTextMsg(const char * message, unsigned int length = 0);
-	void createCanMsg(const uint8_t payload[8]);
+	void createCanMsg(CanId id, uint8_t dlc, const uint8_t * payload);
 
 	void fprint(FILE *stream) const;
 

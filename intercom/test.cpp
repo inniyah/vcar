@@ -17,7 +17,7 @@ void do_send(void * arg) {
 		sender.send(msg);
 
 		const uint8_t can_data[] = { 1, 2, 3, 4, 5, 6, 7, 8 };
-		msg.createCanMsg(can_data);
+		msg.createCanMsg(0x100, sizeof(can_data), can_data);
 		sender.send(msg);
 	}
 }
