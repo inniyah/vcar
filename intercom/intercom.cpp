@@ -13,35 +13,41 @@
 namespace intercom {
 
 void DataMessage::destroyMsg(void) {
-	switch (m_Message.Type) {
-		case MsgText:
-			if (NULL != m_Message.Data.Text.Message) {
-				delete[] m_Message.Data.Text.Message;
-			}
-			break;
-		default:
-			break;
-	}
-	m_Message.Type = MsgEmpty;
+	m_Message.Header.Type = MsgEmpty;
 }
 
 void DataMessage::createTextMsg(const char * message, unsigned int length) {
 	destroyMsg();
-	if (NULL != message && 0 != length) {
-		m_Message.Data.Text.Message = new char[length];
-		memcpy(m_Message.Data.Text.Message, message, length);
-		m_Message.Data.Text.Length = length;
-	} else {
-		m_Message.Data.Text.Message = NULL;
-		m_Message.Data.Text.Length = 0;
+	if ((NULL != message) && (0 == length)) {
+		length = strlen(message) + 1; // include the terminating null byte ('\0')
 	}
-	m_Message.Type = MsgText;
+	if (length > sizeof(m_Message.Data.Text.Message)) { // limit length
+		length = sizeof(m_Message.Data.Text.Message);
+	}
+	if (NULL != message && 0 != length) {
+		memcpy(m_Message.Data.Text.Message, message, length);
+		m_Message.Data.Text.Length = htons(length);
+	} else {
+		m_Message.Data.Text.Message[0] = '\0';
+		m_Message.Data.Text.Length = htons(0);
+	}
+	m_Message.Header.Type = MsgText;
 }
 
 void DataMessage::createCanMsg(const uint8_t payload[8]) {
 	destroyMsg();
 	memcpy(m_Message.Data.Can.Payload, payload, sizeof(CanMsg::Payload));
-	m_Message.Type = MsgCan;
+	m_Message.Header.Type = MsgCan;
+}
+
+void DataMessage::fprint(FILE *stream) const {
+	switch(m_Message.Header.Type) {
+		case DataMessage::MsgText:
+			fprintf(stream, "[Text: \"%s\" (%lu)]", m_Message.Data.Text.Message, (unsigned long)ntohs(m_Message.Data.Text.Length));
+			break;
+		default:
+			break;
+	}
 }
 
 
@@ -127,14 +133,32 @@ bool Sender::send(const DataMessage & msg_to_send) {
 		return false;
 	}
 
-	const char * message="Hello, World!";
+	const DataMessage::FullMsg & msg_info = msg_to_send.m_Message;
+	const char * msg_buffer = reinterpret_cast<const char *>(&msg_info);
+	size_t msg_len = 0;
 
-	/* now just sendto() our destination! */
-	if (sendto(fd, message, strlen(message) + 1, 0, (struct sockaddr *) &addr, sizeof(addr)) < 0) {
-		perror("sendto");
+	switch(msg_info.Header.Type) {
+		case DataMessage::MsgText:
+			msg_len = sizeof(DataMessage::MsgHeader) + sizeof(DataMessage::TextMsgStruct::Length) + ntohs(msg_info.Data.Text.Length);
+			break;
+		default:
+			return true;
+	}
+
+	if (msg_len && msg_buffer) {
+		fputs("Snd Msg: ", stderr);
+		msg_to_send.fprint(stderr);
+		fputs("\n", stderr);
+
+		/* now just sendto() our destination! */
+		if (sendto(fd, msg_buffer, msg_len, 0, (struct sockaddr *) &addr, sizeof(addr)) < 0) {
+			perror("sendto");
+			return false;
+		}
+		return true;
+	} else {
 		return false;
 	}
-	return true;
 }
 
 bool Receiver::receive(DataMessage & msg_rcv) {
@@ -142,14 +166,22 @@ bool Receiver::receive(DataMessage & msg_rcv) {
 		return false;
 	}
 
+	DataMessage::FullMsg & msg_info = msg_rcv.m_Message;
+	char * msg_buffer = reinterpret_cast<char *>(&msg_info);
+	size_t msg_len = sizeof(DataMessage::FullMsg);
+
 	socklen_t addrlen;
 	char msgbuf[INTERCOM_MAXMSGSIZE];
 	addrlen = sizeof(addr);
-	if ((nbytes = recvfrom(fd, msgbuf, INTERCOM_MAXMSGSIZE, 0, (struct sockaddr *) &addr, &addrlen)) < 0) {
+	if ((nbytes = recvfrom(fd, msg_buffer, msg_len, 0, (struct sockaddr *) &addr, &addrlen)) < 0) {
 		perror("recvfrom");
 		return false;
 	}
-	fprintf(stderr, "\"%s\" (%lu)\n", msgbuf, (unsigned long)nbytes);
+
+	fputs("Msg Rcv: ", stderr);
+	msg_rcv.fprint(stderr);
+	fputs("\n", stderr);
+
 	return true;
 }
 

@@ -10,6 +10,7 @@ void do_send(void * arg) {
 	intercom::Sender sender;
 	while (true) {
 		intercom::DataMessage msg;
+		msg.createTextMsg("Hello, World!");
 		sender.send(msg);
 		sleep(1);
 	}
