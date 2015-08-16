@@ -7,7 +7,7 @@
 #include <tinythread.h>
 
 void do_send(void * arg) {
-	intercom::Sender sender;
+	intercom::Sender sender(1);
 	while (true) {
 		sleep(1);
 
@@ -23,7 +23,7 @@ void do_send(void * arg) {
 }
 
 void do_receive(void * arg) {
-	intercom::Receiver receiver;
+	intercom::Receiver receiver(2);
 	while (true) {
 		intercom::DataMessage msg;
 		receiver.receive(msg);

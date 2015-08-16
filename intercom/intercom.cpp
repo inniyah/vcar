@@ -45,14 +45,21 @@ void DataMessage::createCanMsg(CanId id, uint8_t dlc, const uint8_t * payload) {
 void DataMessage::fprint(FILE *stream) const {
 	switch(m_Message.Header.Type) {
 		case MsgText:
-			fprintf(stream, "[Text: \"%s\" (%lu)]", m_Message.Data.Text.Message, (unsigned long)ntohs(m_Message.Data.Text.Length));
+			fprintf(stream, "[Text: \"%s\" (%lu) Src=%lu]",
+				m_Message.Data.Text.Message,
+				(unsigned long)ntohs(m_Message.Data.Text.Length),
+				(unsigned long)ntohl(m_Message.Header.SourceSys)
+			);
 			break;
 		case MsgCan:
 			fprintf(stream, "[CAN: 0x%lX: {", static_cast<unsigned long>(ntohl(m_Message.Data.Can.Id)));
 			for (int i = 0; i < m_Message.Data.Can.Dlc; ++i) {
 				fprintf(stream, " 0x%02X", m_Message.Data.Can.Payload[i]);
 			}
-			fprintf(stream, " } (%u)]", m_Message.Data.Can.Dlc);
+			fprintf(stream, " } (%u) Src=%lu]",
+				m_Message.Data.Can.Dlc,
+				(unsigned long)ntohl(m_Message.Header.SourceSys)
+			);
 			break;
 		default:
 			break;
@@ -60,7 +67,7 @@ void DataMessage::fprint(FILE *stream) const {
 }
 
 
-Sender::Sender() : m_isActive(false) {
+Sender::Sender(SysId sys_id) : m_SysId(sys_id), m_isActive(false) {
 	/* create what looks like an ordinary UDP socket */
 	if ((fd=socket(AF_INET,SOCK_DGRAM,0)) < 0) {
 		perror("socket");
@@ -94,9 +101,10 @@ Sender::Sender() : m_isActive(false) {
 }
 
 Sender::~Sender() {
+	m_isActive = false;
 }
 
-Receiver::Receiver() : m_isActive(false) {
+Receiver::Receiver(SysId sys_id) : m_SysId(sys_id), m_isActive(false) {
 	/* create what looks like an ordinary UDP socket */
 	if ((fd=socket(AF_INET,SOCK_DGRAM,0)) < 0) {
 		perror("socket");
@@ -134,15 +142,16 @@ Receiver::Receiver() : m_isActive(false) {
 }
 
 Receiver::~Receiver() {
+	m_isActive = false;
 }
 
 
-bool Sender::send(const DataMessage & msg_to_send) {
+bool Sender::send(DataMessage & msg_to_send) {
 	if (!m_isActive) {
 		return false;
 	}
 
-	const DataMessage::FullMsg & msg_info = msg_to_send.m_Message;
+	DataMessage::FullMsg & msg_info = msg_to_send.m_Message;
 	const char * msg_buffer = reinterpret_cast<const char *>(&msg_info);
 	size_t msg_len = 0;
 
@@ -158,6 +167,8 @@ bool Sender::send(const DataMessage & msg_to_send) {
 	}
 
 	if (msg_len && msg_buffer) {
+		msg_info.Header.SourceSys = htonl(m_SysId);
+
 		//fputs("Snd Msg: ", stderr);
 		//msg_to_send.fprint(stderr);
 		//fputs("\n", stderr);

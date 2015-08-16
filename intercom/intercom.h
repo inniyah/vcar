@@ -14,6 +14,8 @@
 
 namespace intercom {
 
+typedef uint32_t SysId; /* system identifier, to know what is coming from who */
+
 #pragma pack(1)
 class DataMessage {
 	friend class Sender;
@@ -28,6 +30,7 @@ public:
 
 	typedef struct MsgHeaderStruct {
 		MsgType Type;
+		SysId   SourceSys; /* to be used by the sender function */
 	} __attribute__((packed)) MsgHeader;
 
 	typedef struct TextMsgStruct {
@@ -66,12 +69,13 @@ private:
 
 class Sender {
 public:
-	Sender();
+	Sender(SysId sys_id = 0);
 	~Sender();
 
-	bool send(const DataMessage & msg_to_send);
+	bool send(DataMessage & msg_to_send);
 
 private:
+	SysId m_SysId;
 	bool m_isActive;
 	struct sockaddr_in addr;
 	int fd;
@@ -79,12 +83,13 @@ private:
 
 class Receiver {
 public:
-	Receiver();
+	Receiver(SysId sys_id = 0);
 	~Receiver();
 
 	bool receive(DataMessage & msg_rcv);
 
 private:
+	SysId m_SysId;
 	bool m_isActive;
 	struct sockaddr_in addr;
 	int fd;
