@@ -42,8 +42,15 @@ void DataMessage::createCanMsg(const uint8_t payload[8]) {
 
 void DataMessage::fprint(FILE *stream) const {
 	switch(m_Message.Header.Type) {
-		case DataMessage::MsgText:
+		case MsgText:
 			fprintf(stream, "[Text: \"%s\" (%lu)]", m_Message.Data.Text.Message, (unsigned long)ntohs(m_Message.Data.Text.Length));
+			break;
+		case MsgCan:
+			fputs("[CAN: {", stream);
+			for (int i = 0; i < 8; ++i) {
+				fprintf(stream, " 0x%02X", m_Message.Data.Can.Payload[i]);
+			}
+			fprintf(stream, " } (%lu)]", (unsigned long)8);
 			break;
 		default:
 			break;
@@ -141,14 +148,17 @@ bool Sender::send(const DataMessage & msg_to_send) {
 		case DataMessage::MsgText:
 			msg_len = sizeof(DataMessage::MsgHeader) + sizeof(DataMessage::TextMsgStruct::Length) + ntohs(msg_info.Data.Text.Length);
 			break;
+		case DataMessage::MsgCan:
+			msg_len = sizeof(DataMessage::MsgHeader) + 8;
+			break;
 		default:
 			return true;
 	}
 
 	if (msg_len && msg_buffer) {
-		fputs("Snd Msg: ", stderr);
-		msg_to_send.fprint(stderr);
-		fputs("\n", stderr);
+		//fputs("Snd Msg: ", stderr);
+		//msg_to_send.fprint(stderr);
+		//fputs("\n", stderr);
 
 		/* now just sendto() our destination! */
 		if (sendto(fd, msg_buffer, msg_len, 0, (struct sockaddr *) &addr, sizeof(addr)) < 0) {
@@ -171,7 +181,6 @@ bool Receiver::receive(DataMessage & msg_rcv) {
 	size_t msg_len = sizeof(DataMessage::FullMsg);
 
 	socklen_t addrlen;
-	char msgbuf[INTERCOM_MAXMSGSIZE];
 	addrlen = sizeof(addr);
 	if ((nbytes = recvfrom(fd, msg_buffer, msg_len, 0, (struct sockaddr *) &addr, &addrlen)) < 0) {
 		perror("recvfrom");

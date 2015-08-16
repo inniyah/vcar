@@ -9,10 +9,16 @@
 void do_send(void * arg) {
 	intercom::Sender sender;
 	while (true) {
+		sleep(1);
+
 		intercom::DataMessage msg;
+
 		msg.createTextMsg("Hello, World!");
 		sender.send(msg);
-		sleep(1);
+
+		const uint8_t can_data[] = { 1, 2, 3, 4, 5, 6, 7, 8 };
+		msg.createCanMsg(can_data);
+		sender.send(msg);
 	}
 }
 
