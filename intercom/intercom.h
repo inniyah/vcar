@@ -40,6 +40,10 @@ public:
 
 	typedef uint32_t CanId;
 
+	static const CanId CAN_EFF_FLAG = 0x80000000U; /* EFF/SFF is set in the MSB */
+	static const CanId CAN_RTR_FLAG = 0x40000000U; /* remote transmission request */
+	static const CanId CAN_ERR_FLAG = 0x20000000U; /* error message frame */
+
 	typedef struct CanMsgStruct {
 		CanId   Id;  /* 32 bit CAN_ID + EFF/RTR/ERR flags */
 		uint8_t Dlc; /* frame payload length in byte (0 .. CAN_MAX_DLEN) */
