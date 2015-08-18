@@ -3,8 +3,11 @@ PROGRAM=panel
 all: $(PROGRAM)
 
 OBJS = \
+	intercom.o \
+	tinythread.o \
 	AbstractSvgBox.o \
 	CarSvgBox.o \
+	CarState.o \
 	DialSvgBox.o \
 	OilWaterSvgBox.o \
 	panel.o \
@@ -17,10 +20,10 @@ PKG_CONFIG_LIBS=`pkg-config --libs $(PKG_CONFIG) 2>/dev/null` `fltk-config --ldf
 
 CFLAGS= -O2 -g -Wall
 DEFS= 
-INCS= 
+INCS=  -I../tinythreadpp/source/ -I../intercom/  -I../libcandbc/ -I../libcandbc/model/
 
 LDFLAGS= -Wl,-z,defs -Wl,--as-needed -Wl,--no-undefined
-LIBS=
+LIBS= -lpthread
 
 $(PROGRAM): $(OBJS)
 	g++ $(LDFLAGS) $+ -o $@ $(LIBS) $(PKG_CONFIG_LIBS)
@@ -33,6 +36,24 @@ $(PROGRAM): $(OBJS)
 
 %.h %.cpp: %.fl
 	fluid -c $<
+
+%.o: ../tinythreadpp/source/%.cpp
+	g++ -o $@ -c $+ $(DEFS) $(INCS) $(CFLAGS)
+
+%.o: ../tinythreadpp/source/%.c
+	gcc -o $@ -c $+ $(DEFS) $(INCS) $(CFLAGS)
+
+%.o: ../intercom/%.cpp
+	g++ -o $@ -c $+ $(DEFS) $(INCS) $(CFLAGS)
+
+%.o: ../intercom/%.c
+	gcc -o $@ -c $+ $(DEFS) $(INCS) $(CFLAGS)
+
+%.tab.c %.tab.h: %.y
+	bison -d $<
+
+%.yy.c: %.l %.tab.h
+	flex -o $@ $<
 
 clean:
 	rm -fv $(OBJS)

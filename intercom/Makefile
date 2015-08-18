@@ -1,4 +1,4 @@
-all: test snd_test rcv_test can_test
+all: ../libcandbc/libCanDbc.a test snd_test rcv_test can_test
 
 CFLAGS= -O2 -g -Wall
 LDFLAGS= -Wl,-z,defs -Wl,--as-needed -Wl,--no-undefined

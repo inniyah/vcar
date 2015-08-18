@@ -1,6 +1,7 @@
 #include "config.h"
 #include "panel.h"
 #include "CarSvgBox.h"
+#include "CarState.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -150,6 +151,8 @@ int main(int argc, char * argv[]) {
 	wRpmDial->setSvgFilename("svg/dial_rpm.svg");
 	wRG1Dial->setSvgFilename("svg/dial_rg1.svg");
 	wOilWaterDial->setSvgFilename("svg/dial_ow.svg");
+
+	CarState car_state;
 
 	panel_window->show(argc, argv);
 	return Fl::run();

@@ -20,5 +20,5 @@ private:
 	double          dial_value; /* between 0.0 and 1.0 */
 };
 
-#endif // CARSVGBOX_H_
+#endif // DIALSVGBOX_H_
 
