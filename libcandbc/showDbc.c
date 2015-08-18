@@ -290,7 +290,6 @@ void show_dbc_signals(dbc_t *dbc) {
 			show_message(ml);
 			putchar(';');
 			show_signal(sl);
-			putchar('\n');
 		}
 	}
 }

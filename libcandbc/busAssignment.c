@@ -59,14 +59,17 @@ int busAssignment_parseDBC(busAssignment_t *busAssignment)
 		fprintf(stderr, "Parsing DBC file %s\n", busAssignment->list[i].filename);
 		#endif
 
-		if(NULL != (dbc = dbc_read_file(busAssignment->list[i].filename)))
+		dbc = dbc_read_file(busAssignment->list[i].filename);
+		if(NULL != dbc)
 		{
+#if 0
 			show_dbc_network(dbc);
 			show_dbc_message_list(dbc->message_list);
 			show_dbc_signals(dbc);
 			show_dbc_nodes(dbc);
 			show_dbc_envvars(dbc->envvar_list);
 			show_dbc_valtable_list(dbc->valtable_list);
+#endif
 
 			messageHash_t *messageHash = messageHash_create(dbc->message_list);
 

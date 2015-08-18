@@ -42,7 +42,7 @@ void canMessage_decode(
 	}
 	dtime = nsec * 1e-9 + sec;
 
-#if 1
+#if 0
 	/* debug: dump canMessage */
 	fprintf(stderr,
 		"%lu.%09lu %d %04lx     %02x %02x %02x %02x %02x %02x %02x %02x\n",
@@ -113,7 +113,7 @@ void canMessage_decode(
 					data &= (uint8)~0 >> (7 - start_offset);
 					shift = start_offset + 1;
 				} else {
-					shift = 8;	 /* use all eight bits */
+					shift = 8; /* use all eight bits */
 				}
 
 				if(work_byte == end_byte && end_offset != 0) {
@@ -197,7 +197,7 @@ void canMessage_decode(
 
 		/* invoke signal processing callback function */
 		if (NULL != signalProcCb ) {
-			signalProcCb(s, dtime, rawValue, physicalValue, cbData);
+			signalProcCb(dbcMessage, canMessage, s, dtime, rawValue, physicalValue, cbData);
 		}
 	}
 }

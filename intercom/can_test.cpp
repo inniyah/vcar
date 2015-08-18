@@ -9,45 +9,39 @@
 #include "busAssignment.h"
 #include "signalFormat.h"
 
-static void printSignalProc( /* for debugging: print data to stderr */
+static void printSignalProc(
+		message_t * dbc_msg,
+		canMessage_t * can_msg,
 		const signal_t * s,
 		double dtime,
 		uint32 rawValue,
 		double physicalValue,
 		void * cbData
 ) {
-	const char * local_prefix = "a";
-	char * outputSignalName = signalFormat_stringAppend(local_prefix, s->name);
-
 	fprintf(stderr,
-			"   %s\t=%f ~ raw=%ld\t~ %d|%d@%d%c (%f,%f)"
-			" [%f|%f] %d %ul \"%s\"\n",
-		outputSignalName,
+			"   %s.%s = %f (raw=%ld): %d|%d@%d%c (%f + raw * %f) [%f|%f] %d %ul \"%s\"\n",
+		dbc_msg->name,
+		s->name,
 		physicalValue,
 		rawValue,
 		s->bit_start,
 		s->bit_len,
 		s->endianess,
 		s->signedness?'-':'+',
-		s->scale,
 		s->offset,
+		s->scale,
 		s->min,
 		s->max,
 		s->mux_type,
 		(unsigned int)s->mux_value,
 		s->comment !=NULL ? s->comment : ""
 	);
-
-	/* free temp. signal name */
-	if(outputSignalName != NULL) {
-		free(outputSignalName);
-	}
 }
 
 static void processCanMessage(canMessage_t * can_msg, busAssignment_t * bus_assignment, signalFormat_t signalFormat, sint32 timeResolution) {
 	/* lookup can_msg in message hash */
 	messageHashKey_t key = can_msg->id;
-	message_t * dbc_msg;
+	message_t * dbc_msg = NULL;
 	int i;
 
 	/* loop over all bus assigments */
@@ -107,7 +101,7 @@ int main(int argc, char *argv[]) {
 	busAssignment_associate(busAssignment, bus, dbc_filename);
 	busAssignment_parseDBC(busAssignment);
 
-	canMessage_t can_msg = {
+	canMessage_t can_msg_1 = {
 		.t = { 0, 0 },
 		.bus = 1,
 		.id = 0x100,
@@ -115,7 +109,16 @@ int main(int argc, char *argv[]) {
 		.byte_arr = { 1, 2, 3, 4, 5, 6, 7, 8 }
 	};
 
-	processCanMessage(&can_msg, busAssignment, signalFormat, timeResolution);
+	canMessage_t can_msg_2 = {
+		.t = { 0, 0 },
+		.bus = 1,
+		.id = 0x110,
+		.dlc = 4,
+		.byte_arr = { 1, 2, 3, 4, 5, 6, 7, 8 }
+	};
+
+	processCanMessage(&can_msg_1, busAssignment, signalFormat, timeResolution);
+	processCanMessage(&can_msg_2, busAssignment, signalFormat, timeResolution);
 
 	//	while (true) {
 	//		intercom::DataMessage msg;

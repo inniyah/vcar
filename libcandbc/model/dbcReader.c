@@ -44,8 +44,7 @@ dbc_t *dbc_read_file(char *filename)
 			yyin = fopen (filename, "r");
 			if (yyin == NULL)
 			{
-				fprintf(stderr,"error: can't open the dbc file '%s' for reading\n",
-					filename);
+				fprintf(stderr,"error: can't open the dbc file '%s' for reading\n", filename);
 				dbc_free(dbc);
 				return NULL;
 			}

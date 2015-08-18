@@ -24,6 +24,8 @@ extern "C" {
 
 	/* signal procesing callback function */
 	typedef void (* signalProcCb_t)(
+		message_t * dbc_msg,
+		canMessage_t * can_msg,
 		const signal_t * s,
 		double dtime,
 		uint32 rawValue,
