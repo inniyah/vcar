@@ -5,7 +5,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include <tinythread.h>
+#include "tinythread.h"
+
+class CanMsgParser;
 
 class CarState  {
 public:
@@ -23,6 +25,7 @@ private:
 
 	tthread::thread rcv_thread;
 	tthread::thread snd_thread;
+	CanMsgParser * car_msg_parser;
 };
 
 #endif // CARSTATE_H_

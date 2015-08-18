@@ -3,5 +3,8 @@
 *.a
 *.so
 *.so.*
+*.tab.h
+*.tab.c
+*.yy.c
 obj/*
 tmp/*

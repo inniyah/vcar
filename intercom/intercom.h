@@ -14,6 +14,11 @@
 
 namespace intercom {
 
+enum {
+	Sys_Unknown = 0,
+	Sys_Panel = 1,
+};
+
 typedef uint32_t SysId; /* system identifier, to know what is coming from who */
 
 #pragma pack(1)
@@ -28,12 +33,12 @@ public:
 		MsgCan
 	} MsgType;
 
-	typedef struct MsgHeaderStruct {
+	typedef struct MsgHeaderStruct { // All fields in network endianness - use htonl or htons
 		MsgType Type;
-		SysId   SourceSys; /* to be used by the sender function */
+		SysId   SourceSys; // to be used by the sender function
 	} __attribute__((packed)) MsgHeader;
 
-	typedef struct TextMsgStruct {
+	typedef struct TextMsgStruct { // All fields in network endianness - use htonl or htons
 		uint16_t Length;
 		uint8_t  Message[INTERCOM_MAXMSGSIZE - sizeof(MsgHeader)];
 	} __attribute__((packed)) TextMsg;
@@ -44,7 +49,7 @@ public:
 	static const CanId CAN_RTR_FLAG = 0x40000000U; /* remote transmission request */
 	static const CanId CAN_ERR_FLAG = 0x20000000U; /* error message frame */
 
-	typedef struct CanMsgStruct {
+	typedef struct CanMsgStruct { // All fields in network endianness - use htonl or htons
 		CanId   Id;  /* 32 bit CAN_ID + EFF/RTR/ERR flags */
 		uint8_t Dlc; /* frame payload length in byte (0 .. CAN_MAX_DLEN) */
 		uint8_t Payload[INTERCOM_MAXCANDLEN];
@@ -60,6 +65,18 @@ public:
 
 	void createTextMsg(const char * message, unsigned int length = 0);
 	void createCanMsg(CanId id, uint8_t dlc, const uint8_t * payload);
+
+	MsgType getMsgType() {
+		return m_Message.Header.Type;
+	}
+
+	CanMsg * getCanInfo() {
+		if (MsgCan == m_Message.Header.Type) {
+			return &m_Message.Data.Can;
+		} else {
+			return NULL;
+		}
+	}
 
 	void fprint(FILE *stream) const;
 

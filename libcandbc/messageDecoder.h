@@ -1,7 +1,7 @@
 #ifndef INCLUDE_MESSAGEDECODER_H
 #define INCLUDE_MESSAGEDECODER_H
 
-#include "dbcModel.h"
+#include "model/dbcModel.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,19 +27,12 @@ extern "C" {
 		message_t * dbc_msg,
 		canMessage_t * can_msg,
 		const signal_t * s,
-		double dtime,
 		uint32 rawValue,
 		double physicalValue,
 		void * cbData
 	);
 
-	void canMessage_decode(
-		message_t      * dbcMessage,
-		canMessage_t   * canMessage,
-		sint32           timeResolution,
-		signalProcCb_t   signalProcCb,
-		void           * cbData
-	);
+	void canMessage_decode(message_t * dbcMessage, canMessage_t * canMessage, signalProcCb_t signalProcCb, void * cbData);
 
 #ifdef __cplusplus
 }

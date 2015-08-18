@@ -23,7 +23,7 @@
 #include <ctype.h>
 #include <math.h>
 
-#include "dbcModel.h"
+#include "model/dbcModel.h"
 
 /* Tell Bison how much stack space is needed. */
 #define YYMAXDEPTH 20000

@@ -16,7 +16,7 @@
 
 %{
 
-#include "dbcModel.h"
+#include "model/dbcModel.h"
 #include "dbc.tab.h"
 #include <stdio.h>
 #include <string.h>

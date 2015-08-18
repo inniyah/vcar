@@ -1,6 +1,6 @@
 PROGRAM=panel
 
-all: $(PROGRAM)
+all: ../libcandbc/libCanDbc.a $(PROGRAM)
 
 OBJS = \
 	intercom.o \
@@ -23,10 +23,13 @@ DEFS=
 INCS=  -I../tinythreadpp/source/ -I../intercom/  -I../libcandbc/ -I../libcandbc/model/
 
 LDFLAGS= -Wl,-z,defs -Wl,--as-needed -Wl,--no-undefined
-LIBS= -lpthread
+LIBS= -L../libcandbc -lCanDbc -lpthread
 
 $(PROGRAM): $(OBJS)
 	g++ $(LDFLAGS) $+ -o $@ $(LIBS) $(PKG_CONFIG_LIBS)
+
+../libcandbc/libCanDbc.a:
+	$(MAKE) -C ../libcandbc/ static
 
 %.o: %.cpp
 	g++ -o $@ -c $+ $(DEFS) $(INCS) $(CFLAGS) $(PKG_CONFIG_CFLAGS)

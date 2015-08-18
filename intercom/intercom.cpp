@@ -45,7 +45,7 @@ void DataMessage::createCanMsg(CanId id, uint8_t dlc, const uint8_t * payload) {
 void DataMessage::fprint(FILE *stream) const {
 	switch(m_Message.Header.Type) {
 		case MsgText:
-			fprintf(stream, "[Text: \"%s\" (%lu) Src=%lu]",
+			fprintf(stream, "[Text: \"%s\" (%lu) Src=%8lX]",
 				m_Message.Data.Text.Message,
 				(unsigned long)ntohs(m_Message.Data.Text.Length),
 				(unsigned long)ntohl(m_Message.Header.SourceSys)
@@ -56,7 +56,7 @@ void DataMessage::fprint(FILE *stream) const {
 			for (int i = 0; i < m_Message.Data.Can.Dlc; ++i) {
 				fprintf(stream, " 0x%02X", m_Message.Data.Can.Payload[i]);
 			}
-			fprintf(stream, " } (%u) Src=%lu]",
+			fprintf(stream, " } (%u) Src=%8lX]",
 				m_Message.Data.Can.Dlc,
 				(unsigned long)ntohl(m_Message.Header.SourceSys)
 			);
@@ -67,7 +67,10 @@ void DataMessage::fprint(FILE *stream) const {
 }
 
 
-Sender::Sender(SysId sys_id) : m_SysId(sys_id), m_isActive(false) {
+Sender::Sender(SysId sys_id) :
+		m_SysId( ((::getpid() & 0x000000FFlu) << 24) | (sys_id & 0x00FFFFFFlu)),
+		m_isActive(false)
+{
 	/* create what looks like an ordinary UDP socket */
 	if ((fd=socket(AF_INET,SOCK_DGRAM,0)) < 0) {
 		perror("socket");
@@ -104,7 +107,10 @@ Sender::~Sender() {
 	m_isActive = false;
 }
 
-Receiver::Receiver(SysId sys_id) : m_SysId(sys_id), m_isActive(false) {
+Receiver::Receiver(SysId sys_id) :
+		m_SysId( ((::getpid() & 0x000000FFlu) << 24) | (sys_id & 0x00FFFFFFlu)),
+		m_isActive(false)
+{
 	/* create what looks like an ordinary UDP socket */
 	if ((fd=socket(AF_INET,SOCK_DGRAM,0)) < 0) {
 		perror("socket");
@@ -200,9 +206,16 @@ bool Receiver::receive(DataMessage & msg_rcv) {
 		return false;
 	}
 
-	fputs("Msg Rcv: ", stderr);
-	msg_rcv.fprint(stderr);
-	fputs("\n", stderr);
+	if (htonl(m_SysId) != msg_info.Header.SourceSys) {
+		fputs("Msg Rcv: ", stderr);
+		msg_rcv.fprint(stderr);
+		fputs("\n", stderr);
+	} else {
+		fputs("Msg Ign: ", stderr);
+		msg_rcv.fprint(stderr);
+		fputs("\n", stderr);
+		msg_info.Header.Type = DataMessage::MsgEmpty;
+	}
 
 	return true;
 }

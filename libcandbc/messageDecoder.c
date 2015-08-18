@@ -24,29 +24,13 @@
 #include "model/dbcModel.h"
 #include "messageDecoder.h"
 
-void canMessage_decode(
-		message_t      * dbcMessage,
-		canMessage_t   * canMessage,
-		sint32           timeResolution,
-		signalProcCb_t   signalProcCb,
-		void           * cbData
-) {
-	signal_list_t *sl;
-	uint32  sec = canMessage->t.tv_sec;
-	sint32 nsec = canMessage->t.tv_nsec;
-	double dtime;
-
-	/* limit time resolution */
-	if(timeResolution != 0) {
-		nsec -= (nsec % timeResolution);
-	}
-	dtime = nsec * 1e-9 + sec;
+void canMessage_decode(message_t * dbcMessage, canMessage_t * canMessage, signalProcCb_t signalProcCb, void * cbData) {
+	signal_list_t * sl;
 
 #if 0
 	/* debug: dump canMessage */
-	fprintf(stderr,
-		"%lu.%09lu %d %04lx     %02x %02x %02x %02x %02x %02x %02x %02x\n",
-		sec, nsec, canMessage->bus, canMessage->id,
+	fprintf(stderr, "%lu.%09lu %d %04lx     %02x %02x %02x %02x %02x %02x %02x %02x\n",
+		canMessage->t.tv_sec, canMessage->t.tv_nsec, canMessage->bus, canMessage->id,
 		canMessage->byte_arr[0], canMessage->byte_arr[1], canMessage->byte_arr[2], canMessage->byte_arr[3],
 		canMessage->byte_arr[4], canMessage->byte_arr[5], canMessage->byte_arr[6], canMessage->byte_arr[7]
 	);
@@ -197,7 +181,7 @@ void canMessage_decode(
 
 		/* invoke signal processing callback function */
 		if (NULL != signalProcCb ) {
-			signalProcCb(dbcMessage, canMessage, s, dtime, rawValue, physicalValue, cbData);
+			signalProcCb(dbcMessage, canMessage, s, rawValue, physicalValue, cbData);
 		}
 	}
 }
