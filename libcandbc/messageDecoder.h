@@ -19,6 +19,9 @@ extern "C" {
 		uint8   byte_arr[8];
 	} canMessage_t;
 
+	/* message received callback function */
+	typedef void (* msgRxCb_t)(canMessage_t *message, void *cbData);
+
 	/* signal procesing callback function */
 	typedef void (* signalProcCb_t)(
 		const signal_t * s,

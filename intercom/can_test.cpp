@@ -5,7 +5,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "measurement.h"
+#include "messageDecoder.h"
 #include "busAssignment.h"
 #include "signalFormat.h"
 
@@ -16,7 +16,7 @@ static void printSignalProc( /* for debugging: print data to stderr */
 		double physicalValue,
 		void * cbData
 ) {
-	const char * local_prefix = "";
+	const char * local_prefix = "a";
 	char * outputSignalName = signalFormat_stringAppend(local_prefix, s->name);
 
 	fprintf(stderr,
@@ -101,7 +101,6 @@ int main(int argc, char *argv[]) {
 
 	busAssignment_t * busAssignment = busAssignment_create();
 	signalFormat_t signalFormat = signalFormat_Name;
-	measurement_t * measurement;
 	sint32 timeResolution = 10000;
 	int bus = -1;
 

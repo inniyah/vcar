@@ -20,7 +20,7 @@
 #include <stdio.h>
 #include <dbcTypes.h>
 #include <time.h>
-#include "measurement.h"
+#include "messageDecoder.h"
 
 #ifdef __cplusplus
 extern "C"

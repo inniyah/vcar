@@ -28,7 +28,6 @@ CAN_TEST_OBJS= \
 	signalFormat.o \
 	busAssignment.o \
 	messageDecoder.o \
-	measurement.o \
 	ascReader.o \
 	showDbc.o \
 	can_test.o \
