@@ -13,19 +13,19 @@ extern "C" {
 
 typedef struct {
 	int bus;
-	char *filename;
-	messageHash_t *messageHash;
+	char * filename;
+	messageHash_t * messageHash;
 } busAssignmentEntry_t;
 
 typedef struct {
 	int n;
-	busAssignmentEntry_t *list;	 /* array of n busAssigmentEntry_t's */
+	busAssignmentEntry_t * list; /* array of n busAssigmentEntry_t's */
 } busAssignment_t;
 
 busAssignment_t *busAssignment_create(void);
-void busAssignment_associate(busAssignment_t *busAssigment, int bus, const char * filename);
-void busAssignment_free(busAssignment_t *busAssigment);
-int busAssignment_parseDBC(busAssignment_t *busAssignment);
+void busAssignment_associate(busAssignment_t * busAssigment, int bus, const char * filename);
+void busAssignment_free(busAssignment_t * busAssigment);
+int busAssignment_parseDBC(busAssignment_t * busAssignment);
 
 #ifdef __cplusplus
 }

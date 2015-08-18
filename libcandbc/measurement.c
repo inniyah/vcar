@@ -31,19 +31,17 @@
 #include "model/dbcModel.h"
 
 /* callback structure for timeSeries signal handler */
-typedef struct
-{
-	struct hashtable *timeSeriesHash;
-	char             *local_prefix;
+typedef struct {
+	struct hashtable * timeSeriesHash;
+	char             * local_prefix;
 } signalProcCbData_t;
 
 /* callback structure for timeSeries message handler */
-typedef struct
-{
-	busAssignment_t *busAssignment;
-	measurement_t   *measurement;
-	signalFormat_t   signalFormat;
-	sint32           timeResolution;
+typedef struct {
+	busAssignment_t * busAssignment;
+	measurement_t   * measurement;
+	signalFormat_t    signalFormat;
+	sint32            timeResolution;
 } messageProcCbData_t;
 
 /* simple string hash function for signal names */
@@ -94,7 +92,9 @@ static void signalProc_print(
 		s->comment!=NULL?s->comment:"");
 
 	/* free temp. signal name */
-	if(outputSignalName != NULL) free(outputSignalName);
+	if(outputSignalName != NULL) {
+		free(outputSignalName);
+	}
 }
 
 
@@ -191,8 +191,11 @@ static void canMessage_process(canMessage_t *canMessage, void *cbData){
 				if(messageProcCbData->signalFormat & signalFormat_Message) {
 					local_prefix = signalFormat_stringAppend(prefix, dbcMessage->name);
 				} else {
-					if(prefix != NULL) local_prefix = strdup(prefix);
-					else               local_prefix = NULL;
+					if(prefix != NULL) {
+						local_prefix = strdup(prefix);
+					} else {
+						local_prefix = NULL;
+					}
 				}
 
 				/* call message decoder with time series storage callback */
@@ -210,7 +213,9 @@ static void canMessage_process(canMessage_t *canMessage, void *cbData){
 				);
 
 				/* free local prefix */
-				if(local_prefix != NULL) free(local_prefix);
+				if(local_prefix != NULL) {
+					free(local_prefix);
+				}
 
 				/* end search if message was found */
 				break;

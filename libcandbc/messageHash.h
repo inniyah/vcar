@@ -9,9 +9,18 @@
 #include "model/dbcModel.h"
 #include "hashtable/hashtable.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef uint32 messageHashKey_t;
 typedef struct hashtable messageHash_t;
 
-struct hashtable *messageHash_create(message_list_t *ml);
-void messageHash_free(messageHash_t *const h);
+struct hashtable *messageHash_create(message_list_t * ml);
+void messageHash_free(messageHash_t * const h);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif

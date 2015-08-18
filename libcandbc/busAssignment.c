@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "busAssignment.h"
+#include "showDbc.h"
 
 busAssignment_t *busAssignment_create(void)
 {
@@ -60,6 +61,13 @@ int busAssignment_parseDBC(busAssignment_t *busAssignment)
 
 		if(NULL != (dbc = dbc_read_file(busAssignment->list[i].filename)))
 		{
+			show_dbc_network(dbc);
+			show_dbc_message_list(dbc->message_list);
+			show_dbc_signals(dbc);
+			show_dbc_nodes(dbc);
+			show_dbc_envvars(dbc->envvar_list);
+			show_dbc_valtable_list(dbc->valtable_list);
+
 			messageHash_t *messageHash = messageHash_create(dbc->message_list);
 
 			// busAssignment->list[i].databaseName = NULL;

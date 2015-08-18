@@ -30,6 +30,7 @@ CAN_TEST_OBJS= \
 	messageDecoder.o \
 	measurement.o \
 	ascReader.o \
+	showDbc.o \
 	can_test.o \
 	intercom.o
 
