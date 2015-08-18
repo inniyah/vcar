@@ -45,7 +45,7 @@ void canMessage_decode(
 #if 1
 	/* debug: dump canMessage */
 	fprintf(stderr,
-		"%d.%09d %d %04x     %02x %02x %02x %02x %02x %02x %02x %02x\n",
+		"%lu.%09lu %d %04lx     %02x %02x %02x %02x %02x %02x %02x %02x\n",
 		sec, nsec, canMessage->bus, canMessage->id,
 		canMessage->byte_arr[0], canMessage->byte_arr[1], canMessage->byte_arr[2], canMessage->byte_arr[3],
 		canMessage->byte_arr[4], canMessage->byte_arr[5], canMessage->byte_arr[6], canMessage->byte_arr[7]
