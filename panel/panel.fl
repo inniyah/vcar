@@ -1,20 +1,20 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0303 
+version 1.0302 
 header_name {.h} 
 code_name {.cpp}
 Function {makePanelWindow()} {open
 } {
   Fl_Window {} {open
-    xywh {2624 286 750 550} type Double hide
+    xywh {170 303 750 550} type Double
     code0 {\#include "config.h"}
-    code1 {\#include "panel_cb.h"}
+    code1 {\#include "panel_cb.h"} visible
   } {
-    Fl_Light_Button wKeyOn {
-      label {Key On}
+    Fl_Light_Button wBatteryButton {
+      label Battery
       xywh {5 10 100 35}
     }
-    Fl_Light_Button wEngineOn {
-      label {Engine On}
+    Fl_Light_Button wIgnitionButton {
+      label Ignition selected
       xywh {5 45 100 35}
     }
     Fl_Choice wKeyState {
@@ -94,7 +94,7 @@ Function {makePanelWindow()} {open
       label Gears
       xywh {105 485 35 30} type {Vert Knob}
     }
-    Fl_Slider wGearSlider {selected
+    Fl_Slider wGearSlider {
       xywh {105 425 35 55} type {Vert Knob}
     }
   }
