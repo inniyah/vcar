@@ -34,10 +34,11 @@ void DataMessage::createTextMsg(const char * message, unsigned int length) {
 	m_Message.Header.Type = MsgText;
 }
 
-void DataMessage::createCanMsg(CanId id, uint8_t dlc, const uint8_t * payload) {
+void DataMessage::createCanMsg(CanId id, uint8_t dlc, const uint8_t * payload, uint8_t bus) {
 	destroyMsg();
 	m_Message.Data.Can.Id = htonl(id);
 	m_Message.Data.Can.Dlc = dlc;
+	m_Message.Data.Can.Bus = bus;
 	memcpy(m_Message.Data.Can.Payload, payload, dlc);
 	m_Message.Header.Type = MsgCan;
 }
@@ -214,7 +215,7 @@ bool Receiver::receive(DataMessage & msg_rcv) {
 		fputs("Msg Ign: ", stderr);
 		msg_rcv.fprint(stderr);
 		fputs("\n", stderr);
-		msg_info.Header.Type = DataMessage::MsgEmpty;
+		//msg_info.Header.Type = DataMessage::MsgEmpty;
 	}
 
 	return true;

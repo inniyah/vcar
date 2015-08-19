@@ -51,6 +51,7 @@ public:
 
 	typedef struct CanMsgStruct { // All fields in network endianness - use htonl or htons
 		CanId   Id;  /* 32 bit CAN_ID + EFF/RTR/ERR flags */
+		uint8_t Bus;
 		uint8_t Dlc; /* frame payload length in byte (0 .. CAN_MAX_DLEN) */
 		uint8_t Payload[INTERCOM_MAXCANDLEN];
 	} __attribute__((packed)) CanMsg;
@@ -64,7 +65,7 @@ public:
 	} __attribute__((packed)) FullMsg;
 
 	void createTextMsg(const char * message, unsigned int length = 0);
-	void createCanMsg(CanId id, uint8_t dlc, const uint8_t * payload);
+	void createCanMsg(CanId id, uint8_t dlc, const uint8_t * payload, uint8_t bus = 0);
 
 	MsgType getMsgType() {
 		return m_Message.Header.Type;
