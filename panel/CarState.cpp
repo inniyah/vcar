@@ -23,9 +23,34 @@ public:
 	CanMsgParser(const char * dbc_filename);
 	virtual ~CanMsgParser();
 
-	void processCanMessage(intercom::DataMessage::CanMsg * can_msg);
-	void decodeCanMessage(message_t * dbc_msg, intercom::DataMessage::CanMsg * can_msg);
-	void processCanSignal(const signal_t * sgn, message_t * dbc_msg, intercom::DataMessage::CanMsg * can_msg, uint32 raw_value, double phys_value);
+	void processCanMessage(
+		const intercom::DataMessage::CanMsg * can_msg
+	);
+	void decodeCanMessage(
+		const message_t * dbc_msg,
+		const intercom::DataMessage::CanMsg * can_msg
+	);
+	void processCanSignal(
+		const signal_t * sgn,
+		const message_t * dbc_msg,
+		const intercom::DataMessage::CanMsg * can_msg,
+		uint32 raw_value,
+		double phys_value
+	);
+
+	void requestCanMessage(
+		intercom::DataMessage::CanMsg * can_msg
+	);
+
+	void encodeCanMessage(
+		const message_t * dbc_msg,
+		intercom::DataMessage::CanMsg * can_msg
+	);
+
+	uint32 requestCanSignal(
+		const signal_t * sgn,
+		const message_t * dbc_msg
+	);
 
 	busAssignment_t * busAssignment;
 	signalFormat_t signalFormat;
@@ -85,6 +110,12 @@ void CarState::sendLoop() {
 		const uint8_t can_data[] = { 1, 2, 3, 4, 5, 6 };
 		msg.createCanMsg(0x100, sizeof(can_data), can_data);
 		sender.send(msg);
+
+		msg.createCanMsg(0x110, 4);
+		intercom::DataMessage::CanMsg * can_msg = msg.getCanInfo();
+		if (NULL != can_msg) {
+			car_msg_parser->requestCanMessage(can_msg);
+		}
 	}
 }
 
@@ -117,7 +148,7 @@ CanMsgParser::~CanMsgParser() {
 	busAssignment_free(busAssignment);
 }
 
-void CanMsgParser::processCanMessage(intercom::DataMessage::CanMsg * can_msg) {
+void CanMsgParser::processCanMessage(const intercom::DataMessage::CanMsg * can_msg) {
 	/* lookup can_msg in message hash */
 	messageHashKey_t key = ntohl(can_msg->Id);
 	message_t * dbc_msg = NULL;
@@ -138,7 +169,7 @@ void CanMsgParser::processCanMessage(intercom::DataMessage::CanMsg * can_msg) {
 	}
 }
 
-void CanMsgParser::processCanSignal(const signal_t * sgn, message_t * dbc_msg, intercom::DataMessage::CanMsg * can_msg, uint32 raw_value, double phys_value) {
+void CanMsgParser::processCanSignal(const signal_t * sgn, const message_t * dbc_msg, const intercom::DataMessage::CanMsg * can_msg, uint32 raw_value, double phys_value) {
 	fprintf(stderr, "   %s.%s = %f (raw=%ld): %d|%d@%d%c (%f + raw * %f) [%f|%f] %d %ul \"%s\"\n",
 		dbc_msg->name,
 		sgn->name,
@@ -158,11 +189,9 @@ void CanMsgParser::processCanSignal(const signal_t * sgn, message_t * dbc_msg, i
 	);
 }
 
-void CanMsgParser::decodeCanMessage(message_t * dbc_msg, intercom::DataMessage::CanMsg * can_msg) {
-	signal_list_t * sl;
-
+void CanMsgParser::decodeCanMessage(const message_t * dbc_msg, const intercom::DataMessage::CanMsg * can_msg) {
 	/* iterate over all signals */
-	for(sl = dbc_msg->signal_list; sl != NULL; sl = sl->next) {
+	for(signal_list_t * sitem = dbc_msg->signal_list; sitem != NULL; sitem = sitem->next) {
 		/*
 		 * The "raw value" of a signal is the value as it is transmitted
 		 * over the network.
@@ -197,16 +226,16 @@ void CanMsgParser::decodeCanMessage(message_t * dbc_msg, intercom::DataMessage::
 		 *    11 10  9  8  7  6  5  4
 		 *                15 14 13 12   <- end_byte
 		 */
-		const signal_t *const s = sl->signal;
-		uint8  bit_len          = s->bit_len;
-		uint8  start_offset     = s->bit_start & 7;
-		uint8  start_byte       = s->bit_start / 8;
+		const signal_t *const sgn = sitem->signal;
+		uint8  bit_len            = sgn->bit_len;
+		uint8  start_offset       = sgn->bit_start & 7;
+		uint8  start_byte         = sgn->bit_start / 8;
 		uint8  data;
 		uint8  shift;
 
 		/* align signal into ulong32 */
 		/* 0 = Big Endian, 1 = Little Endian */
-		if(s->endianess == 0) { /* big endian */
+		if(sgn->endianess == 0) { /* big endian */
 			uint8  end_byte     = start_byte + (7 + bit_len - start_offset - 1)/8;
 			uint8  end_offset   = (start_offset - bit_len + 1) & 7;
 
@@ -260,7 +289,7 @@ void CanMsgParser::decodeCanMessage(message_t * dbc_msg, intercom::DataMessage::
 		double physicalValue;
 
 		/* perform sign extension */
-		if(s->signedness && (bit_len < 32)) {
+		if(sgn->signedness && (bit_len < 32)) {
 			sint32 m = 1<< (bit_len-1);
 			rawValue = ((sint32)rawValue ^ m) - m;
 		}
@@ -276,12 +305,127 @@ void CanMsgParser::decodeCanMessage(message_t * dbc_msg, intercom::DataMessage::
 		 * direction.
 		 * [Physical value] = ( [Raw value] * [Factor] ) + [Offset]
 		 */
-		if(s->signedness) {
-			physicalValue = (double)(sint32)rawValue * s->scale + s->offset;
+		if (sgn->signedness) {
+			physicalValue = (double)(sint32)rawValue * sgn->scale + sgn->offset;
 		} else {
-			physicalValue = (double)        rawValue * s->scale + s->offset;
+			physicalValue = (double)        rawValue * sgn->scale + sgn->offset;
 		}
 
-		processCanSignal(s, dbc_msg, can_msg, rawValue, physicalValue);
+		processCanSignal(sgn, dbc_msg, can_msg, rawValue, physicalValue);
+	}
+}
+
+void CanMsgParser::requestCanMessage(intercom::DataMessage::CanMsg * can_msg) {
+	/* lookup can_msg in message hash */
+	messageHashKey_t key = ntohl(can_msg->Id);
+	message_t * dbc_msg = NULL;
+	int i;
+
+	/* loop over all bus assigments */
+	for(i = 0; i < busAssignment->n ; i++) {
+		busAssignmentEntry_t * entry = &busAssignment->list[i];
+
+		/* check if bus matches */
+		if ((entry->bus == -1) || (entry->bus == can_msg->Bus)) {
+			dbc_msg = (message_t *)hashtable_search(entry->messageHash, &key);
+			if(NULL != dbc_msg) {
+				encodeCanMessage(dbc_msg, can_msg);
+				break; /* end search if message was found */
+			}
+		}
+	}
+}
+
+uint32 CanMsgParser::requestCanSignal(const signal_t * sgn, const message_t * dbc_msg) {
+	fprintf(stderr, "   req %s.%s: %d|%d@%d%c (%f + raw * %f) [%f|%f] %d %ul \"%s\"\n",
+		dbc_msg->name,
+		sgn->name,
+		sgn->bit_start,
+		sgn->bit_len,
+		sgn->endianess,
+		sgn->signedness ? '-' : '+',
+		sgn->offset,
+		sgn->scale,
+		sgn->min,
+		sgn->max,
+		sgn->mux_type,
+		(unsigned int)sgn->mux_value,
+		sgn->comment !=NULL ? sgn->comment : ""
+	);
+	return 1;
+}
+
+void CanMsgParser::encodeCanMessage(const message_t * dbc_msg, intercom::DataMessage::CanMsg * can_msg) {
+	for(signal_list_t * sitem = dbc_msg->signal_list; sitem != NULL; sitem = sitem->next) {
+
+		const signal_t *const sgn = sitem->signal;
+		uint8  bit_len            = sgn->bit_len;
+		uint8  start_offset       = sgn->bit_start & 7;
+		uint8  start_byte         = sgn->bit_start / 8;
+		uint8  data;
+		uint8  shift;
+
+		uint32 rawValue   = requestCanSignal(sgn, dbc_msg);
+
+		/* perform sign extension */
+		if (sgn->signedness && (bit_len < 32)) {
+			sint32 m = 1<< (bit_len-1);
+			rawValue = ((sint32)rawValue + m) ^ m;
+		}
+
+#if 0
+		/* align signal into ulong32 */
+		/* 0 = Big Endian, 1 = Little Endian */
+		if(sgn->endianess == 0) { /* big endian */
+			uint8  end_byte     = start_byte + (7 + bit_len - start_offset - 1)/8;
+			uint8  end_offset   = (start_offset - bit_len + 1) & 7;
+
+			/* loop over all source bytes from start_byte to end_byte */
+			for (int work_byte = start_byte; work_byte <= end_byte; work_byte++) {
+				/* fetch source byte */
+				data = can_msg->Payload[work_byte];
+
+				/* process source byte */
+				if (work_byte == start_byte && start_offset != 7) {
+					/* less that 8 bits in start byte? mask out unused bits */
+					data &= (uint8)~0 >> (7 - start_offset);
+					shift = start_offset + 1;
+				} else {
+					shift = 8; /* use all eight bits */
+				}
+
+				if (work_byte == end_byte && end_offset != 0) {
+					/* less that 8 bits in end byte? shift out unused bits */
+					data >>= end_offset;
+					shift -= end_offset;
+				}
+
+				/* store processed byte */
+				rawValue <<= shift; /* make room for shift bits */
+				rawValue |= data; /* insert new bits at low position */
+			}
+		} else {
+			/* little endian - similar algorithm with reverse bit significance  */
+			uint8  end_byte     = start_byte + (bit_len + start_offset - 1)/8;
+			uint8  end_offset   = (start_offset + bit_len - 1) & 7;
+
+			for (int work_byte = end_byte; work_byte >= start_byte; work_byte--) {
+				data = can_msg->Payload[work_byte];
+				if(work_byte == end_byte && end_offset != 7) {
+					data &= (uint8)~0 >> (7 - end_offset);
+					shift = end_offset + 1;
+				} else {
+					shift = 8;
+				}
+
+				if (work_byte == start_byte && start_offset != 0) {
+					data >>= start_offset;
+					shift -= start_offset;
+				}
+				rawValue <<= shift;
+				rawValue |= data;
+			}
+		}
+#endif
 	}
 }

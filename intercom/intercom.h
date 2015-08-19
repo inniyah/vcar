@@ -65,7 +65,7 @@ public:
 	} __attribute__((packed)) FullMsg;
 
 	void createTextMsg(const char * message, unsigned int length = 0);
-	void createCanMsg(CanId id, uint8_t dlc, const uint8_t * payload, uint8_t bus = 0);
+	void createCanMsg(CanId id, uint8_t dlc = 0, const uint8_t * payload = NULL, uint8_t bus = 0);
 
 	MsgType getMsgType() {
 		return m_Message.Header.Type;

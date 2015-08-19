@@ -39,7 +39,11 @@ void DataMessage::createCanMsg(CanId id, uint8_t dlc, const uint8_t * payload, u
 	m_Message.Data.Can.Id = htonl(id);
 	m_Message.Data.Can.Dlc = dlc;
 	m_Message.Data.Can.Bus = bus;
-	memcpy(m_Message.Data.Can.Payload, payload, dlc);
+	if (NULL != payload) {
+		memcpy(m_Message.Data.Can.Payload, payload, dlc);
+	} else {
+		memset(m_Message.Data.Can.Payload, 0, sizeof(m_Message.Data.Can.Payload));
+	}
 	m_Message.Header.Type = MsgCan;
 }
 
