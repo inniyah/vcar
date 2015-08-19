@@ -6,18 +6,6 @@
 
 #include <string.h>
 
-/* CAN message type */
-typedef struct {
-	struct {
-		time_t tv_sec;
-		uint32 tv_nsec;
-	} t;         /* time stamp */
-	uint8   bus; /* can bus */
-	uint32  id;  /* numeric CAN-ID */
-	uint8   dlc;
-	uint8   byte_arr[8];
-} canMessage_t;
-
 class CanMsgParser {
 public:
 	CanMsgParser(const char * dbc_filename);
@@ -111,10 +99,11 @@ void CarState::sendLoop() {
 		msg.createCanMsg(0x100, sizeof(can_data), can_data);
 		sender.send(msg);
 
-		msg.createCanMsg(0x110, 4);
+		msg.createCanMsg(0x110);
 		intercom::DataMessage::CanMsg * can_msg = msg.getCanInfo();
 		if (NULL != can_msg) {
 			car_msg_parser->requestCanMessage(can_msg);
+			sender.send(msg);
 		}
 	}
 }
@@ -189,7 +178,28 @@ void CanMsgParser::processCanSignal(const signal_t * sgn, const message_t * dbc_
 	);
 }
 
+/*  CanMsgParser::decodeCanMessage --  decode CAN messages
+	Copyright (C) 2007-2009 Andreas Heitmann
+
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 void CanMsgParser::decodeCanMessage(const message_t * dbc_msg, const intercom::DataMessage::CanMsg * can_msg) {
+	if (!dbc_msg || !can_msg) {
+		return;
+	}
+
 	/* iterate over all signals */
 	for(signal_list_t * sitem = dbc_msg->signal_list; sitem != NULL; sitem = sitem->next) {
 		/*
@@ -356,6 +366,12 @@ uint32 CanMsgParser::requestCanSignal(const signal_t * sgn, const message_t * db
 }
 
 void CanMsgParser::encodeCanMessage(const message_t * dbc_msg, intercom::DataMessage::CanMsg * can_msg) {
+	if (!dbc_msg || !can_msg) {
+		return;
+	}
+
+	can_msg->Dlc = dbc_msg->len;
+
 	for(signal_list_t * sitem = dbc_msg->signal_list; sitem != NULL; sitem = sitem->next) {
 
 		const signal_t *const sgn = sitem->signal;
@@ -372,7 +388,6 @@ void CanMsgParser::encodeCanMessage(const message_t * dbc_msg, intercom::DataMes
 			sint32 m = 1<< (bit_len-1);
 			rawValue = ((sint32)rawValue + m) ^ m;
 		}
-
 #if 0
 		/* align signal into ulong32 */
 		/* 0 = Big Endian, 1 = Little Endian */
@@ -380,10 +395,13 @@ void CanMsgParser::encodeCanMessage(const message_t * dbc_msg, intercom::DataMes
 			uint8  end_byte     = start_byte + (7 + bit_len - start_offset - 1)/8;
 			uint8  end_offset   = (start_offset - bit_len + 1) & 7;
 
-			/* loop over all source bytes from start_byte to end_byte */
+			/* loop over all bytes from start_byte to end_byte */
 			for (int work_byte = start_byte; work_byte <= end_byte; work_byte++) {
+
+
+
 				/* fetch source byte */
-				data = can_msg->Payload[work_byte];
+				can_msg->Payload[work_byte] |= data;
 
 				/* process source byte */
 				if (work_byte == start_byte && start_offset != 7) {
