@@ -168,10 +168,17 @@ bool Sender::send(DataMessage & msg_to_send) {
 
 	switch(msg_info.Header.Type) {
 		case DataMessage::MsgText:
-			msg_len = sizeof(DataMessage::MsgHeader) + sizeof(DataMessage::TextMsgStruct::Length) + ntohs(msg_info.Data.Text.Length);
+			msg_len =
+				sizeof(DataMessage::MsgHeader)
+				+ sizeof(DataMessage::TextMsgStruct::Length)
+				+ ntohs(msg_info.Data.Text.Length);
 			break;
 		case DataMessage::MsgCan:
-			msg_len = sizeof(DataMessage::MsgHeader) + sizeof(DataMessage::CanMsgStruct) - 8 + msg_info.Data.Can.Dlc;
+			msg_len =
+				sizeof(DataMessage::MsgHeader)
+				+ sizeof(DataMessage::CanMsgStruct)
+				- sizeof(DataMessage::CanMsgStruct::Payload)
+				+ msg_info.Data.Can.Dlc;
 			break;
 		default:
 			return true;
