@@ -159,10 +159,11 @@ void CanMsgParser::processCanMessage(const intercom::DataMessage::CanMsg * can_m
 }
 
 void CanMsgParser::processCanSignal(const signal_t * sgn, const message_t * dbc_msg, const intercom::DataMessage::CanMsg * can_msg, uint32 raw_value, double phys_value) {
-	fprintf(stderr, "   %s.%s = %f (raw=%ld): %d|%d@%d%c (%f + raw * %f) [%f|%f] %d %ul \"%s\"\n",
+	fprintf(stderr, "   %s.%s = %f (raw=%ld=0x%lX): %d|%d@%d%c (%f + raw * %f) [%f|%f] %d %ul \"%s\"\n",
 		dbc_msg->name,
 		sgn->name,
 		phys_value,
+		raw_value,
 		raw_value,
 		sgn->bit_start,
 		sgn->bit_len,
@@ -347,6 +348,7 @@ void CanMsgParser::requestCanMessage(intercom::DataMessage::CanMsg * can_msg) {
 }
 
 uint32 CanMsgParser::requestCanSignal(const signal_t * sgn, const message_t * dbc_msg) {
+#if 0
 	fprintf(stderr, "   req %s.%s: %d|%d@%d%c (%f + raw * %f) [%f|%f] %d %ul \"%s\"\n",
 		dbc_msg->name,
 		sgn->name,
@@ -362,7 +364,8 @@ uint32 CanMsgParser::requestCanSignal(const signal_t * sgn, const message_t * db
 		(unsigned int)sgn->mux_value,
 		sgn->comment !=NULL ? sgn->comment : ""
 	);
-	return 1;
+#endif
+	return 0x8383;
 }
 
 void CanMsgParser::encodeCanMessage(const message_t * dbc_msg, intercom::DataMessage::CanMsg * can_msg) {
@@ -379,7 +382,7 @@ void CanMsgParser::encodeCanMessage(const message_t * dbc_msg, intercom::DataMes
 		uint8  start_offset       = sgn->bit_start & 7;
 		uint8  start_byte         = sgn->bit_start / 8;
 		uint8  data;
-		uint8  shift;
+		uint8  mask;
 
 		uint32 rawValue   = requestCanSignal(sgn, dbc_msg);
 
@@ -388,6 +391,47 @@ void CanMsgParser::encodeCanMessage(const message_t * dbc_msg, intercom::DataMes
 			sint32 m = 1<< (bit_len-1);
 			rawValue = ((sint32)rawValue + m) ^ m;
 		}
+
+		/* 0 = Big Endian, 1 = Little Endian */
+		if(sgn->endianess == 0) { /* big endian */
+
+			// TODO
+
+		} else {
+			/* little endian - similar algorithm with reverse bit significance  */
+			uint8  end_byte     = start_byte + (bit_len + start_offset - 1)/8;
+			uint8  end_offset   = (start_offset + bit_len - 1) & 7;
+
+printf("%u:%u -> %u:%u\n", start_byte, start_offset, end_byte, end_offset);
+
+			for (int work_byte = end_byte; work_byte >= start_byte; work_byte--) {
+
+				data = 0xFF;
+
+				if(work_byte == end_byte && end_offset != 7) {
+					mask = (uint8)~0 >> (7 - end_offset);
+					data = rawValue & mask;
+					rawValue >>= (7 - end_offset);
+				} else {
+					mask = 0xFF;
+					data = rawValue & mask;
+					rawValue >>= 8;
+				}
+
+				if (work_byte == start_byte && start_offset != 0) {
+					mask = (uint8)~0 >> (7 - start_offset);
+					data = rawValue & mask;
+					data >>= start_offset;
+				}
+
+				/* store processed byte */
+				can_msg->Payload[work_byte] = (
+					(data & mask)
+					| (can_msg->Payload[work_byte] & (~mask))
+				);
+			}
+		}
+
 #if 0
 		/* align signal into ulong32 */
 		/* 0 = Big Endian, 1 = Little Endian */
