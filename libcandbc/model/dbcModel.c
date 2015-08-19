@@ -365,6 +365,7 @@ message_t *message_dup(message_t *orig)
 	{
 		CREATE(message_t, copy);
 		copy->id               = orig->id;
+		copy->len              = orig->len;
 		copy->name             = string_dup(orig->name);
 		copy->sender           = string_dup(orig->sender);
 		copy->signal_list      = signal_list_dup(orig->signal_list);
