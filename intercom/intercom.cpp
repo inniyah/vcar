@@ -171,7 +171,7 @@ bool Sender::send(DataMessage & msg_to_send) {
 			msg_len = sizeof(DataMessage::MsgHeader) + sizeof(DataMessage::TextMsgStruct::Length) + ntohs(msg_info.Data.Text.Length);
 			break;
 		case DataMessage::MsgCan:
-			msg_len = sizeof(DataMessage::MsgHeader) + 8;
+			msg_len = sizeof(DataMessage::MsgHeader) + sizeof(DataMessage::CanMsgStruct) - 8 + msg_info.Data.Can.Dlc;
 			break;
 		default:
 			return true;
@@ -180,9 +180,9 @@ bool Sender::send(DataMessage & msg_to_send) {
 	if (msg_len && msg_buffer) {
 		msg_info.Header.SourceSys = htonl(m_SysId);
 
-		//fputs("Snd Msg: ", stderr);
-		//msg_to_send.fprint(stderr);
-		//fputs("\n", stderr);
+		fputs("Snd Msg: ", stderr);
+		msg_to_send.fprint(stderr);
+		fputs("\n", stderr);
 
 		/* now just sendto() our destination! */
 		if (sendto(fd, msg_buffer, msg_len, 0, (struct sockaddr *) &addr, sizeof(addr)) < 0) {
@@ -210,6 +210,7 @@ bool Receiver::receive(DataMessage & msg_rcv) {
 		perror("recvfrom");
 		return false;
 	}
+	//fprintf(stderr, "Bytes received:%ld (max expected: %lu)\n", (long int)nbytes, (long int)msg_len);
 
 	if (htonl(m_SysId) != msg_info.Header.SourceSys) {
 		fputs("Msg Rcv: ", stderr);
