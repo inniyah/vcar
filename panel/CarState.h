@@ -3,16 +3,36 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <unistd.h>
+
+#include <map>
 
 #include "tinythread.h"
 
 class CanMsgParser;
 
-class CarState  {
+struct AnalogValue {
+	uint64_t RawValue;
+	double Scale;
+	double Offset;
+	bool Unsigned;
+};
+
+typedef std::map<std::string, std::map<std::string, AnalogValue > > AnalogMap;
+typedef std::map<std::string, AnalogValue >::iterator AnalogMapVarIterator;
+typedef std::map<std::string, std::map<std::string, AnalogValue > >::iterator AnalogMapGroupIterator;
+
+class CarState {
+	friend class CanMsgParser;
+
 public:
 	CarState();
 	virtual ~CarState();
+
+	void printAnalogData();
+
+	AnalogMap analog_data;
 
 private:
 	bool stop;

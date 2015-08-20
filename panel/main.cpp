@@ -2,10 +2,12 @@
 #include "panel.h"
 #include "CarSvgBox.h"
 #include "CarState.h"
+#include "RuntimeVarsWidgets.h"
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <assert.h>
 
 #include <FL/Fl.H>
 #include <FL/Fl_Tree.H>
@@ -24,7 +26,10 @@ void CarCmdToggleHazard() {
 };
 
 void ChangeAccel(Fl_Widget *w, void *data) {
+	CarState * car_state = reinterpret_cast<CarState*>(data);
+	assert(NULL != car_state);
 	Fl_Slider * slider = reinterpret_cast<Fl_Slider *>(w);
+	assert(NULL != slider);
 	double value = (slider->maximum() - slider->value()) / slider->maximum();
 	fprintf(stderr, "Accel %lf\n", value);
 
@@ -32,7 +37,10 @@ void ChangeAccel(Fl_Widget *w, void *data) {
 };
 
 void ChangeBrake(Fl_Widget *w, void *data) {
+	CarState * car_state = reinterpret_cast<CarState*>(data);
+	assert(NULL != car_state);
 	Fl_Slider * slider = reinterpret_cast<Fl_Slider *>(w);
+	assert(NULL != slider);
 	double value = (slider->maximum() - slider->value()) / slider->maximum();
 	fprintf(stderr, "Brake %lf\n", value);
 
@@ -58,7 +66,10 @@ void ChangeBackGear(Fl_Widget *w, void *data) {
 }
 
 void ChangeSteeringWheel(Fl_Widget *w, void *data) {
+	CarState * car_state = reinterpret_cast<CarState*>(data);
+	assert(NULL != car_state);
 	Fl_Dial * dial = reinterpret_cast<Fl_Dial *>(w);
+	assert(NULL != dial);
 	fprintf(stderr, "Steering Wheel %lf\n", dial->value() / dial->maximum());
 };
 
@@ -102,8 +113,17 @@ void CarCmdTreeCallback(Fl_Widget *w, void *data) {
 	}
 }
 
+void initCarState(CarState & car_state) {
+	car_state.analog_data["driving_controls"]["acceleration"].RawValue = 1;
+	car_state.analog_data["driving_controls"]["brake"].RawValue = 1;
+	car_state.analog_data["driving_controls"]["wheel"].RawValue = 1;
+}
+
 int main(int argc, char * argv[]) {
 	Fl_Double_Window * panel_window = makePanelWindow();
+
+	CarState car_state;
+	initCarState(car_state);
 
 	wKeyState->add("Key Off",   0, cbKeyOff,   0, 0);
 	wKeyState->add("Key On",    0, cbKeyOn,    0, 0);
@@ -131,11 +151,11 @@ int main(int argc, char * argv[]) {
 
 	wAccelSlider->scrollvalue(0 /*pos*/, 1 /*size*/, 0 /*first*/, 11 /*total*/);
 	wAccelSlider->value(wAccelSlider->maximum());
-	wAccelSlider->callback(ChangeAccel);
+	wAccelSlider->callback(ChangeAccel, &car_state);
 
 	wBrakeSlider->scrollvalue(0 /*pos*/, 1 /*size*/, 0 /*first*/, 11 /*total*/);
 	wBrakeSlider->value(wBrakeSlider->maximum());
-	wBrakeSlider->callback(ChangeBrake);
+	wBrakeSlider->callback(ChangeBrake, &car_state);
 
 	wGearSlider->scrollvalue(0 /*pos*/, 1 /*size*/, 0 /*first*/, 6 /*total*/); /* 5 Gears */
 	wGearSlider->value(wGearSlider->maximum());
@@ -145,14 +165,14 @@ int main(int argc, char * argv[]) {
 	wGearBackSlider->callback(ChangeBackGear);
 
 	wSteeringWheel->angles(0, 360);
-	wSteeringWheel->callback(ChangeSteeringWheel);
+	wSteeringWheel->callback(ChangeSteeringWheel, &car_state);
 	wSteeringWheel->value(0.5f);
 
 	wRpmDial->setSvgFilename("svg/dial_rpm.svg");
 	wRG1Dial->setSvgFilename("svg/dial_rg1.svg");
 	wOilWaterDial->setSvgFilename("svg/dial_ow.svg");
 
-	CarState car_state;
+	wRuntimeVars->setCarState(&car_state);
 
 	panel_window->show(argc, argv);
 	return Fl::run();

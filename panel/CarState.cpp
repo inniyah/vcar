@@ -4,9 +4,15 @@
 #include "busAssignment.h"
 #include "signalFormat.h"
 
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
+#include <cstdlib>
+#include <cstdio>
+#include <string>
+#include <iostream>
+#include <map>
+#include <string>
+#include <algorithm>
+#include <iomanip>
+#include <vector>
 
 class CanMsgParser {
 public:
@@ -14,13 +20,22 @@ public:
 	virtual ~CanMsgParser();
 
 	void processCanMessage(
-		const intercom::DataMessage::CanMsg * can_msg
+		const intercom::DataMessage::CanMsg * can_msg,
+		bool just_check = false
 	);
 	void decodeCanMessage(
 		const message_t * dbc_msg,
-		const intercom::DataMessage::CanMsg * can_msg
+		const intercom::DataMessage::CanMsg * can_msg,
+		bool just_check = false
 	);
 	void processCanSignal(
+		const signal_t * sgn,
+		const message_t * dbc_msg,
+		const intercom::DataMessage::CanMsg * can_msg,
+		uint32 raw_value,
+		double phys_value
+	);
+	void checkCanSignal(
 		const signal_t * sgn,
 		const message_t * dbc_msg,
 		const intercom::DataMessage::CanMsg * can_msg,
@@ -42,6 +57,8 @@ public:
 		const message_t * dbc_msg
 	);
 
+	CarState * carState;
+
 	busAssignment_t * busAssignment;
 	signalFormat_t signalFormat;
 };
@@ -54,7 +71,10 @@ CarState::CarState() :
 	snd_thread(sendThreadFunc, this),
 	car_msg_parser(NULL)
 {
-	car_msg_parser = new CanMsgParser("../dbc/can01.dbc");
+	car_msg_parser = new CanMsgParser("dbc/can01.dbc");
+	if (car_msg_parser) {
+		car_msg_parser->carState  = this;
+	}
 }
 
 CarState::~CarState() {
@@ -78,10 +98,18 @@ void CarState::receiveLoop() {
 		intercom::DataMessage msg;
 		receiver.receive(msg);
 
+		bool just_check = false;
+		if (receiver.getSysId() == msg.getSysId()) {
+			//fputs("* Msg Ign: ", stderr); msg.fprint(stderr); fputs("\n", stderr);
+			just_check = true;
+		} else {
+			//fputs("* Msg Rcv: ", stderr); msg.fprint(stderr); fputs("\n", stderr);
+		}
+
 		if ((NULL != car_msg_parser) && (intercom::DataMessage::MsgCan == msg.getMsgType())) {
 			intercom::DataMessage::CanMsg * can_msg = msg.getCanInfo();
 			if (NULL != can_msg) {
-				car_msg_parser->processCanMessage(can_msg);
+				car_msg_parser->processCanMessage(can_msg, just_check);
 			}
 		}
 	}
@@ -97,11 +125,7 @@ void CarState::sendLoop() {
 
 	while (!stop) {
 		sleep(1);
-		const uint8_t can_data[] = { 1, 2, 3, 4, 5, 6 };
-		msg.createCanMsg(0x100, sizeof(can_data), can_data);
-		//sender.send(msg);
-
-		msg.createCanMsg(0x110);
+		msg.createCanMsg(0x100);
 		intercom::DataMessage::CanMsg * can_msg = msg.getCanInfo();
 		if (NULL != can_msg) {
 			car_msg_parser->requestCanMessage(can_msg);
@@ -126,7 +150,7 @@ void CarState::sendThreadFunc(void * arg) {
 
 // CanMsgParser
 
-CanMsgParser::CanMsgParser(const char * dbc_filename) {
+CanMsgParser::CanMsgParser(const char * dbc_filename) : carState(NULL) {
 	busAssignment = busAssignment_create();
 	signalFormat = signalFormat_Name;
 	int bus = -1;
@@ -139,7 +163,7 @@ CanMsgParser::~CanMsgParser() {
 	busAssignment_free(busAssignment);
 }
 
-
+/*
 static void print_bits(int size, const void * const ptr) {
 	const unsigned char * b = reinterpret_cast<const unsigned char*>(ptr);
 	unsigned char byte;
@@ -155,9 +179,9 @@ static void print_bits(int size, const void * const ptr) {
 	}
 		printf("> ");
 }
+*/
 
-
-void CanMsgParser::processCanMessage(const intercom::DataMessage::CanMsg * can_msg) {
+void CanMsgParser::processCanMessage(const intercom::DataMessage::CanMsg * can_msg, bool just_check) {
 	/* lookup can_msg in message hash */
 	messageHashKey_t key = ntohl(can_msg->Id);
 	message_t * dbc_msg = NULL;
@@ -171,7 +195,7 @@ void CanMsgParser::processCanMessage(const intercom::DataMessage::CanMsg * can_m
 		if((entry->bus == -1) || (entry->bus == can_msg->Bus)) {
 			dbc_msg = (message_t *)hashtable_search(entry->messageHash, &key);
 			if(NULL != dbc_msg) {
-				decodeCanMessage(dbc_msg, can_msg);
+				decodeCanMessage(dbc_msg, can_msg, just_check);
 				break; /* end search if message was found */
 			}
 		}
@@ -179,8 +203,46 @@ void CanMsgParser::processCanMessage(const intercom::DataMessage::CanMsg * can_m
 }
 
 void CanMsgParser::processCanSignal(const signal_t * sgn, const message_t * dbc_msg, const intercom::DataMessage::CanMsg * can_msg, uint32 raw_value, double phys_value) {
+	if (carState) {
+		carState->analog_data[dbc_msg->name][sgn->name].RawValue = raw_value;
+	}
+
 #if 1
-	fprintf(stderr, "   %s.%s = %f (raw=%ld=0x%lX): %d|%d@%d%c (%f + raw * %f) [%f|%f] %d %ul \"%s\"\n",
+	fprintf(stderr, "   RCV CAN: %s.%s = %f (raw=%ld=0x%lX): %d|%d@%d%c (%f + raw * %f) [%f|%f] %d %ul \"%s\"\n",
+		dbc_msg->name,
+		sgn->name,
+		phys_value,
+		raw_value,
+		raw_value,
+		sgn->bit_start,
+		sgn->bit_len,
+		sgn->endianess,
+		sgn->signedness ? '-' : '+',
+		sgn->offset,
+		sgn->scale,
+		sgn->min,
+		sgn->max,
+		sgn->mux_type,
+		(unsigned int)sgn->mux_value,
+		sgn->comment !=NULL ? sgn->comment : ""
+	);
+#endif
+}
+
+void CanMsgParser::checkCanSignal(const signal_t * sgn, const message_t * dbc_msg, const intercom::DataMessage::CanMsg * can_msg, uint32 raw_value, double phys_value) {
+	if (carState) {
+		if (carState->analog_data[dbc_msg->name][sgn->name].RawValue != raw_value) {
+			fprintf(stdout, "ERR: Signal %s.%s ([rcv]%ld != [exp]%ld)\n",
+				dbc_msg->name,
+				sgn->name,
+				raw_value,
+				carState->analog_data[dbc_msg->name][sgn->name].RawValue
+			);
+		}
+	}
+
+#if 1
+	fprintf(stderr, "   CHK CAN: %s.%s = %f (raw=%ld=0x%lX): %d|%d@%d%c (%f + raw * %f) [%f|%f] %d %ul \"%s\"\n",
 		dbc_msg->name,
 		sgn->name,
 		phys_value,
@@ -218,12 +280,10 @@ void CanMsgParser::processCanSignal(const signal_t * sgn, const message_t * dbc_
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-void CanMsgParser::decodeCanMessage(const message_t * dbc_msg, const intercom::DataMessage::CanMsg * can_msg) {
+void CanMsgParser::decodeCanMessage(const message_t * dbc_msg, const intercom::DataMessage::CanMsg * can_msg, bool just_check) {
 	if (!dbc_msg || !can_msg) {
 		return;
 	}
-
-	printf("IN:  "); print_bits(can_msg->Dlc, can_msg->Payload); puts("\n");
 
 	/* iterate over all signals */
 	for(signal_list_t * sitem = dbc_msg->signal_list; sitem != NULL; sitem = sitem->next) {
@@ -289,8 +349,6 @@ void CanMsgParser::decodeCanMessage(const message_t * dbc_msg, const intercom::D
 				/* fetch source byte */
 				data = can_msg->Payload[work_byte];
 
-				printf("{%u}: %u:%u -> %u:%u -> 0x%02X -> ", work_byte, start_byte, start_offset, end_byte, end_offset, data);
-
 				/* process source byte */
 				if (work_byte == start_byte && start_offset != 7) {
 					/* less that 8 bits in start byte? mask out unused bits */
@@ -306,8 +364,7 @@ void CanMsgParser::decodeCanMessage(const message_t * dbc_msg, const intercom::D
 					shift -= end_offset;
 				}
 
-				printf("(<<%d) + 0x%02X\n", shift, data);
-
+				/* store processed byte */
 				rawValue <<= shift; /* make room for shift bits */
 				rawValue |= data; /* insert new bits at low position */
 			}
@@ -326,10 +383,7 @@ void CanMsgParser::decodeCanMessage(const message_t * dbc_msg, const intercom::D
 
 			for (int work_byte = end_byte; work_byte >= start_byte; --work_byte) {
 				data = can_msg->Payload[work_byte];
-
-				printf("[%u]: %u:%u -> %u:%u -> 0x%02X -> ", work_byte, start_byte, start_offset, end_byte, end_offset, data);
-
-				if (work_byte == end_byte && end_offset != 7) {
+				if(work_byte == end_byte && end_offset != 7) {
 					data &= (uint8)~0 >> (7 - end_offset);
 					shift = end_offset + 1;
 				} else {
@@ -340,9 +394,6 @@ void CanMsgParser::decodeCanMessage(const message_t * dbc_msg, const intercom::D
 					data >>= start_offset;
 					shift -= start_offset;
 				}
-
-				printf("(<<%d) + 0x%02X\n", shift, data);
-
 				rawValue <<= shift;
 				rawValue |= data;
 			}
@@ -373,7 +424,11 @@ void CanMsgParser::decodeCanMessage(const message_t * dbc_msg, const intercom::D
 			physicalValue = (double)        rawValue * sgn->scale + sgn->offset;
 		}
 
-		processCanSignal(sgn, dbc_msg, can_msg, rawValue, physicalValue);
+		if (just_check) {
+			checkCanSignal(sgn, dbc_msg, can_msg, rawValue, physicalValue);
+		} else {
+			processCanSignal(sgn, dbc_msg, can_msg, rawValue, physicalValue);
+		}
 	}
 }
 
@@ -399,13 +454,14 @@ void CanMsgParser::requestCanMessage(intercom::DataMessage::CanMsg * can_msg) {
 }
 
 uint32 CanMsgParser::requestCanSignal(const signal_t * sgn, const message_t * dbc_msg) {
-#if 1
-	int bits = sgn->bit_len;
-	uint32 raw = 0x8197 & (0xFFFFFFFFFFFFFFFFll >> (64 - bits)); // 10000001 10010111
-	fprintf(stderr, "   req %s.%s -> raw=%ld=0x%lX: %d|%d@%d%c (%f + raw * %f) [%f|%f] %d %ul \"%s\"\n",
+	uint32 raw = 0;
+	if (carState) {
+		raw = carState->analog_data[dbc_msg->name][sgn->name].RawValue;
+	}
+#if 0
+	fprintf(stderr, "   SND CAN: %s.%s -> raw==%ld: %d|%d@%d%c (%f + raw * %f) [%f|%f] %d %ul \"%s\"\n",
 		dbc_msg->name,
 		sgn->name,
-		raw,
 		raw,
 		sgn->bit_start,
 		sgn->bit_len,
@@ -429,7 +485,7 @@ void CanMsgParser::encodeCanMessage(const message_t * dbc_msg, intercom::DataMes
 	}
 
 	can_msg->Dlc = dbc_msg->len;
-	printf("INI: "); print_bits(can_msg->Dlc, can_msg->Payload); puts("\n");
+	//print_bits(can_msg->Dlc, can_msg->Payload); puts("\n");
 
 		/*
 		 * signal bit order:
@@ -479,30 +535,30 @@ void CanMsgParser::encodeCanMessage(const message_t * dbc_msg, intercom::DataMes
 			uint8  end_byte     = start_byte + (7 + bit_len - start_offset - 1)/8;
 			uint8  end_offset   = (start_offset - bit_len + 1) & 7;
 
-			printf("%u:%u -> %u:%u ->", start_byte, start_offset, end_byte, end_offset);
+			//printf("%u:%u -> %u:%u ->", start_byte, start_offset, end_byte, end_offset);
 
 			for (int work_byte = end_byte; work_byte >= start_byte; --work_byte) {
 				if (work_byte == end_byte && end_offset != 7) {
-					shift = 8 - end_offset;
-					mask  = 0xFF ^ ((uint8)~0 >> shift);
-					data  = (rawValue << (8 - shift)) & mask;
+					mask  =  0xFF ^ ((uint8)~0 >> (9 - end_offset));
+					data  = (rawValue << (7 - end_offset - 2)) & mask;
+					shift = 9 - end_offset;
 				} else if (work_byte == start_byte && start_offset != 0) {
-					shift = start_offset + 1;
-					mask  = (uint8)~0 >> (8 - shift);
+					mask  = (uint8)~0 >> (8 - start_offset);
 					data  = rawValue & mask;
+					shift = start_offset;
 				} else {
-					shift = 8;
 					mask  = 0xFF;
 					data  = rawValue & mask;
+					shift = 8;
 				}
 
-				printf(" {%d|%lX|%X|%X|%d}", work_byte, rawValue, data, mask, shift);
+				//printf(" {%d|%lX|%X|%X|%d}", work_byte, rawValue, data, mask, shift);
 
 				can_msg->Payload[work_byte] = ( (data & mask) | (can_msg->Payload[work_byte] & (~mask)) );
 				rawValue >>= shift;
 			}
 
-			printf(" {%lX}\n", rawValue);
+			//printf(" {%lX}\n", rawValue);
 
 		} else { /* 1 = Little Endian */
 		/*
@@ -517,32 +573,54 @@ void CanMsgParser::encodeCanMessage(const message_t * dbc_msg, intercom::DataMes
 			uint8  end_byte     = start_byte + (bit_len + start_offset - 1)/8;
 			uint8  end_offset   = (start_offset + bit_len - 1) & 7;
 
-			printf("%u:%u -> %u:%u ->", start_byte, start_offset, end_byte, end_offset);
+			//printf("%u:%u -> %u:%u ->", start_byte, start_offset, end_byte, end_offset);
 
 			for (int work_byte = start_byte; work_byte <= end_byte; ++work_byte) {
-				if (work_byte == end_byte && end_offset != 7) {
-					shift = end_offset + 1;
-					mask  = (uint8)~0 >> (8 - shift);
-					data  = rawValue & mask;
+				if(work_byte == end_byte && end_offset != 7) {
+					mask  = 0xFF ^ ((uint8)~0 >> (7 - end_offset));
+					data  = (rawValue << (7 - end_offset - 2)) & mask;
+					shift = 7 - end_offset;
 				} else if (work_byte == start_byte && start_offset != 0) {
-					shift = 8 - start_offset;
-					mask  = 0xFF ^ ((uint8)~0 >> shift);
-					data  = (rawValue << (8 - shift)) & mask;
+					mask  = (uint8)~0 >> (8 - start_offset);
+					data  = (rawValue & mask);
+					shift = start_offset;
 				} else {
-					shift = 8;
 					mask  = 0xFF;
 					data  = rawValue & mask;
+					shift = 8;
 				}
 
-				printf(" [%d|%lX|%X|%X|%d]", work_byte, rawValue, data, mask, shift);
+				//printf(" [%d|%lX|%X|%X|%d]", work_byte, rawValue, data, mask, shift);
 
 				can_msg->Payload[work_byte] = ( (data & mask) | (can_msg->Payload[work_byte] & (~mask)) );
 				rawValue >>= shift;
 			}
 
-			printf(" [%lX]\n", rawValue);
+			//printf(" [%lX]\n", rawValue);
 
 		}
-		printf("OUT: "); print_bits(can_msg->Dlc, can_msg->Payload); puts("\n");
+		//print_bits(can_msg->Dlc, can_msg->Payload); puts("\n");
 	}
 }
+
+void CarState::printAnalogData() {
+	AnalogMapVarIterator v;
+	AnalogMapGroupIterator g;
+	for (g = analog_data.begin(); g != analog_data.end(); g++) {
+		std::cout
+			<< (*g).first
+			<< ":"
+			<< std::endl;
+		for (v = (*g).second.begin(); v != (*g).second.end(); v++) {
+				std::cout
+					<< "    "
+					<< (*g).first
+					<< "."
+					<< (*v).first
+					<< " = "
+					<< (*v).second.RawValue
+					<< std::endl;
+		}
+	}
+}
+

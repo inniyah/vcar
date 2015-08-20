@@ -219,6 +219,7 @@ bool Receiver::receive(DataMessage & msg_rcv) {
 	}
 	//fprintf(stderr, "Bytes received:%ld (max expected: %lu)\n", (long int)nbytes, (long int)msg_len);
 
+#if 0
 	if (htonl(m_SysId) != msg_info.Header.SourceSys) {
 		fputs("Msg Rcv: ", stderr);
 		msg_rcv.fprint(stderr);
@@ -229,7 +230,7 @@ bool Receiver::receive(DataMessage & msg_rcv) {
 		fputs("\n", stderr);
 		//msg_info.Header.Type = DataMessage::MsgEmpty;
 	}
-
+#endif
 	return true;
 }
 

@@ -10,6 +10,7 @@ OBJS = \
 	CarState.o \
 	DialSvgBox.o \
 	OilWaterSvgBox.o \
+	RuntimeVarsWidgets.o \
 	panel.o \
 	panel_cb.o \
 	main.o

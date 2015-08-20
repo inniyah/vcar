@@ -71,6 +71,10 @@ public:
 		return m_Message.Header.Type;
 	}
 
+	SysId getSysId() {
+		return ntohl(m_Message.Header.SourceSys);
+	}
+
 	CanMsg * getCanInfo() {
 		if (MsgCan == m_Message.Header.Type) {
 			return &m_Message.Data.Can;
@@ -96,6 +100,10 @@ public:
 
 	bool send(DataMessage & msg_to_send);
 
+	SysId getSysId() {
+		return m_SysId;
+	}
+
 private:
 	SysId m_SysId;
 	bool m_isActive;
@@ -109,6 +117,10 @@ public:
 	~Receiver();
 
 	bool receive(DataMessage & msg_rcv);
+
+	SysId getSysId() {
+		return m_SysId;
+	}
 
 private:
 	SysId m_SysId;
