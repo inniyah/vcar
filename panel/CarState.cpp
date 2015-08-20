@@ -54,7 +54,7 @@ CarState::CarState() :
 	snd_thread(sendThreadFunc, this),
 	car_msg_parser(NULL)
 {
-	car_msg_parser = new CanMsgParser("../dbc/can01.dbc");
+	car_msg_parser = new CanMsgParser("../dbc/can02.dbc");
 }
 
 CarState::~CarState() {
@@ -483,17 +483,17 @@ void CanMsgParser::encodeCanMessage(const message_t * dbc_msg, intercom::DataMes
 
 			for (int work_byte = end_byte; work_byte >= start_byte; --work_byte) {
 				if (work_byte == end_byte && end_offset != 7) {
-					mask  =  0xFF ^ ((uint8)~0 >> (9 - end_offset));
-					data  = (rawValue << (7 - end_offset - 2)) & mask;
 					shift = 9 - end_offset;
+					mask  = 0xFF ^ ((uint8)~0 >> shift);
+					data  = (rawValue << (7 - end_offset - 2)) & mask;
 				} else if (work_byte == start_byte && start_offset != 0) {
-					mask  = (uint8)~0 >> (8 - start_offset);
-					data  = rawValue & mask;
 					shift = start_offset;
+					mask  = (uint8)~0 >> (8 - shift);
+					data  = rawValue & mask;
 				} else {
+					shift = 8;
 					mask  = 0xFF;
 					data  = rawValue & mask;
-					shift = 8;
 				}
 
 				printf(" {%d|%lX|%X|%X|%d}", work_byte, rawValue, data, mask, shift);
@@ -526,7 +526,7 @@ void CanMsgParser::encodeCanMessage(const message_t * dbc_msg, intercom::DataMes
 					data  = (rawValue & mask);
 				} else if (work_byte == start_byte && start_offset != 0) {
 					shift = 8 - start_offset;
-					mask  = 0xFF ^ ((uint8)~0 >> (shift));
+					mask  = 0xFF ^ ((uint8)~0 >> shift);
 					data  = (rawValue << (start_offset)) & mask;
 				} else {
 					shift = 8;
