@@ -13,7 +13,7 @@ PKG_CONFIG_LIBS=`pkg-config --libs $(PKG_CONFIG) 2>/dev/null`
 
 CFLAGS= -O2 -g -Wall
 DEFS=
-INCS=-ITinyThread++-1.1/source/
+INCS=-I../tinythreadpp/source/
 
 LDFLAGS= -Wl,-z,defs -Wl,--as-needed -Wl,--no-undefined
 LIBS=-lpthread
