@@ -54,7 +54,7 @@ CarState::CarState() :
 	snd_thread(sendThreadFunc, this),
 	car_msg_parser(NULL)
 {
-	car_msg_parser = new CanMsgParser("../dbc/can02.dbc");
+	car_msg_parser = new CanMsgParser("../dbc/can01.dbc");
 }
 
 CarState::~CarState() {
@@ -429,7 +429,7 @@ void CanMsgParser::encodeCanMessage(const message_t * dbc_msg, intercom::DataMes
 	}
 
 	can_msg->Dlc = dbc_msg->len;
-	print_bits(can_msg->Dlc, can_msg->Payload); puts("\n");
+	printf("INI: "); print_bits(can_msg->Dlc, can_msg->Payload); puts("\n");
 
 		/*
 		 * signal bit order:
@@ -483,11 +483,11 @@ void CanMsgParser::encodeCanMessage(const message_t * dbc_msg, intercom::DataMes
 
 			for (int work_byte = end_byte; work_byte >= start_byte; --work_byte) {
 				if (work_byte == end_byte && end_offset != 7) {
-					shift = 9 - end_offset;
+					shift = 8 - end_offset;
 					mask  = 0xFF ^ ((uint8)~0 >> shift);
-					data  = (rawValue << (7 - end_offset - 2)) & mask;
+					data  = (rawValue << (8 - shift)) & mask;
 				} else if (work_byte == start_byte && start_offset != 0) {
-					shift = start_offset;
+					shift = start_offset + 1;
 					mask  = (uint8)~0 >> (8 - shift);
 					data  = rawValue & mask;
 				} else {
@@ -523,11 +523,11 @@ void CanMsgParser::encodeCanMessage(const message_t * dbc_msg, intercom::DataMes
 				if (work_byte == end_byte && end_offset != 7) {
 					shift = end_offset + 1;
 					mask  = (uint8)~0 >> (8 - shift);
-					data  = (rawValue & mask);
+					data  = rawValue & mask;
 				} else if (work_byte == start_byte && start_offset != 0) {
 					shift = 8 - start_offset;
 					mask  = 0xFF ^ ((uint8)~0 >> shift);
-					data  = (rawValue << (start_offset)) & mask;
+					data  = (rawValue << (8 - shift)) & mask;
 				} else {
 					shift = 8;
 					mask  = 0xFF;
