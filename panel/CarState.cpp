@@ -74,10 +74,11 @@ static void can_bus_msg_sgn_cb(int can_bus, message_t * can_msg, signal_t * can_
 	CarState * car_state = reinterpret_cast<CarState *>(arg);
 	if (NULL != car_state) {
 		AnalogValue & av = car_state->analog_data[can_msg->name][can_sgn->name];
-		av.RawValue = 0xFFFF;
-		av.Scale    = can_sgn->scale;
-		av.Offset   = can_sgn->offset;
-		av.Sign     = (can_sgn->signedness != 0);
+		av.RawValue   = 0xFFFF;
+		av.Scale      = can_sgn->scale;
+		av.Offset     = can_sgn->offset;
+		av.Signedness = (can_sgn->signedness != 0);
+		av.Units      = can_sgn->unit != NULL ? can_sgn->unit : "";
 	}
 	printf("    SIGNAL %s (msg=0x%lX): len=%d end=%s sign=%s [sc=%.2f,of=%.2f] (%.2f-%.2f)\n",
 		can_sgn->name,

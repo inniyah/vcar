@@ -14,9 +14,10 @@ class CanMsgParser;
 
 struct AnalogValue {
 	uint64_t RawValue;
-	double Scale;
-	double Offset;
-	bool   Sign;
+	double       Scale;
+	double       Offset;
+	bool         Signedness;
+	const char * Units;
 };
 
 typedef std::map<std::string, std::map<std::string, AnalogValue > > AnalogMap;
