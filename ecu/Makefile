@@ -27,6 +27,12 @@ $(PROGRAM): $(OBJS)
 %.o: %.c
 	gcc -o $@ -c $+ $(DEFS) $(INCS) $(CFLAGS) $(PKG_CONFIG_CFLAGS)
 
+%.o: os/%.cpp
+	g++ -o $@ -c $+ $(DEFS) $(INCS) $(CFLAGS) $(PKG_CONFIG_CFLAGS)
+
+%.o: os/%.c
+	gcc -o $@ -c $+ $(DEFS) $(INCS) $(CFLAGS) $(PKG_CONFIG_CFLAGS)
+
 %.o: ../tinythreadpp/source/%.cpp
 	g++ -o $@ -c $+ $(DEFS) $(INCS) $(CFLAGS) $(PKG_CONFIG_CFLAGS)
 
