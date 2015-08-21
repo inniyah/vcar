@@ -196,10 +196,10 @@ static void show_signal(signal_list_t *sl) {
 			"%d;"       /* endianess */
 			"%d;"       /* signedness */
 			"%f;"       /* scale */
-			"%f;"      /* offset */
+			"%f;"       /* offset */
 			"%f;"       /* min */
-			"%f;"      /* max */
-			"%s;"      /* signal val type */
+			"%f;"       /* max */
+			"%s;"       /* signal val type */
 			"\"%s\";"   /* unit */             
 		,
 		/* Signal */

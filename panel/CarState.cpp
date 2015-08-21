@@ -65,6 +65,33 @@ public:
 
 // CarState
 
+static void can_bus_msg_cb(int can_bus, message_t * can_msg, void * arg) {
+	CarState * car_state = reinterpret_cast<CarState *>(arg);
+	printf("  CAN MSG 0x%lX (%s) on bus %d\n", (unsigned long)can_msg->id, can_msg->name, can_bus);
+}
+
+static void can_bus_msg_sgn_cb(int can_bus, message_t * can_msg, signal_t * can_sgn, void * arg) {
+	CarState * car_state = reinterpret_cast<CarState *>(arg);
+	if (NULL != car_state) {
+		AnalogValue & av = car_state->analog_data[can_msg->name][can_sgn->name];
+		av.RawValue = 0xFFFF;
+		av.Scale    = can_sgn->scale;
+		av.Offset   = can_sgn->offset;
+		av.Sign     = (can_sgn->signedness != 0);
+	}
+	printf("    SIGNAL %s (msg=0x%lX): len=%d end=%s sign=%s [sc=%.2f,of=%.2f] (%.2f-%.2f)\n",
+		can_sgn->name,
+		(unsigned long)can_msg->id,
+		can_sgn->bit_len,
+		can_sgn->endianess != 0 ? "le" : "be",
+		can_sgn->signedness != 0 ? "-" : "+",
+		can_sgn->scale,
+		can_sgn->offset,
+		can_sgn->min,
+		can_sgn->max
+	);
+}
+
 CarState::CarState() :
 	stop(false),
 	rcv_thread(receiveThreadFunc, this),
@@ -73,7 +100,10 @@ CarState::CarState() :
 {
 	car_msg_parser = new CanMsgParser("dbc/can01.dbc");
 	if (car_msg_parser) {
-		car_msg_parser->carState  = this;
+		car_msg_parser->carState = this;
+		if (car_msg_parser->busAssignment) {
+			busAssignment_iterate(car_msg_parser->busAssignment, can_bus_msg_cb, can_bus_msg_sgn_cb, this);
+		}
 	}
 }
 
@@ -402,8 +432,8 @@ void CanMsgParser::decodeCanMessage(const message_t * dbc_msg, const intercom::D
 		double physicalValue;
 
 		/* perform sign extension */
-		if(sgn->signedness && (bit_len < 32)) {
-			sint32 m = 1<< (bit_len-1);
+		if (sgn->signedness && (bit_len < 32)) {
+			sint32 m = 1 << (bit_len-1);
 			rawValue = ((sint32)rawValue ^ m) - m;
 		}
 

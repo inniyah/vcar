@@ -18,13 +18,16 @@
 #include "config.h"
 #endif
 
-#include <stdio.h>
-#include <string.h>
 #include "busAssignment.h"
 #include "showDbc.h"
 
-busAssignment_t *busAssignment_create(void)
-{
+#include "hashtable/hashtable.h"
+#include "hashtable/hashtable_itr.h"
+
+#include <stdio.h>
+#include <string.h>
+
+busAssignment_t *busAssignment_create(void) {
 	CREATE(busAssignment_t, busAssignment);
 
 	busAssignment->n = 0;
@@ -33,26 +36,20 @@ busAssignment_t *busAssignment_create(void)
 }
 
 
-void busAssignment_associate(busAssignment_t *busAssignment, int bus, const char * filename)
-{
+void busAssignment_associate(busAssignment_t * busAssignment, int bus, const char * filename) {
 	busAssignment->n++;
-	busAssignment->list = (busAssignmentEntry_t *)
-		realloc(busAssignment->list,
-		busAssignment->n
-		* sizeof(*(busAssignment->list)));
+	busAssignment->list = (busAssignmentEntry_t *)realloc(busAssignment->list, busAssignment->n * sizeof(*(busAssignment->list)));
 	busAssignment->list[busAssignment->n-1].bus = bus;
 	busAssignment->list[busAssignment->n-1].filename = strdup(filename);
 	busAssignment->list[busAssignment->n-1].messageHash = NULL;
 }
 
 
-int busAssignment_parseDBC(busAssignment_t *busAssignment)
-{
+int busAssignment_parseDBC(busAssignment_t * busAssignment) {
 	int i;
 	int ret = 0;
 
-	for(i = 0; i < busAssignment->n; i++)
-	{
+	for (i = 0; i < busAssignment->n; i++) {
 		dbc_t *dbc;
 
 		#if 0
@@ -60,8 +57,7 @@ int busAssignment_parseDBC(busAssignment_t *busAssignment)
 		#endif
 
 		dbc = dbc_read_file(busAssignment->list[i].filename);
-		if(NULL != dbc)
-		{
+		if(NULL != dbc) {
 #if 0
 			show_dbc_network(dbc);
 			show_dbc_message_list(dbc->message_list);
@@ -75,8 +71,7 @@ int busAssignment_parseDBC(busAssignment_t *busAssignment)
 
 			// busAssignment->list[i].databaseName = NULL;
 			busAssignment->list[i].messageHash = messageHash;
-			if(messageHash == NULL)
-			{
+			if(messageHash == NULL) {
 				fprintf(stderr,
 					"busAssignment_parseDBC(): error parsing DBC file %s\n",
 					busAssignment->list[i].filename);
@@ -84,9 +79,7 @@ int busAssignment_parseDBC(busAssignment_t *busAssignment)
 				break;
 			}
 			dbc_free(dbc);
-		}
-		else
-		{
+		} else {
 			fprintf(stderr, "busAssignment_parseDBC(): error opening DBC file %s\n",
 				busAssignment->list[i].filename);
 			ret = 1;
@@ -97,19 +90,82 @@ int busAssignment_parseDBC(busAssignment_t *busAssignment)
 }
 
 
-void busAssignment_free(busAssignment_t *busAssignment)
-{
+void busAssignment_free(busAssignment_t * busAssignment) {
 	int i;
 
-	if(busAssignment != NULL)
-	{
-		for(i = 0; i < busAssignment->n; i++)
-		{
+	if (busAssignment != NULL) {
+		for (i = 0; i < busAssignment->n; i++) {
 			busAssignmentEntry_t *entry = &(busAssignment->list[i]);
 			free(entry->filename);
 			messageHash_free(entry->messageHash);
 		}
-		if(busAssignment->list != NULL) free(busAssignment->list);
+		if(busAssignment->list != NULL) {
+			free(busAssignment->list);
+		}
 	}
 	free(busAssignment);
+}
+
+static void busAssignment_messageHash_print(struct hashtable * const h) {
+	if(NULL != h) {
+		if (hashtable_count(h) > 0) {
+			struct hashtable_itr *itr = hashtable_iterator(h);
+			do {
+				message_t * m = hashtable_iterator_value(itr);
+				if (m) {
+					signal_list_t * sl;
+					printf("  CAN MSG 0x%lX (%s)\n", (unsigned long)m->id, m->name);
+					for(sl = m->signal_list; sl != NULL; sl = sl->next) {
+						printf("    SIGNAL %s\n", sl->signal->name);
+					}
+
+				}
+			} while (hashtable_iterator_advance(itr));
+		}
+	}
+}
+
+void busAssignment_print(busAssignment_t * busAssignment) {
+	int i;
+
+	if (busAssignment != NULL) {
+		for (i = 0; i < busAssignment->n; i++) {
+			busAssignmentEntry_t * entry = &(busAssignment->list[i]);
+			if (entry) {
+				printf("CAN BUS %d\n", entry->bus);
+				busAssignment_messageHash_print(entry->messageHash);
+			}
+		}
+	}
+}
+
+void busAssignment_iterate(busAssignment_t * busAssignment, busAssignmentMessageCallback msg_cb, busAssignmentSignalCallback sgn_cb, void * arg) {
+	int i;
+	if (busAssignment != NULL) {
+		for (i = 0; i < busAssignment->n; i++) {
+			busAssignmentEntry_t * entry = &(busAssignment->list[i]);
+			if (entry) {
+				struct hashtable * const h = entry->messageHash;
+				if (NULL != h) {
+					if (hashtable_count(h) > 0) {
+						struct hashtable_itr *itr = hashtable_iterator(h);
+						do {
+							message_t * m = hashtable_iterator_value(itr);
+							if (m) {
+								signal_list_t * sl;
+								if (NULL != msg_cb) {
+									msg_cb(entry->bus, m, arg);
+								}
+								for(sl = m->signal_list; sl != NULL; sl = sl->next) {
+									if (NULL != msg_cb) {
+										sgn_cb(entry->bus, m, sl->signal, arg);
+									}
+								}
+							}
+						} while (hashtable_iterator_advance(itr));
+					}
+				}
+			}
+		}
+	}
 }

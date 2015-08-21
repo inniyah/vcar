@@ -16,7 +16,7 @@ struct AnalogValue {
 	uint64_t RawValue;
 	double Scale;
 	double Offset;
-	bool Unsigned;
+	bool   Sign;
 };
 
 typedef std::map<std::string, std::map<std::string, AnalogValue > > AnalogMap;
