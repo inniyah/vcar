@@ -5,13 +5,13 @@
 
 #ifdef __cplusplus
 
-#define ISR(x) extern "C" void isr_##x(void)
-#define TASK(x) extern "C" void task_##x(void)
+#define ISR(x) extern "C" void isr_##x(int, short , void *)
+#define TASK(x) extern "C" void task_##x(int, short , void *)
 
 #else
 
-#define ISR(x) void isr_##x(void)
-#define TASK(x) void task_##x(void)
+#define ISR(x) void isr_##x(int, short , void *)
+#define TASK(x) void task_##x(int, short , void *)
 
 #endif
 
@@ -35,9 +35,12 @@ extern "C" {
 void requestExit();
 int isExitRequested();
 
-void setEventAfterUs(struct event & ev, uint64_t us, void (*fn)(int, short, void *), void * arg);
-void setEventAfterMs(struct event & ev, uint64_t ms, void (*fn)(int, short, void *), void * arg);
-void setEventAfterS(struct event & ev, uint32_t s, void (*fn)(int, short, void *), void * arg);
+void addEventAfterUs  (struct event & ev, uint64_t us, void (*fn)(int, short, void *), void * arg);
+void addEventAfterMs  (struct event & ev, uint64_t ms, void (*fn)(int, short, void *), void * arg);
+void addEventAfterSec (struct event & ev, uint32_t s,  void (*fn)(int, short, void *), void * arg);
+void addEventEveryUs  (struct event & ev, uint64_t us, void (*fn)(int, short, void *), void * arg);
+void addEventEveryMs  (struct event & ev, uint64_t ms, void (*fn)(int, short, void *), void * arg);
+void addEventEverySec (struct event & ev, uint64_t s,  void (*fn)(int, short, void *), void * arg);
 
 #ifdef __cplusplus
 }

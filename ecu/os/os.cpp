@@ -23,7 +23,7 @@ extern "C" int isExitRequested() {
 	return (exit_requested ? ~0 : 0);
 }
 
-extern "C" void setEventAfterUs(struct event & ev, uint64_t us, void (*fn)(int, short, void *), void * arg) {
+extern "C" void addEventAfterUs(struct event & ev, uint64_t us, void (*fn)(int, short, void *), void * arg) {
 	struct timeval tv;
 	tv.tv_sec = (us / 1000000);
 	tv.tv_usec = (us % 1000000);
@@ -31,7 +31,7 @@ extern "C" void setEventAfterUs(struct event & ev, uint64_t us, void (*fn)(int, 
 	evtimer_add(&ev, &tv);
 }
 
-extern "C" void setEventAfterMs(struct event & ev, uint64_t ms, void (*fn)(int, short, void *), void * arg) {
+extern "C" void addEventAfterMs(struct event & ev, uint64_t ms, void (*fn)(int, short, void *), void * arg) {
 	struct timeval tv;
 	tv.tv_sec = (ms / 1000);
 	tv.tv_usec = (ms % 1000) * 1000;
@@ -39,10 +39,34 @@ extern "C" void setEventAfterMs(struct event & ev, uint64_t ms, void (*fn)(int, 
 	evtimer_add(&ev, &tv);
 }
 
-extern "C" void setEventAfterS(struct event & ev, uint32_t s, void (*fn)(int, short, void *), void * arg) {
+extern "C" void addEventAfterS(struct event & ev, uint32_t s, void (*fn)(int, short, void *), void * arg) {
 	struct timeval tv;
 	tv.tv_sec = s;
 	tv.tv_usec = 0;
 	evtimer_set(&ev, fn, arg);
+	evtimer_add(&ev, &tv);
+}
+
+extern "C" void addEventEveryUs(struct event & ev, uint64_t us, void (*fn)(int, short, void *), void * arg) {
+	struct timeval tv;
+	tv.tv_sec = (us / 1000000);
+	tv.tv_usec = (us % 1000000);
+	event_set(&ev, 0, EV_PERSIST, fn, arg);
+	evtimer_add(&ev, &tv);
+}
+
+extern "C" void addEventEveryMs(struct event & ev, uint64_t ms, void (*fn)(int, short, void *), void * arg) {
+	struct timeval tv;
+	tv.tv_sec = (ms / 1000);
+	tv.tv_usec = (ms % 1000) * 1000;
+	event_set(&ev, 0, EV_PERSIST, fn, arg);
+	evtimer_add(&ev, &tv);
+}
+
+extern "C" void addEventEverySec(struct event & ev, uint64_t s, void (*fn)(int, short, void *), void * arg) {
+	struct timeval tv;
+	tv.tv_sec = s;
+	tv.tv_usec = 0;
+	event_set(&ev, 0, EV_PERSIST, fn, arg);
 	evtimer_add(&ev, &tv);
 }
