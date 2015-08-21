@@ -7,9 +7,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <unistd.h>
-#include <assert.h>
 #include <sys/time.h>
+#include <unistd.h>
+#include <errno.h>
+#include <assert.h>
+#include <event.h>
 
 // Periodic Alarms
 
@@ -166,17 +168,25 @@ void CanBusHandler::sendThreadFunc(void * arg) {
 
 // Main Function
 
+void heartbeat(int fd, short event, void *arg) {
+  printf("Heart Beat!\n");
+}
+
 int main(int argc, const char * argv[]) {
+	event_init();
 	task_init();
 
 	PeriodicAlarm periodic_alarm_100ms (&task_100ms, 100);
 	PeriodicAlarm periodic_alarm_10ms  (&task_10ms,   10);
 	CanBusHandler can_bus_handler;
 
-	printf("+\n");
-	while (true) {
-		usleep(1000000lu);
-		printf("+\n");
+	struct event ev;
+	while (!isExitRequested()) {
+		setEventAfterMs(ev, 3000, heartbeat, NULL);
+		event_dispatch();
 	}
+
+	printf("</end>\n");
+
 	return EXIT_SUCCESS;
 }

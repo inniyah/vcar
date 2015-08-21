@@ -52,7 +52,11 @@ bool CanDevice::insertTxMessage(CanMsgId msg_id, uint8_t dlc, uint8_t * payload)
 
 // Public API
 
-CanTransceiverStatus CanTransceiver_getStatus(CanDevId can_id) {
+extern "C" uint8_t CanSystem_getNumberOfDevices() {
+	return CanDevice::NUM_CAN_DEVICES;
+}
+
+extern "C" CanTransceiverStatus CanTransceiver_getStatus(CanDevId can_id) {
 	if ((can_id < 0) || (can_id >= CanDevice::NUM_CAN_DEVICES)) {
 		return CanTransceiverStatus_Undefined;
 	}
@@ -66,7 +70,7 @@ CanTransceiverStatus CanTransceiver_getStatus(CanDevId can_id) {
 	}
 }
 
-CanTransceiverError  CanTransceiver_init(CanDevId can_id) {
+extern "C" CanTransceiverError  CanTransceiver_init(CanDevId can_id) {
 	if ((can_id < 0) || (can_id >= CanDevice::NUM_CAN_DEVICES)) {
 		return CanTransceiverError_WrongDevice;
 	}
@@ -74,7 +78,7 @@ CanTransceiverError  CanTransceiver_init(CanDevId can_id) {
 	return CanTransceiverError_Ok;
 }
 
-CanTransceiverError  CanTransceiver_start(CanDevId can_id) {
+extern "C" CanTransceiverError  CanTransceiver_start(CanDevId can_id) {
 	if ((can_id < 0) || (can_id >= CanDevice::NUM_CAN_DEVICES)) {
 		return CanTransceiverError_WrongDevice;
 	}
@@ -85,7 +89,7 @@ CanTransceiverError  CanTransceiver_start(CanDevId can_id) {
 	return CanTransceiverError_Ok;
 }
 
-CanTransceiverError  CanTransceiver_stop(CanDevId can_id) {
+extern "C" CanTransceiverError  CanTransceiver_stop(CanDevId can_id) {
 	if ((can_id < 0) || (can_id >= CanDevice::NUM_CAN_DEVICES)) {
 		return CanTransceiverError_WrongDevice;
 	}
@@ -96,35 +100,35 @@ CanTransceiverError  CanTransceiver_stop(CanDevId can_id) {
 	return CanTransceiverError_Ok;
 }
 
-CanDriverStatus CanDriver_getStatus(CanDevId can_id) {
+extern "C" CanDriverStatus CanDriver_getStatus(CanDevId can_id) {
 	if ((can_id < 0) || (can_id >= CanDevice::NUM_CAN_DEVICES)) {
 		return CanDriverStatus_Undefined;
 	}
 	return CanDriverStatus_Undefined;
 }
 
-CanDriverError  CanDriver_open(CanDevId can_id) {
+extern "C" CanDriverError CanDriver_open(CanDevId can_id) {
 	if ((can_id < 0) || (can_id >= CanDevice::NUM_CAN_DEVICES)) {
 		return CanDriverError_WrongDevice;
 	}
 	return CanDriverError_Ok;
 }
 
-CanDriverError  CanDriver_close(CanDevId can_id) {
+extern "C" CanDriverError CanDriver_close(CanDevId can_id) {
 	if ((can_id < 0) || (can_id >= CanDevice::NUM_CAN_DEVICES)) {
 		return CanDriverError_WrongDevice;
 	}
 	return CanDriverError_Ok;
 }
 
-CanDriverError  CanDriver_mute(CanDevId can_id) {
+extern "C" CanDriverError CanDriver_mute(CanDevId can_id) {
 	if ((can_id < 0) || (can_id >= CanDevice::NUM_CAN_DEVICES)) {
 		return CanDriverError_WrongDevice;
 	}
 	return CanDriverError_Ok;
 }
 
-CanDriverError  CanDriver_unmute(CanDevId can_id) {
+extern "C" CanDriverError CanDriver_unmute(CanDevId can_id) {
 	if ((can_id < 0) || (can_id >= CanDevice::NUM_CAN_DEVICES)) {
 		return CanDriverError_WrongDevice;
 	}

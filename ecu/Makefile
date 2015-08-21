@@ -7,6 +7,7 @@ OBJS = \
 	intercom.o \
 	main.o \
 	can.o \
+	os.o \
 	task_handlers.o \
 	isr_handlers.o
 
@@ -19,7 +20,7 @@ DEFS=
 INCS=-I../tinythreadpp/source/ -I../intercom/
 
 LDFLAGS= -Wl,-z,defs -Wl,--as-needed -Wl,--no-undefined
-LIBS=-lpthread
+LIBS=-levent -lpthread
 
 $(PROGRAM): $(OBJS)
 	g++ $(LDFLAGS) $+ -o $@ $(LIBS) $(PKG_CONFIG_LIBS)

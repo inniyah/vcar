@@ -26,6 +26,23 @@ TASK(10ms);
 ISR(CAN_MSG_RECV);
 ISR(CAN_MSG_SENT);
 
+// Events
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void requestExit();
+int isExitRequested();
+
+void setEventAfterUs(struct event & ev, uint64_t us, void (*fn)(int, short, void *), void * arg);
+void setEventAfterMs(struct event & ev, uint64_t ms, void (*fn)(int, short, void *), void * arg);
+void setEventAfterS(struct event & ev, uint32_t s, void (*fn)(int, short, void *), void * arg);
+
+#ifdef __cplusplus
+}
+#endif
+
 // Can Bus
 
 #define CAN_MAX_SIZE 8
@@ -71,6 +88,8 @@ typedef enum {
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+uint8_t              CanSystem_getNumberOfDevices();
 
 CanTransceiverStatus CanTransceiver_getStatus(CanDevId can_id);
 CanTransceiverError  CanTransceiver_init(CanDevId can_id);
