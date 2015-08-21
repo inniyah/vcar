@@ -95,6 +95,7 @@ static void can_bus_msg_sgn_cb(int can_bus, message_t * can_msg, signal_t * can_
 
 CarState::CarState() :
 	stop(false),
+	receiver(intercom::Sys_Panel),
 	rcv_thread(receiveThreadFunc, this),
 	snd_thread(sendThreadFunc, this),
 	car_msg_parser(NULL)
@@ -114,6 +115,7 @@ CarState::~CarState() {
 	intercom::DataMessage msg;
 	msg.createTextMsg("Bye!");
 	sender.send(msg);
+	receiver.shutdown();
 	snd_thread.join();
 	rcv_thread.join();
 
@@ -124,7 +126,7 @@ CarState::~CarState() {
 }
 
 void CarState::receiveLoop() {
-	intercom::Receiver receiver(intercom::Sys_Panel);
+	//intercom::Receiver receiver(intercom::Sys_Panel);
 	while (!stop) {
 		intercom::DataMessage msg;
 		receiver.receive(msg);

@@ -9,6 +9,7 @@
 #include <map>
 
 #include "tinythread.h"
+#include "intercom.h"
 
 class CanMsgParser;
 
@@ -40,6 +41,8 @@ private:
 
 	void receiveLoop();
 	void sendLoop();
+
+	intercom::Receiver receiver;
 
 	static void receiveThreadFunc(void * arg);
 	static void sendThreadFunc(void * arg);

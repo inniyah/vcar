@@ -117,6 +117,7 @@ public:
 	~Receiver();
 
 	bool receive(DataMessage & msg_rcv);
+	void shutdown();
 
 	SysId getSysId() {
 		return m_SysId;

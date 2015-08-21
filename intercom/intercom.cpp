@@ -234,4 +234,9 @@ bool Receiver::receive(DataMessage & msg_rcv) {
 	return true;
 }
 
+void Receiver::shutdown() {
+	::shutdown(fd, SHUT_RDWR);
+}
+
+
 }; // namespace Intercom
