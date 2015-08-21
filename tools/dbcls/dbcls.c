@@ -46,8 +46,7 @@ static int nodes_flag;
 static int envvars_flag;
 static int valtables_flag;
 
-static void help(void)
-{
+static void help(void) {
   fprintf(stderr,
           "Usage: dbcls [OPTION] -d dbcfile\n"
           "List information about dbcfile.\n"
@@ -63,9 +62,7 @@ static void help(void)
           "      --help     display this help and exit\n");
 }
 
-int
-main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
   dbc_t *dbc;
   char *filename = NULL; /* default: stdin */
   int c;
@@ -144,5 +141,5 @@ main(int argc, char **argv)
     dbc_free(dbc);
   }
 
-  return 0;
+  return EXIT_SUCCESS;
 }

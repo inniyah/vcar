@@ -6,11 +6,11 @@
 #ifdef __cplusplus
 extern "C"
 {
-	#endif
+#endif
 
 	dbc_t *dbc_read_file(char *filename);
 
-	#ifdef __cplusplus
+#ifdef __cplusplus
 }
 #endif
 #endif

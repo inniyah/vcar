@@ -1,4 +1,5 @@
 #include "hooks.h"
+#include "hwregs.h"
 
 #include "tinythread.h"
 #include "intercom.h"

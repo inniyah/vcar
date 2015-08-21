@@ -3,14 +3,17 @@
 
 #include "dbcModel.h"
 
+#include <stdio.h>
+
 #ifdef __cplusplus
 extern "C"
 {
-	#endif
+#endif
 
 	void dbc_write(FILE *out, dbc_t *dbc);
 
-	#ifdef __cplusplus
+#ifdef __cplusplus
 }
 #endif
+
 #endif
