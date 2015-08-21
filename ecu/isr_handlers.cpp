@@ -1,12 +1,14 @@
+#include "os/os.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
 
-extern "C" void isr_canMsgReceived(void) {
+ISR(CAN_MSG_RECV) {
 
 }
 
-extern "C" void isr_canMsgSent(void) {
+ISR(CAN_MSG_SENT) {
 
 }

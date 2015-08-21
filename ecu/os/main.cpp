@@ -1,5 +1,5 @@
-#include "hooks.h"
-#include "hwregs.h"
+#include "os.h"
+#include "can.h"
 
 #include "tinythread.h"
 #include "intercom.h"
@@ -98,7 +98,7 @@ CanBusHandler::CanBusHandler() :
 
 CanBusHandler::~CanBusHandler() {
 	stop = true;
-	intercom::Sender sender(intercom::Sys_Panel);
+	intercom::Sender sender(intercom::Sys_Ecu);
 	intercom::DataMessage msg;
 	msg.createTextMsg("Bye!");
 	sender.send(msg);
@@ -108,20 +108,27 @@ CanBusHandler::~CanBusHandler() {
 }
 
 void CanBusHandler::receiveLoop() {
-	//intercom::Receiver receiver(intercom::Sys_Panel);
+	//intercom::Receiver receiver(intercom::Sys_Ecu);
 	while (!stop) {
 		intercom::DataMessage msg;
 		receiver.receive(msg);
+		bool ignore = false;
 
 		if (receiver.getSysId() == msg.getSysId()) {
 			fputs("* Msg Ign: ", stderr); msg.fprint(stderr); fputs("\n", stderr);
+			ignore = true;
 		} else {
 			fputs("* Msg Rcv: ", stderr); msg.fprint(stderr); fputs("\n", stderr);
+			ignore = false;
 		}
 
 		switch (msg.getMsgType()) {
-			case intercom::DataMessage::MsgCan: {
+			case intercom::DataMessage::MsgCan:
+				if (!ignore) {
 					intercom::DataMessage::CanMsg * can_msg = msg.getCanInfo();
+					if ((NULL != can_msg) && (can_msg->Bus >= 0) && (can_msg->Bus < CanDevice::NUM_CAN_DEVICES)) {
+						CanDevice::m_CanDevices[can_msg->Bus].insertTxMessage(can_msg->Id, can_msg->Dlc, can_msg->Payload);
+					}
 				}
 				break;
 			default:
@@ -131,7 +138,7 @@ void CanBusHandler::receiveLoop() {
 }
 
 void CanBusHandler::sendLoop() {
-	intercom::Sender sender(intercom::Sys_Panel);
+	intercom::Sender sender(intercom::Sys_Ecu);
 	intercom::DataMessage msg;
 
 	sleep(1);
@@ -160,6 +167,8 @@ void CanBusHandler::sendThreadFunc(void * arg) {
 // Main Function
 
 int main(int argc, const char * argv[]) {
+	task_init();
+
 	PeriodicAlarm periodic_alarm_100ms (&task_100ms, 100);
 	PeriodicAlarm periodic_alarm_10ms  (&task_10ms,   10);
 	CanBusHandler can_bus_handler;

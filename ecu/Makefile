@@ -6,6 +6,7 @@ OBJS = \
 	tinythread.o \
 	intercom.o \
 	main.o \
+	can.o \
 	task_handlers.o \
 	isr_handlers.o
 

@@ -61,8 +61,9 @@ void DataMessage::fprint(FILE *stream) const {
 			for (int i = 0; i < m_Message.Data.Can.Dlc; ++i) {
 				fprintf(stream, " 0x%02X", m_Message.Data.Can.Payload[i]);
 			}
-			fprintf(stream, " } (%u) Src=%8lX]",
+			fprintf(stream, " } (%u) Bus=%d Src=%8lX]",
 				m_Message.Data.Can.Dlc,
+				m_Message.Data.Can.Bus,
 				(unsigned long)ntohl(m_Message.Header.SourceSys)
 			);
 			break;
