@@ -17,11 +17,11 @@ TASK(init) {
 }
 
 TASK(100ms) {
-	fprintf(stderr, "<100ms>\n");
+	//fprintf(stderr, "<100ms>\n");
 	//time_t now = time(NULL);
 	//fprintf(stderr, "Time: %s\n", ctime(&now));
 }
 
 TASK(10ms) {
-	fprintf(stderr, "<10ms>\n");
+	//fprintf(stderr, "<10ms>\n");
 }

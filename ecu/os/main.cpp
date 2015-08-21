@@ -130,7 +130,7 @@ int main(int argc, const char * argv[]) {
 	addEventEveryMs(ev_10ms,   10, task_10ms, NULL);
 
 	struct event ev_hb;
-	addEventEverySec(ev_hb,     1, heartbeat, NULL);
+	addEventEverySec(ev_hb,     5, heartbeat, NULL);
 
 	while (!isExitRequested()) {
 		event_dispatch();
