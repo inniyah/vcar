@@ -16,7 +16,8 @@ namespace intercom {
 
 enum {
 	Sys_Unknown = 0,
-	Sys_Panel = 1,
+	Sys_Panel   = 1,
+	Sys_Ecu     = 2,
 };
 
 typedef uint32_t SysId; /* system identifier, to know what is coming from who */

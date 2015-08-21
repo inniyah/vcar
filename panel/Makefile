@@ -21,7 +21,7 @@ PKG_CONFIG_LIBS=`pkg-config --libs $(PKG_CONFIG) 2>/dev/null` `fltk-config --ldf
 
 CFLAGS= -O2 -g -Wall
 DEFS= 
-INCS=  -I../tinythreadpp/source/ -I../intercom/  -I../libcandbc/ -I../libcandbc/model/
+INCS=  -I../tinythreadpp/source/ -I../intercom/ -I../libcandbc/ -I../libcandbc/model/
 
 LDFLAGS= -Wl,-z,defs -Wl,--as-needed -Wl,--no-undefined
 LIBS= -L../libcandbc -lCanDbc -lpthread

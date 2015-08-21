@@ -1,12 +1,16 @@
 #include "hooks.h"
 
+#include "tinythread.h"
+#include "intercom.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
 #include <assert.h>
 #include <sys/time.h>
-#include <tinythread.h>
+
+// Periodic Alarms
 
 class PeriodicAlarm {
 public:
@@ -61,14 +65,108 @@ void PeriodicAlarm::loop(void * arg) {
 	}
 }
 
+// Can Bus Handler
+
+class CanBusHandler {
+public:
+	CanBusHandler();
+	virtual ~CanBusHandler();
+
+private:
+	bool stop;
+
+	void receiveLoop();
+	void sendLoop();
+
+	intercom::Receiver receiver;
+
+	static void receiveThreadFunc(void * arg);
+	static void sendThreadFunc(void * arg);
+
+	tthread::thread rcv_thread;
+	tthread::thread snd_thread;
+};
+
+CanBusHandler::CanBusHandler() :
+	stop(false),
+	receiver(intercom::Sys_Ecu),
+	rcv_thread(receiveThreadFunc, this),
+	snd_thread(sendThreadFunc, this)
+{
+}
+
+CanBusHandler::~CanBusHandler() {
+	stop = true;
+	intercom::Sender sender(intercom::Sys_Panel);
+	intercom::DataMessage msg;
+	msg.createTextMsg("Bye!");
+	sender.send(msg);
+	receiver.shutdown();
+	snd_thread.join();
+	rcv_thread.join();
+}
+
+void CanBusHandler::receiveLoop() {
+	//intercom::Receiver receiver(intercom::Sys_Panel);
+	while (!stop) {
+		intercom::DataMessage msg;
+		receiver.receive(msg);
+
+		if (receiver.getSysId() == msg.getSysId()) {
+			fputs("* Msg Ign: ", stderr); msg.fprint(stderr); fputs("\n", stderr);
+		} else {
+			fputs("* Msg Rcv: ", stderr); msg.fprint(stderr); fputs("\n", stderr);
+		}
+
+		switch (msg.getMsgType()) {
+			case intercom::DataMessage::MsgCan: {
+					intercom::DataMessage::CanMsg * can_msg = msg.getCanInfo();
+				}
+				break;
+			default:
+				break;
+		}
+	}
+}
+
+void CanBusHandler::sendLoop() {
+	intercom::Sender sender(intercom::Sys_Panel);
+	intercom::DataMessage msg;
+
+	sleep(1);
+	msg.createTextMsg("Hello!");
+	sender.send(msg);
+
+	while (!stop) {
+		sleep(1);
+	}
+}
+
+void CanBusHandler::receiveThreadFunc(void * arg) {
+	CanBusHandler * obj = reinterpret_cast<CanBusHandler *>(arg);
+	if (NULL != obj) {
+		obj->receiveLoop();
+	}
+}
+
+void CanBusHandler::sendThreadFunc(void * arg) {
+	CanBusHandler * obj = reinterpret_cast<CanBusHandler *>(arg);
+	if (NULL != obj) {
+		obj->sendLoop();
+	}
+}
+
+// Main Function
+
 int main(int argc, const char * argv[]) {
 	PeriodicAlarm periodic_alarm_100ms (&task_100ms, 100);
 	PeriodicAlarm periodic_alarm_10ms  (&task_10ms,   10);
+	CanBusHandler can_bus_handler;
 
 	printf("+\n");
 	while (true) {
 		usleep(1000000lu);
-		printf("*\n");
+		printf("+\n");
 	}
 	return EXIT_SUCCESS;
 }
