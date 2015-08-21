@@ -156,8 +156,8 @@ void busAssignment_iterate(busAssignment_t * busAssignment, busAssignmentMessage
 								if (NULL != msg_cb) {
 									msg_cb(entry->bus, m, arg);
 								}
-								for(sl = m->signal_list; sl != NULL; sl = sl->next) {
-									if (NULL != msg_cb) {
+								if (NULL != msg_cb) {
+									for(sl = m->signal_list; sl != NULL; sl = sl->next) {
 										sgn_cb(entry->bus, m, sl->signal, arg);
 									}
 								}
