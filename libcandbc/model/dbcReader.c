@@ -22,8 +22,7 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 #include "dbcModel.h"
 #include "dbcReader.h"
 
-dbc_t *dbc_read_file(char *filename)
-{
+dbc_t * dbc_read_file(const char * filename) {
 	extern void yyrestart( FILE *input_file );
 	extern YY_BUFFER_STATE yy_create_buffer( FILE *file, int size );
 	extern void yy_switch_to_buffer ( YY_BUFFER_STATE new_buffer );
@@ -35,22 +34,17 @@ dbc_t *dbc_read_file(char *filename)
 	YY_BUFFER_STATE bufstate;
 
 	CREATE(dbc_t, dbc);
-	if(dbc != NULL)
-	{
+	if(dbc != NULL) {
 		current_yacc_file = filename;
 
-		if(filename != NULL)
-		{
+		if(filename != NULL) {
 			yyin = fopen (filename, "r");
-			if (yyin == NULL)
-			{
+			if (yyin == NULL) {
 				fprintf(stderr,"error: can't open the dbc file '%s' for reading\n", filename);
 				dbc_free(dbc);
 				return NULL;
 			}
-		}
-		else
-		{
+		} else {
 			yyin = stdin;
 		}
 
@@ -63,19 +57,13 @@ dbc_t *dbc_read_file(char *filename)
 		fclose (yyin);
 
 		/* set filename */
-		if(error == 0)
-		{
-			if(filename != NULL)
-			{
+		if(error == 0) {
+			if(filename != NULL) {
 				dbc->filename = strdup(filename);
-			}
-			else
-			{
+			} else {
 				dbc->filename = strdup("<stdin>");
 			}
-		}
-		else
-		{
+		} else {
 			dbc->filename = NULL;
 		}
 	}

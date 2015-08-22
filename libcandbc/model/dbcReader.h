@@ -8,9 +8,10 @@ extern "C"
 {
 #endif
 
-	dbc_t *dbc_read_file(char *filename);
+	dbc_t * dbc_read_file(const char * filename);
 
 #ifdef __cplusplus
 }
 #endif
+
 #endif
