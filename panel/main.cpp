@@ -31,6 +31,7 @@ void ChangeAccel(Fl_Widget *w, void *data) {
 	Fl_Slider * slider = reinterpret_cast<Fl_Slider *>(w);
 	assert(NULL != slider);
 	double value = (slider->maximum() - slider->value()) / slider->maximum();
+	car_state->analog_data["driving_controls"]["acceleration"].RawValue = 250 * value;
 	fprintf(stderr, "Accel %lf\n", value);
 
 	wRpmDial->setDialValue(value);
@@ -42,6 +43,7 @@ void ChangeBrake(Fl_Widget *w, void *data) {
 	Fl_Slider * slider = reinterpret_cast<Fl_Slider *>(w);
 	assert(NULL != slider);
 	double value = (slider->maximum() - slider->value()) / slider->maximum();
+	car_state->analog_data["driving_controls"]["brake"].RawValue = 250 * value;
 	fprintf(stderr, "Brake %lf\n", value);
 
 	if (slider->maximum() != slider->value()) {
@@ -52,16 +54,30 @@ void ChangeBrake(Fl_Widget *w, void *data) {
 };
 
 void ChangeGear(Fl_Widget *w, void *data) {
+	CarState * car_state = reinterpret_cast<CarState*>(data);
+	assert(NULL != car_state);
 	Fl_Slider * slider = reinterpret_cast<Fl_Slider *>(w);
+	double value = (slider->maximum() - slider->value());
+	car_state->analog_data["driving_controls"]["gear"].RawValue = value;
+	if (value != 0) {
+		wGearBackSlider->deactivate();
+	} else {
+		wGearBackSlider->activate();
+	}
 }
 
 void ChangeBackGear(Fl_Widget *w, void *data) {
+	CarState * car_state = reinterpret_cast<CarState*>(data);
+	assert(NULL != car_state);
 	Fl_Slider * slider = reinterpret_cast<Fl_Slider *>(w);
-	double value = (slider->maximum() - slider->value()) / slider->maximum();
 	if (slider->maximum() != slider->value()) {
+		car_state->analog_data["driving_controls"]["gear"].RawValue = 0;
 		wCarBox->BackwardsLights(false);
+		wGearSlider->activate();
 	} else {
+		car_state->analog_data["driving_controls"]["gear"].RawValue = -1;
 		wCarBox->BackwardsLights(true);
+		wGearSlider->deactivate();
 	}
 }
 
@@ -159,10 +175,10 @@ int main(int argc, char * argv[]) {
 
 	wGearSlider->scrollvalue(0 /*pos*/, 1 /*size*/, 0 /*first*/, 6 /*total*/); /* 5 Gears */
 	wGearSlider->value(wGearSlider->maximum());
-	wGearSlider->callback(ChangeGear);
+	wGearSlider->callback(ChangeGear, &car_state);
 	wGearBackSlider->scrollvalue(0 /*pos*/, 1 /*size*/, 0 /*first*/, 2 /*total*/);
 	wGearBackSlider->value(0);
-	wGearBackSlider->callback(ChangeBackGear);
+	wGearBackSlider->callback(ChangeBackGear, &car_state);
 
 	wSteeringWheel->angles(0, 360);
 	wSteeringWheel->callback(ChangeSteeringWheel, &car_state);
