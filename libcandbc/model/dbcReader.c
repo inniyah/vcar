@@ -26,7 +26,7 @@ dbc_t * dbc_read_file(const char * filename) {
 	extern void yyrestart( FILE *input_file );
 	extern YY_BUFFER_STATE yy_create_buffer( FILE *file, int size );
 	extern void yy_switch_to_buffer ( YY_BUFFER_STATE new_buffer );
-	extern char *current_yacc_file;
+	extern const char *current_yacc_file;
 	extern FILE *yyin;
 	extern int yyparse (void *YYPARSE_PARAM);
 	extern void yy_delete_buffer ( YY_BUFFER_STATE b );

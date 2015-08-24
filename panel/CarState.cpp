@@ -6,6 +6,7 @@
 
 #include <cstdlib>
 #include <cstdio>
+#include <cstring>
 #include <string>
 #include <iostream>
 #include <map>
@@ -74,11 +75,12 @@ static void can_bus_msg_sgn_cb(int can_bus, message_t * can_msg, signal_t * can_
 	CarState * car_state = reinterpret_cast<CarState *>(arg);
 	if (NULL != car_state) {
 		AnalogValue & av = car_state->analog_data[can_msg->name][can_sgn->name];
-		av.RawValue   = 0xFFFF;
-		av.Scale      = can_sgn->scale;
-		av.Offset     = can_sgn->offset;
-		av.Signedness = (can_sgn->signedness != 0);
-		av.Units      = can_sgn->unit != NULL ? can_sgn->unit : "";
+		av.StartRawValue = 0;
+		av.RawValue      = 0;
+		av.Scale         = can_sgn->scale;
+		av.Offset        = can_sgn->offset;
+		av.Signedness    = (can_sgn->signedness != 0);
+		av.Units         = can_sgn->unit != NULL ? can_sgn->unit : "";
 	}
 	printf("    SIGNAL %s (msg=0x%lX): len=%d end=%s sign=%s [sc=%.2f,of=%.2f] (%.2f-%.2f)\n",
 		can_sgn->name,
@@ -93,6 +95,34 @@ static void can_bus_msg_sgn_cb(int can_bus, message_t * can_msg, signal_t * can_
 	);
 }
 
+static void can_bus_msg_sgn_att_cb(int can_bus, message_t * can_msg, signal_t * can_sgn, attribute_t * sgn_att, void * arg) {
+	CarState * car_state = reinterpret_cast<CarState *>(arg);
+	if (NULL != car_state && NULL != sgn_att && NULL != sgn_att->value) {
+		AnalogValue & av = car_state->analog_data[can_msg->name][can_sgn->name];
+		switch (sgn_att->value->value_type) {
+			case vt_integer:
+				av.StartRawValue = (sgn_att->value->value.int_val) & (0xFFFFFFFFu & ((uint32)~0 >> (32 - can_sgn->bit_len)));
+				break;
+			case vt_float:
+				break;
+			case vt_string:
+				break;
+			case vt_enum:
+				break;
+			case vt_hex:
+				break;
+			default:
+				break;
+		}
+		av.RawValue = av.StartRawValue;
+
+		printf("      ATTRIBUTE %s -> %lu\n",
+			sgn_att->name,
+			av.StartRawValue
+		);
+	}
+}
+
 CarState::CarState() :
 	stop(false),
 	receiver(intercom::Sys_Panel),
@@ -104,7 +134,7 @@ CarState::CarState() :
 	if (car_msg_parser) {
 		car_msg_parser->carState = this;
 		if (car_msg_parser->busAssignment) {
-			busAssignment_iterate(car_msg_parser->busAssignment, can_bus_msg_cb, can_bus_msg_sgn_cb, this);
+			busAssignment_iterate(car_msg_parser->busAssignment, can_bus_msg_cb, can_bus_msg_sgn_cb, can_bus_msg_sgn_att_cb, this);
 		}
 	}
 }
@@ -196,23 +226,19 @@ CanMsgParser::~CanMsgParser() {
 	busAssignment_free(busAssignment);
 }
 
-/*
 static void print_bits(int size, const void * const ptr) {
 	const unsigned char * b = reinterpret_cast<const unsigned char*>(ptr);
-	unsigned char byte;
-
 	printf("< ");
 	for (int i = 0; i < size; ++i) {
 		for (int j = 7; j >= 0; --j) {
-			byte = b[i] & (1<<j);
+			unsigned char byte = b[i] & (1<<j);
 			byte >>= j;
 			printf("%u", byte);
 		}
 		printf(" ");
 	}
-		printf("> ");
+	printf("> ");
 }
-*/
 
 void CanMsgParser::processCanMessage(const intercom::DataMessage::CanMsg * can_msg, bool just_check) {
 	/* lookup can_msg in message hash */
@@ -520,6 +546,9 @@ void CanMsgParser::encodeCanMessage(const message_t * dbc_msg, intercom::DataMes
 	can_msg->Dlc = dbc_msg->len;
 	//print_bits(can_msg->Dlc, can_msg->Payload); puts("\n");
 
+	intercom::DataMessage::CanMsg mask_msg;
+	mask_msg.Dlc = can_msg->Dlc;
+
 		/*
 		 * signal bit order:
 		 *
@@ -548,6 +577,7 @@ void CanMsgParser::encodeCanMessage(const message_t * dbc_msg, intercom::DataMes
 		uint8  shift;
 
 		uint32 rawValue   = requestCanSignal(sgn, dbc_msg);
+		memset(mask_msg.Payload, 0, sizeof(mask_msg.Payload));
 
 		/* perform sign extension */
 		if (sgn->signedness && (bit_len < 32)) {
@@ -568,7 +598,7 @@ void CanMsgParser::encodeCanMessage(const message_t * dbc_msg, intercom::DataMes
 			uint8  end_byte     = start_byte + (7 + bit_len - start_offset - 1)/8;
 			uint8  end_offset   = (start_offset - bit_len + 1) & 7;
 
-			//printf("%u:%u -> %u:%u ->", start_byte, start_offset, end_byte, end_offset);
+			printf("%u:%u -> %u:%u ->", start_byte, start_offset, end_byte, end_offset);
 
 			for (int work_byte = end_byte; work_byte >= start_byte; --work_byte) {
 				if (work_byte == end_byte && end_offset != 7) {
@@ -585,13 +615,14 @@ void CanMsgParser::encodeCanMessage(const message_t * dbc_msg, intercom::DataMes
 					shift = 8;
 				}
 
-				//printf(" {%d|%lX|%X|%X|%d}", work_byte, rawValue, data, mask, shift);
+				printf(" {%d|%lX|%X|%X|%d}", work_byte, rawValue, data, mask, shift);
 
 				can_msg->Payload[work_byte] = ( (data & mask) | (can_msg->Payload[work_byte] & (~mask)) );
+				mask_msg.Payload[work_byte] = ( (0xFF & mask) | (mask_msg.Payload[work_byte] & (~mask)) );
 				rawValue >>= shift;
 			}
 
-			//printf(" {%lX}\n", rawValue);
+			printf(" {%lX}\n", rawValue);
 
 		} else { /* 1 = Little Endian */
 		/*
@@ -606,10 +637,14 @@ void CanMsgParser::encodeCanMessage(const message_t * dbc_msg, intercom::DataMes
 			uint8  end_byte     = start_byte + (bit_len + start_offset - 1)/8;
 			uint8  end_offset   = (start_offset + bit_len - 1) & 7;
 
-			//printf("%u:%u -> %u:%u ->", start_byte, start_offset, end_byte, end_offset);
+			printf("%u:%u -> %u:%u ->", start_byte, start_offset, end_byte, end_offset);
 
 			for (int work_byte = start_byte; work_byte <= end_byte; ++work_byte) {
-				if(work_byte == end_byte && end_offset != 7) {
+				if (work_byte == end_byte && work_byte == start_byte && (start_offset != 0 || end_offset != 7)) {
+					mask  = (uint8)~0 >> (7 - end_offset + start_offset) << (start_offset);
+					data  = (rawValue << start_offset) & mask;
+					shift = start_offset;
+				} else if (work_byte == end_byte && end_offset != 7) {
 					mask  = 0xFF ^ ((uint8)~0 >> (7 - end_offset));
 					data  = (rawValue << (7 - end_offset - 2)) & mask;
 					shift = 7 - end_offset;
@@ -623,16 +658,18 @@ void CanMsgParser::encodeCanMessage(const message_t * dbc_msg, intercom::DataMes
 					shift = 8;
 				}
 
-				//printf(" [%d|%lX|%X|%X|%d]", work_byte, rawValue, data, mask, shift);
+				printf(" [%d|%lX|%X|%X|%d]", work_byte, rawValue, data, mask, shift);
 
 				can_msg->Payload[work_byte] = ( (data & mask) | (can_msg->Payload[work_byte] & (~mask)) );
+				mask_msg.Payload[work_byte] = ( (0xFF & mask) | (mask_msg.Payload[work_byte] & (~mask)) );
 				rawValue >>= shift;
 			}
 
-			//printf(" [%lX]\n", rawValue);
+			printf(" [%lX]\n", rawValue);
 
 		}
-		//print_bits(can_msg->Dlc, can_msg->Payload); puts("\n");
+		print_bits(can_msg->Dlc, mask_msg.Payload); printf("\n");
+		print_bits(can_msg->Dlc, can_msg->Payload); printf("\n");
 	}
 }
 

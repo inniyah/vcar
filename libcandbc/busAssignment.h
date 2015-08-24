@@ -31,7 +31,15 @@ int busAssignment_parseDBC(busAssignment_t * busAssignment);
 
 typedef void(*busAssignmentMessageCallback)(int can_bus, message_t * can_msg, void * arg);
 typedef void(*busAssignmentSignalCallback)(int can_bus, message_t * can_msg, signal_t * can_sgn, void * arg);
-void busAssignment_iterate(busAssignment_t * busAssignment, busAssignmentMessageCallback msg_cb, busAssignmentSignalCallback sgn_cb, void * arg);
+typedef void(*busAssignmentAttributeCallback)(int can_bus, message_t * can_msg, signal_t * can_sgn, attribute_t * sgn_att, void * arg);
+
+void busAssignment_iterate(
+	busAssignment_t * busAssignment,
+	busAssignmentMessageCallback msg_cb,
+	busAssignmentSignalCallback sgn_cb,
+	busAssignmentAttributeCallback att_cb,
+	void * arg
+);
 
 #ifdef __cplusplus
 }

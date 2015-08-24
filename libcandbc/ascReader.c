@@ -24,8 +24,7 @@
 #include <ctype.h>
 #include "ascReader.h"
 
-typedef enum
-{
+typedef enum {
 	unset = 0,
 	decimal = 10,
 	hexadecimal = 16
@@ -38,75 +37,51 @@ typedef enum
  * msgRxCb  callback function for received messages
  * cbData   pointer to opaque callback data
  */
-void ascReader_processFile(FILE *fp, msgRxCb_t msgRxCb, void *cbData)
-{
+void ascReader_processFile(FILE *fp, msgRxCb_t msgRxCb, void *cbData) {
 	char buffer[100];
 	char *cp;
 	numBase_t numbase = unset;
 
 	/* loop for reading input lines */
-	while(1)
-	{
-		char *buffer_lasts;		 /* reentrancy structure for strtok on buffer */
+	while (1) {
+		char *buffer_lasts; /* reentrancy structure for strtok on buffer */
 		char *bp;
 
 		bp = fgets(buffer,sizeof(buffer),fp);
-		if(feof(fp)) break;		 /* EOF... stop loop */
+		if(feof(fp)) break; /* EOF... stop loop */
 		if(bp==NULL) break;
-								 /* remove line CR/NL */
-		if ((cp = strstr(buffer, "\n\r")) != NULL)
-		{
+		if ((cp = strstr(buffer, "\n\r")) != NULL) { /* remove line CR/NL */
 			*cp = '\0';
 		}
-								 /* get first token */
-		cp = strtok_r (buffer," ", &buffer_lasts);
-		if(!strcmp(cp,"date"))
-		{
-			;					 /* skip date info */
-		}						 /* parse numeric base */
-		else if(!strcmp(cp,"base"))
-		{
-								 /* dec/hex */
-			cp = strtok_r(NULL," ", &buffer_lasts);
-			if(!strcmp(cp,"dec"))
-			{
+		cp = strtok_r (buffer," ", &buffer_lasts); /* get first token */
+		if(!strcmp(cp,"date")) {
+			; /* skip date info */
+		} else if(!strcmp(cp,"base")) { /* parse numeric base */
+			cp = strtok_r(NULL," ", &buffer_lasts); /* dec/hex */
+			if(!strcmp(cp,"dec")) {
 				numbase = decimal;
-			}
-			else if(!strcmp(cp,"hex"))
-			{
+			} else if(!strcmp(cp,"hex")) {
 				numbase = hexadecimal;
-			}
-			else
-			{
+			} else {
 				fprintf(stderr,
 					"ascReader_processFile(): unknown numeric base %s\n",
 					cp);
 			}
 			continue;
-		}
-		else if(!strcmp(cp,"internal"))
-		{
+		} else if(!strcmp(cp,"internal")) {
 			continue;
-		}
-		else if(!strcmp(cp,"Begin"))
-		{
+		} else if(!strcmp(cp,"Begin")) {
 			continue;
-		}
-		else if(!strcmp(cp,"Start"))
-		{
+		} else if(!strcmp(cp,"Start")) {
 			continue;
-		}
-		else
-		{
+		} else {
 			canMessage_t message;
 
-			char   *id_str;		 /* symbolic CAN-ID */
+			char   *id_str; /* symbolic CAN-ID */
 			char   *rx;
-			char   *d;
 			int     i;
 
-			if(numbase == unset)
-			{
+			if(numbase == unset) {
 				fprintf(stderr,"ascReader_processFile(): missing numeric base\n");
 				break;
 			}
@@ -155,7 +130,6 @@ void ascReader_processFile(FILE *fp, msgRxCb_t msgRxCb, void *cbData)
 			if((rx[0] != 'R') || (rx[1] != 'x')) continue;
 
 			cp = strtok_r(NULL, " ", &buffer_lasts); if(cp == NULL) continue;
-			d = cp;
 
 			/* get DLC */
 			cp = strtok_r(NULL, " ", &buffer_lasts); if(cp == NULL) continue;

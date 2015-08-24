@@ -14,7 +14,8 @@
 class CanMsgParser;
 
 struct AnalogValue {
-	uint64_t RawValue;
+	uint64_t     RawValue;
+	uint64_t     StartRawValue;
 	double       Scale;
 	double       Offset;
 	bool         Signedness;

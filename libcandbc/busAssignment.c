@@ -139,7 +139,13 @@ void busAssignment_print(busAssignment_t * busAssignment) {
 	}
 }
 
-void busAssignment_iterate(busAssignment_t * busAssignment, busAssignmentMessageCallback msg_cb, busAssignmentSignalCallback sgn_cb, void * arg) {
+void busAssignment_iterate(
+	busAssignment_t * busAssignment,
+	busAssignmentMessageCallback msg_cb,
+	busAssignmentSignalCallback sgn_cb,
+	busAssignmentAttributeCallback att_cb,
+	void * arg
+) {
 	int i;
 	if (busAssignment != NULL) {
 		for (i = 0; i < busAssignment->n; i++) {
@@ -152,13 +158,19 @@ void busAssignment_iterate(busAssignment_t * busAssignment, busAssignmentMessage
 						do {
 							message_t * m = hashtable_iterator_value(itr);
 							if (m) {
-								signal_list_t * sl;
 								if (NULL != msg_cb) {
 									msg_cb(entry->bus, m, arg);
 								}
 								if (NULL != msg_cb) {
+									signal_list_t * sl;
 									for(sl = m->signal_list; sl != NULL; sl = sl->next) {
 										sgn_cb(entry->bus, m, sl->signal, arg);
+										if (NULL != att_cb) {
+											attribute_list_t * al;
+											for(al = sl->signal->attribute_list; al != NULL; al = al->next) {
+												att_cb(entry->bus, m, sl->signal, al->attribute, arg);
+											}
+										}
 									}
 								}
 							}
