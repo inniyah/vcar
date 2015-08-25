@@ -10,6 +10,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
+#include <cassert>
 #include <string>
 #include <iostream>
 #include <map>
@@ -131,7 +132,7 @@ int main(int argc, const char * argv[]) {
 			}
 			dbc_free(dbc);
 			dbc = NULL;
-
+#if 0
 			CanSignalMapElementIterator v;
 			CanSignalMapGroupIterator g;
 			for (g = can_sgn_map.begin(); g != can_sgn_map.end(); g++) {
@@ -145,7 +146,7 @@ int main(int argc, const char * argv[]) {
 				}
 				printf("}; /* CanMsg_%s */\n\n", (*g).first.c_str());
 			}
-
+#endif
 		} else {
 			fprintf(stderr, "can't open input file '%s'\n", inFilename);
 			ret = EXIT_FAILURE;
@@ -160,6 +161,20 @@ int main(int argc, const char * argv[]) {
 	}
 
 	return ret;
+}
+
+static void print_bits(int size, const void * const ptr) {
+	const unsigned char * b = reinterpret_cast<const unsigned char*>(ptr);
+	printf("< ");
+	for (int i = 0; i < size; ++i) {
+		for (int j = 7; j >= 0; --j) {
+			unsigned char byte = b[i] & (1<<j);
+			byte >>= j;
+			printf("%u", byte);
+		}
+		printf(" ");
+	}
+	printf("> ");
 }
 
 /*  CanMsgParser::decodeCanMessage --  decode CAN messages
@@ -186,6 +201,9 @@ std::string getCanSignalDecoder(const message_t * dbc_msg, const signal_t * can_
 
 	char cstr[256];
 	memset(cstr, 0, sizeof(cstr));
+
+	uint8_t msg_mask[8];
+	memset(msg_mask, 0, sizeof(msg_mask));
 
 	/*
 	 * compute some signal properties
@@ -242,22 +260,24 @@ std::string getCanSignalDecoder(const message_t * dbc_msg, const signal_t * can_
 		/* loop over all source bytes from start_byte to end_byte */
 		for (int work_byte = start_byte; work_byte <= end_byte; ++work_byte) {
 			if (work_byte == start_byte && work_byte == end_byte && start_offset != 7 && end_offset != 0) {
-				mask = (uint8)~0 >> (7 - start_offset);
+				mask   = (uint8)~0 >> (7 - start_offset + end_offset) << end_offset;
 				rotate = end_offset;
-				shift = start_offset - end_offset + 1;
+				shift  = start_offset - end_offset + 1;
 			} else if (work_byte == start_byte && start_offset != 7) {
-				mask = (uint8)~0 >> (7 - start_offset);
+				mask   = (uint8)~0 >> (7 - start_offset);
 				rotate = 0;
-				shift = start_offset + 1;
+				shift  = start_offset + 1;
 			} else if (work_byte == end_byte && end_offset != 0) {
-				mask = 0xFF;
+				mask   = 0xFF ^ ((uint8)~0 >> (8 - end_offset));
 				rotate = end_offset;
-				shift = 8 - end_offset;
+				shift  = 8 - end_offset;
 			} else {
-				mask = 0xFF;
+				mask   = 0xFF;
 				rotate = 0;
-				shift = 8;
+				shift  = 8;
 			}
+
+			msg_mask[work_byte] = ( (0xFF & mask) | (msg_mask[work_byte] & (~mask)) );
 
 			position -= shift;
 			memset(buff, 0, sizeof(buff));
@@ -276,6 +296,7 @@ std::string getCanSignalDecoder(const message_t * dbc_msg, const signal_t * can_
 				strncat(cstr, buff,  sizeof(cstr)-1);
 			}
 		}
+		assert(0 == position);
 
 	} else { /* 1 = Little Endian */
 		/*
@@ -289,29 +310,30 @@ std::string getCanSignalDecoder(const message_t * dbc_msg, const signal_t * can_
 
 		uint8  end_byte   = start_byte + (bit_len + start_offset - 1)/8;
 		uint8  end_offset = (start_offset + bit_len - 1) & 7;
-		uint8  position   = can_sgn->bit_len;
+		uint8  position   = 0;
 		char   buff[100];
 
-		for (int work_byte = end_byte; work_byte >= start_byte; --work_byte) {
+		for (int work_byte = start_byte; work_byte <= end_byte; ++work_byte) {
 			if (work_byte == start_byte && work_byte == end_byte && start_offset != 0 && end_offset != 7) {
-				mask = (uint8)~0 >> (7 - end_offset);
+				mask   = (uint8)~0 >> (7 - end_offset + start_offset) << (start_offset);
 				rotate = start_offset;
-				shift = end_offset - start_offset + 1;
+				shift  = end_offset - start_offset + 1;
 			} else if (work_byte == end_byte && end_offset != 7) {
-				mask = (uint8)~0 >> (7 - end_offset);
+				mask   = (uint8)~0 >> (7 - end_offset);
 				rotate = 0;
-				shift = end_offset + 1;
+				shift  = end_offset + 1;
 			} else if (work_byte == start_byte && start_offset != 0) {
-				mask = 0xFF;
+				mask   = 0xFF ^ ((uint8)~0 >> (8 - start_offset));
 				rotate = start_offset;
-				shift = 8 - start_offset;
+				shift  = 8 - start_offset;
 			} else {
-				mask = 0xFF;
+				mask   = 0xFF;
 				rotate = 0;
-				shift = 8;
+				shift  = 8;
 			}
 
-			position -= shift;
+			msg_mask[work_byte] = ( (0xFF & mask) | (msg_mask[work_byte] & (~mask)) );
+
 			memset(buff, 0, sizeof(buff));
 			if (position > rotate) {
 				snprintf(buff, sizeof(buff)-1, "((static_cast<int>(data[%d]) & 0x%02X) << %d)", work_byte, mask, (position - rotate));
@@ -327,8 +349,13 @@ std::string getCanSignalDecoder(const message_t * dbc_msg, const signal_t * can_
 				strncat(cstr, " + ", sizeof(cstr)-1);
 				strncat(cstr, buff,  sizeof(cstr)-1);
 			}
+			position += shift;
 		}
+		assert(can_sgn->bit_len == position);
+
 	}
+
+	print_bits(dbc_msg->len, msg_mask); printf("\n");
 
 	printf("%s\n", cstr);
 	return cstr;
@@ -341,6 +368,9 @@ std::string getCanSignalEncoder(const message_t * dbc_msg, const signal_t * can_
 
 	char cstr[256];
 	memset(cstr, 0, sizeof(cstr));
+
+	uint8_t msg_mask[8];
+	memset(msg_mask, 0, sizeof(msg_mask));
 
 	/*
 	 * signal bit order:
@@ -386,33 +416,65 @@ std::string getCanSignalEncoder(const message_t * dbc_msg, const signal_t * can_
 
 		uint8  end_byte     = start_byte + (7 + bit_len - start_offset - 1)/8;
 		uint8  end_offset   = (start_offset - bit_len + 1) & 7;
-		uint8  position   = can_sgn->bit_len;
+		uint8  position     = can_sgn->bit_len;
 		char   buff[100];
 
-		printf("%u:%u -> %u:%u\n", start_byte, start_offset, end_byte, end_offset);
+		//printf("%u:%u -> %u:%u (be)\n", start_byte, start_offset, end_byte, end_offset);
 
-		for (int work_byte = end_byte; work_byte >= start_byte; --work_byte) {
-			if (work_byte == end_byte && end_offset != 7) {
-				mask   =  0xFF ^ ((uint8)~0 >> (9 - end_offset));
-				rotate = 7 - end_offset - 2;
-				shift  = 9 - end_offset;
-			} else if (work_byte == start_byte && start_offset != 0) {
-				mask   = (uint8)~0 >> (8 - start_offset);
+		for (int work_byte = start_byte; work_byte <= end_byte; ++work_byte) {
+			if (work_byte == start_byte && work_byte == end_byte && start_offset != 7 && end_offset != 0) {
+				mask   = (uint8)~0 >> (7 - start_offset + end_offset) << end_offset;
+				rotate = end_offset;
+				shift  = start_offset - end_offset + 1;
+			} else if (work_byte == start_byte && start_offset != 7) {
+				mask   = (uint8)~0 >> (7 - start_offset);
 				rotate = 0;
-				shift  = start_offset;
+				shift  = start_offset + 1;
+			} else if (work_byte == end_byte && end_offset != 0) {
+				mask   = 0xFF ^ ((uint8)~0 >> (8 - end_offset));
+				rotate = end_offset;
+				shift  = 8 - end_offset;
 			} else {
 				mask   = 0xFF;
 				rotate = 0;
 				shift  = 8;
 			}
 
+			msg_mask[work_byte] = ( (0xFF & mask) | (msg_mask[work_byte] & (~mask)) );
+
 			position -= shift;
 			memset(buff, 0, sizeof(buff));
-
-			//can_msg->Payload[work_byte] = ( (data & mask) | (can_msg->Payload[work_byte] & (~mask)) );
-			//mask_msg.Payload[work_byte] = ( (0xFF & mask) | (mask_msg.Payload[work_byte] & (~mask)) );
-			//rawValue >>= shift;
+			if (0xFF == mask) {
+				if (0 == rotate) {
+					if (0 == position) {
+						printf("data[%d] = static_cast<int>(value) & 0xFF;\n", work_byte);
+					} else {
+						printf("data[%d] = (static_cast<int>(value) >> %d) & 0xFF;\n", work_byte, position);
+					}
+				} else {
+					if (0 == position) {
+						printf("data[%d] = (static_cast<int>(value) << %d) & 0xFF\n", work_byte, rotate);
+					} else {
+						printf("data[%d] = ((static_cast<int>(value) >> %d) << %d) & 0xFF\n", work_byte, position, rotate);
+					}
+				}
+			} else {
+				if (0 == rotate) {
+					if (0 == position) {
+						printf("data[%d] = (0x%02X & data[%d]) | (0x%02X & static_cast<int>(value))\n", work_byte, (~mask) & 0xFF, work_byte, mask & 0xFF);
+					} else {
+						printf("data[%d] = (0x%02X & data[%d]) | (0x%02X & (static_cast<int>(value) >> %d))\n", work_byte, (~mask) & 0xFF, work_byte, mask & 0xFF, position);
+					}
+				} else {
+					if (0 == position) {
+						printf("data[%d] = (0x%02X & data[%d]) | (0x%02X & (static_cast<int>(value) << %d))\n", work_byte, (~mask) & 0xFF, work_byte, mask & 0xFF, rotate);
+					} else {
+						printf("data[%d] = (0x%02X & data[%d]) | (0x%02X & ((static_cast<int>(value) >> %d) << %d))\n", work_byte, (~mask) & 0xFF, work_byte, mask & 0xFF, position, rotate);
+					}
+				}
+			}
 		}
+		assert(0 == position);
 
 	} else { /* 1 = Little Endian */
 	/*
@@ -426,41 +488,69 @@ std::string getCanSignalEncoder(const message_t * dbc_msg, const signal_t * can_
 
 		uint8  end_byte     = start_byte + (bit_len + start_offset - 1)/8;
 		uint8  end_offset   = (start_offset + bit_len - 1) & 7;
-		uint8  position   = can_sgn->bit_len;
+		uint8  position     = 0;
 		char   buff[100];
 
-		printf("%u:%u -> %u:%u\n", start_byte, start_offset, end_byte, end_offset);
+		printf("%u:%u -> %u:%u (le)\n", start_byte, start_offset, end_byte, end_offset);
 
 		for (int work_byte = start_byte; work_byte <= end_byte; ++work_byte) {
 			if (work_byte == end_byte && work_byte == start_byte && (start_offset != 0 || end_offset != 7)) {
 				mask    = (uint8)~0 >> (7 - end_offset + start_offset) << (start_offset);
 				rotate  = start_offset;
-				shift   = start_offset;
+				shift   = end_offset - start_offset + 1;
 			} else if (work_byte == end_byte && end_offset != 7) {
-				mask   = 0xFF ^ ((uint8)~0 >> (7 - end_offset));
-				rotate = 7 - end_offset - 2;
-				shift  = 7 - end_offset;
-			} else if (work_byte == start_byte && start_offset != 0) {
-				mask   = (uint8)~0 >> (8 - start_offset);
+				mask   = (uint8)~0 >> (7 - end_offset);
 				rotate = 0;
-				shift  = start_offset;
+				shift  = end_offset + 1;
+			} else if (work_byte == start_byte && start_offset != 0) {
+				mask   = 0xFF ^ ((uint8)~0 >> (8 - start_offset));
+				rotate = start_offset;
+				shift  = 8 - start_offset;
 			} else {
 				mask   = 0xFF;
 				rotate = 0;
 				shift  = 8;
 			}
 
-			position -= shift;
+			msg_mask[work_byte] = ( (0xFF & mask) | (msg_mask[work_byte] & (~mask)) );
+
 			memset(buff, 0, sizeof(buff));
-
-			printf("data[%d] = (((static_cast<int>(v) >> %d) & 0x%02X) << %d)\n", work_byte, position, mask, rotate);
-
-			//can_msg->Payload[work_byte] = ( (data & mask) | (can_msg->Payload[work_byte] & (~mask)) );
-			//mask_msg.Payload[work_byte] = ( (0xFF & mask) | (mask_msg.Payload[work_byte] & (~mask)) );
-			//rawValue >>= shift;
+			if (0xFF == mask) {
+				if (0 == rotate) {
+					if (0 == position) {
+						printf("data[%d] = static_cast<int>(value) & 0xFF;\n", work_byte);
+					} else {
+						printf("data[%d] = (static_cast<int>(value) >> %d) & 0xFF;\n", work_byte, position);
+					}
+				} else {
+					if (0 == position) {
+						printf("data[%d] = (static_cast<int>(value) << %d) & 0xFF\n", work_byte, rotate);
+					} else {
+						printf("data[%d] = ((static_cast<int>(value) >> %d) << %d) & 0xFF\n", work_byte, position, rotate);
+					}
+				}
+			} else {
+				if (0 == rotate) {
+					if (0 == position) {
+						printf("data[%d] = (0x%02X & data[%d]) | (0x%02X & static_cast<int>(value))\n", work_byte, (~mask) & 0xFF, work_byte, mask & 0xFF);
+					} else {
+						printf("data[%d] = (0x%02X & data[%d]) | (0x%02X & (static_cast<int>(value) >> %d))\n", work_byte, (~mask) & 0xFF, work_byte, mask & 0xFF, position);
+					}
+				} else {
+					if (0 == position) {
+						printf("data[%d] = (0x%02X & data[%d]) | (0x%02X & (static_cast<int>(value) << %d))\n", work_byte, (~mask) & 0xFF, work_byte, mask & 0xFF, rotate);
+					} else {
+						printf("data[%d] = (0x%02X & data[%d]) | (0x%02X & ((static_cast<int>(value) >> %d) << %d))\n", work_byte, (~mask) & 0xFF, work_byte, mask & 0xFF, position, rotate);
+					}
+				}
+			}
+			position += shift;
 		}
+		assert(can_sgn->bit_len == position);
 
 	}
+
+	print_bits(dbc_msg->len, msg_mask); printf("\n");
 
 	printf("%s\n", cstr);
 	return cstr;
