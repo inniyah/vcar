@@ -99,27 +99,29 @@ static void can_bus_msg_sgn_att_cb(int can_bus, message_t * can_msg, signal_t * 
 	CarState * car_state = reinterpret_cast<CarState *>(arg);
 	if (NULL != car_state && NULL != sgn_att && NULL != sgn_att->value) {
 		AnalogValue & av = car_state->analog_data[can_msg->name][can_sgn->name];
-		switch (sgn_att->value->value_type) {
-			case vt_integer:
-				av.StartRawValue = (sgn_att->value->value.int_val) & (0xFFFFFFFFu & ((uint32)~0 >> (32 - can_sgn->bit_len)));
-				break;
-			case vt_float:
-				break;
-			case vt_string:
-				break;
-			case vt_enum:
-				break;
-			case vt_hex:
-				break;
-			default:
-				break;
-		}
-		av.RawValue = av.StartRawValue;
+		if (!strcmp(sgn_att->name, "GenSigStartValue")) {
+			switch (sgn_att->value->value_type) {
+				case vt_integer:
+					av.StartRawValue = (sgn_att->value->value.int_val) & (0xFFFFFFFFu & ((uint32)~0 >> (32 - can_sgn->bit_len)));
+					break;
+				case vt_float:
+					break;
+				case vt_string:
+					break;
+				case vt_enum:
+					break;
+				case vt_hex:
+					break;
+				default:
+					break;
+			}
+			av.RawValue = av.StartRawValue;
 
-		printf("      ATTRIBUTE %s -> %lu\n",
-			sgn_att->name,
-			av.StartRawValue
-		);
+			printf("      ATTRIBUTE %s -> %lu\n",
+				sgn_att->name,
+				av.StartRawValue
+			);
+		}
 	}
 }
 
@@ -345,7 +347,7 @@ void CanMsgParser::decodeCanMessage(const message_t * dbc_msg, const intercom::D
 	}
 
 	/* iterate over all signals */
-	for(signal_list_t * sitem = dbc_msg->signal_list; sitem != NULL; sitem = sitem->next) {
+	for (signal_list_t * sitem = dbc_msg->signal_list; sitem != NULL; sitem = sitem->next) {
 		/*
 		 * The "raw value" of a signal is the value as it is transmitted
 		 * over the network.
@@ -390,7 +392,7 @@ void CanMsgParser::decodeCanMessage(const message_t * dbc_msg, const intercom::D
 
 		/* align signal into ulong32 */
 
-		if(sgn->endianess == 0) { /* 0 = Big Endian */
+		if (sgn->endianess == 0) { /* 0 = Big Endian */
 			/*
 			 *     7  6  5  4  3  2  1  0      offset
 			 *
@@ -566,7 +568,9 @@ void CanMsgParser::encodeCanMessage(const message_t * dbc_msg, intercom::DataMes
 		 * start_byte
 		 */
 
-	for(signal_list_t * sitem = dbc_msg->signal_list; sitem != NULL; sitem = sitem->next) {
+	memset(can_msg->Payload, 0xFF, sizeof(can_msg->Payload));
+
+	for (signal_list_t * sitem = dbc_msg->signal_list; sitem != NULL; sitem = sitem->next) {
 
 		const signal_t *const sgn = sitem->signal;
 		uint8  bit_len            = sgn->bit_len;
