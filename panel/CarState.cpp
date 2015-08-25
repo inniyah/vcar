@@ -407,22 +407,20 @@ void CanMsgParser::decodeCanMessage(const message_t * dbc_msg, const intercom::D
 
 			/* loop over all source bytes from start_byte to end_byte */
 			for (int work_byte = start_byte; work_byte <= end_byte; ++work_byte) {
-				/* fetch source byte */
-				data = can_msg->Payload[work_byte];
+				data = can_msg->Payload[work_byte]; /* fetch source byte */
 
-				/* process source byte */
-				if (work_byte == start_byte && start_offset != 7) {
-					/* less that 8 bits in start byte? mask out unused bits */
+				if (work_byte == start_byte && work_byte == end_byte && start_offset != 7 && end_offset != 0) {
+					data &= (uint8)~0 >> (7 - start_offset);
+					data >>= end_offset;
+					shift = start_offset - end_offset + 1;
+				} else if (work_byte == start_byte && start_offset != 7) {
 					data &= (uint8)~0 >> (7 - start_offset);
 					shift = start_offset + 1;
-				} else {
-					shift = 8; /* use all eight bits */
-				}
-
-				if (work_byte == end_byte && end_offset != 0) {
-					/* less that 8 bits in end byte? shift out unused bits */
+				} else if (work_byte == end_byte && end_offset != 0) {
 					data >>= end_offset;
-					shift -= end_offset;
+					shift = 8 - end_offset;
+				} else {
+					shift = 8;
 				}
 
 				/* store processed byte */
@@ -443,18 +441,23 @@ void CanMsgParser::decodeCanMessage(const message_t * dbc_msg, const intercom::D
 			uint8  end_offset   = (start_offset + bit_len - 1) & 7;
 
 			for (int work_byte = end_byte; work_byte >= start_byte; --work_byte) {
-				data = can_msg->Payload[work_byte];
-				if(work_byte == end_byte && end_offset != 7) {
+				data = can_msg->Payload[work_byte]; /* fetch source byte */
+
+				if (work_byte == start_byte && work_byte == end_byte && start_offset != 0 && end_offset != 7) {
+					data &= (uint8)~0 >> (7 - end_offset);
+					data >>= start_offset;
+					shift = end_offset - start_offset + 1;
+				} else if (work_byte == end_byte && end_offset != 7) {
 					data &= (uint8)~0 >> (7 - end_offset);
 					shift = end_offset + 1;
+				} else if (work_byte == start_byte && start_offset != 0) {
+					data >>= start_offset;
+					shift = 8 - start_offset;
 				} else {
 					shift = 8;
 				}
 
-				if (work_byte == start_byte && start_offset != 0) {
-					data >>= start_offset;
-					shift -= start_offset;
-				}
+				/* store processed byte */
 				rawValue <<= shift;
 				rawValue |= data;
 			}
