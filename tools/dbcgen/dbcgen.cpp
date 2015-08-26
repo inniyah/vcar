@@ -432,6 +432,8 @@ std::string getCanSignalDecoder(const message_t * dbc_msg, const signal_t * can_
 
 	strncat(cstr, ";", sizeof(cstr)-1);
 
+	/* TODO: perform sign extension */
+
 	//print_bits(dbc_msg->len, msg_mask); printf("\n");
 	//printf("%s\n", cstr);
 	return cstr;
@@ -474,7 +476,7 @@ std::string getCanSignalEncoder(const message_t * dbc_msg, const signal_t * can_
 
 	if (can_sgn->signedness && (bit_len < 32)) { /* perform sign extension */
 		char buff[100];
-		snprintf(buff, sizeof(buff)-1, "\t\tint32_t m = 1 << %d;\n\t\tvalue = ((int32_t)value + m) ^ m;", bit_len - 1);
+		snprintf(buff, sizeof(buff)-1, "\t\tvalue = ((int)value + (1 << %d)) ^ (1 << %d);", bit_len - 1, bit_len - 1);
 		strncpy(cstr, buff, sizeof(cstr)-1);
 	}
 
