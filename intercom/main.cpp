@@ -1,4 +1,4 @@
-#incluye "intercom.h"
+#include "intercom.h"
 
 #include <stdio.h>
 #include <stdlib.h>

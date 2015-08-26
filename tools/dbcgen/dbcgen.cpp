@@ -248,7 +248,8 @@ int main(int argc, const char * argv[]) {
 			fprintf(out_file, "#define DBCGEN_H_%s\n\n", uuid_str.c_str());
 
 			fprintf(out_file, "#include <stdint.h>\n");
-			fprintf(out_file, "#include <stdlib.h>\n\n");
+			fprintf(out_file, "#include <stdlib.h>\n");
+			fprintf(out_file, "#include <string.h>\n\n");
 
 			fprintf(out_file, "namespace CanBus_%s { \n\n", compName.c_str());
 
@@ -257,7 +258,7 @@ int main(int argc, const char * argv[]) {
 			for (g = can_sgn_map.begin(); g != can_sgn_map.end(); g++) {
 				fprintf(out_file, "#pragma pack(1)\n");
 				fprintf(out_file, "struct CanMsg_%s {\n", (*g).first.c_str());
-				fprintf(out_file, "\tstatic const uint8_t id  = 0x%04X;\n",  can_msg_map[(*g).first].Id);
+				fprintf(out_file, "\tstatic const uint32_t id  = 0x%04X;\n",  can_msg_map[(*g).first].Id);
 				fprintf(out_file, "\tstatic const uint8_t dlt = %d;\n", can_msg_map[(*g).first].Dlt);
 				fprintf(out_file, "\tuint8_t data[%d];\n", can_msg_map[(*g).first].Dlt);
 
@@ -315,8 +316,7 @@ int main(int argc, const char * argv[]) {
 			fprintf(out_file, "\tuint8_t * getCanMessageBuffer(uint32_t id, uint8_t dlt) {\n");
 			fprintf(out_file, "\t\tswitch(id) {\n");
 			for (CanMessageIdListIterator it = can_msg_list.begin(); it != can_msg_list.end(); it++) {
-				fprintf(out_file, "\t\t\tcase Msg_%s.id:  /* 0x%04X or %u */\n\t\t\t\treturn (Msg_%s.dlt == dlt ? Msg_%s.data : NULL);\n",
-					(*it).second.c_str(),
+				fprintf(out_file, "\t\t\tcase 0x%04X: /* %u */\n\t\t\t\treturn (Msg_%s.dlt == dlt ? Msg_%s.data : NULL);\n",
 					(*it).first,
 					(*it).first,
 					(*it).second.c_str(),
@@ -325,7 +325,8 @@ int main(int argc, const char * argv[]) {
 			}
 			fprintf(out_file, "\t\t\tdefault:\n\t\t\t\treturn NULL;\n");
 			fprintf(out_file, "\t\t}\n");
-			fprintf(out_file, "\t}\n\n");
+			fprintf(out_file, "\t}\n");
+			fprintf(out_file, "};\n\n");
 
 			fprintf(out_file, "} // namespace CanBus_%s\n\n", compName.c_str());
 
@@ -531,7 +532,7 @@ std::string getCanSignalDecoder(const message_t * dbc_msg, const signal_t * can_
 
 			if ('\0' == cstr[0]) {
 				if (can_sgn->signedness && (bit_len < 32)) { /* perform sign extension */
-					strncpy(cstr, "\t\treturn ((int32_t)", sizeof(cstr)-1);
+					strncpy(cstr, "\t\treturn (((int32_t)", sizeof(cstr)-1);
 				} else {
 					strncpy(cstr, "\t\treturn ", sizeof(cstr)-1);
 				}
