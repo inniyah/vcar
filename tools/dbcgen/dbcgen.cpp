@@ -31,6 +31,8 @@ struct CanSignalInfo {
 	double       Offset;
 	bool         Signedness;
 	std::string  Units;
+	std::string  GetValueCode;
+	std::string  SetValueCode;
 	uint64_t     StartRawValue;
 };
 
@@ -126,27 +128,39 @@ int main(int argc, const char * argv[]) {
 								break;
 						}
 					}
-					getCanSignalDecoder(can_msg, can_sgn);
-					getCanSignalEncoder(can_msg, can_sgn);
+					si.GetValueCode = getCanSignalDecoder(can_msg, can_sgn);
+					si.SetValueCode = getCanSignalEncoder(can_msg, can_sgn);
 				}
 			}
 			dbc_free(dbc);
 			dbc = NULL;
-#if 0
+
 			CanSignalMapElementIterator v;
 			CanSignalMapGroupIterator g;
 			for (g = can_sgn_map.begin(); g != can_sgn_map.end(); g++) {
+				printf("#pragma pack(1)\n");
 				printf("struct CanMsg_%s {\n", (*g).first.c_str());
-				for (v = (*g).second.begin(); v != (*g).second.end(); v++) {
+				printf("\tuint8_t data[%d];\n", can_msg_map[(*g).first].Dlt);
 
-					printf("\tuint32_t %s; /* %s */\n",
+				printf("\tinline int getDlt() {\n\t\treturn %d;\n\t}\n",
+					can_msg_map[(*g).first].Dlt
+				);
+
+				for (v = (*g).second.begin(); v != (*g).second.end(); v++) {
+					printf("\tinline int getSignal_%s() {\n%s\n\t}\n",
 						(*v).first.c_str(),
-						(*v).second.Units.c_str()
+						(*v).second.GetValueCode.c_str()
 					);
+					printf("\tinline void setSignal_%s(int value) {\n%s\n\t}\n",
+						(*v).first.c_str(),
+						(*v).second.SetValueCode.c_str()
+					);
+
 				}
-				printf("}; /* CanMsg_%s */\n\n", (*g).first.c_str());
+				printf("} __attribute__((packed)); /* CanMsg_%s */\n", (*g).first.c_str());
+				printf("#pragma pack()\n\n");
 			}
-#endif
+
 		} else {
 			fprintf(stderr, "can't open input file '%s'\n", inFilename);
 			ret = EXIT_FAILURE;
@@ -163,6 +177,7 @@ int main(int argc, const char * argv[]) {
 	return ret;
 }
 
+#if 0
 static void print_bits(int size, const void * const ptr) {
 	const unsigned char * b = reinterpret_cast<const unsigned char*>(ptr);
 	printf("< ");
@@ -176,6 +191,7 @@ static void print_bits(int size, const void * const ptr) {
 	}
 	printf("> ");
 }
+#endif
 
 /*  CanMsgParser::decodeCanMessage --  decode CAN messages
 	Copyright (C) 2007-2009 Andreas Heitmann
@@ -199,7 +215,7 @@ std::string getCanSignalDecoder(const message_t * dbc_msg, const signal_t * can_
 		return "";
 	}
 
-	char cstr[256];
+	char cstr[512];
 	memset(cstr, 0, sizeof(cstr));
 
 	uint8_t msg_mask[8];
@@ -255,7 +271,7 @@ std::string getCanSignalDecoder(const message_t * dbc_msg, const signal_t * can_
 		uint8  end_byte   = start_byte + (7 + bit_len - start_offset - 1)/8;
 		uint8  end_offset = (start_offset - bit_len + 1) & 7;
 		uint8  position   = can_sgn->bit_len;
-		char   buff[100];
+		char   buff[256];
 
 		/* loop over all source bytes from start_byte to end_byte */
 		for (int work_byte = start_byte; work_byte <= end_byte; ++work_byte) {
@@ -290,11 +306,11 @@ std::string getCanSignalDecoder(const message_t * dbc_msg, const signal_t * can_
 			}
 
 			if ('\0' == cstr[0]) {
-				strncpy(cstr, buff, sizeof(cstr)-1);
+				strncpy(cstr, "\t\treturn ", sizeof(cstr)-1);
 			} else {
-				strncat(cstr, " + ", sizeof(cstr)-1);
-				strncat(cstr, buff,  sizeof(cstr)-1);
+				strncat(cstr, "\n\t\t\t+ ", sizeof(cstr)-1);
 			}
+			strncat(cstr, buff, sizeof(cstr)-1);
 		}
 		assert(0 == position);
 
@@ -311,7 +327,7 @@ std::string getCanSignalDecoder(const message_t * dbc_msg, const signal_t * can_
 		uint8  end_byte   = start_byte + (bit_len + start_offset - 1)/8;
 		uint8  end_offset = (start_offset + bit_len - 1) & 7;
 		uint8  position   = 0;
-		char   buff[100];
+		char   buff[256];
 
 		for (int work_byte = start_byte; work_byte <= end_byte; ++work_byte) {
 			if (work_byte == start_byte && work_byte == end_byte && start_offset != 0 && end_offset != 7) {
@@ -344,20 +360,20 @@ std::string getCanSignalDecoder(const message_t * dbc_msg, const signal_t * can_
 			}
 
 			if ('\0' == cstr[0]) {
-				strncpy(cstr, buff, sizeof(cstr)-1);
+				strncpy(cstr, "\t\treturn ", sizeof(cstr)-1);
 			} else {
-				strncat(cstr, " + ", sizeof(cstr)-1);
-				strncat(cstr, buff,  sizeof(cstr)-1);
+				strncat(cstr, "\n\t\t\t+ ", sizeof(cstr)-1);
 			}
+			strncat(cstr, buff, sizeof(cstr)-1);
+
 			position += shift;
 		}
 		assert(can_sgn->bit_len == position);
 
 	}
 
-	print_bits(dbc_msg->len, msg_mask); printf("\n");
-
-	printf("%s\n", cstr);
+	//print_bits(dbc_msg->len, msg_mask); printf("\n");
+	//printf("%s\n", cstr);
 	return cstr;
 }
 
@@ -366,7 +382,7 @@ std::string getCanSignalEncoder(const message_t * dbc_msg, const signal_t * can_
 		return "";
 	}
 
-	char cstr[256];
+	char cstr[512];
 	memset(cstr, 0, sizeof(cstr));
 
 	uint8_t msg_mask[8];
@@ -447,32 +463,38 @@ std::string getCanSignalEncoder(const message_t * dbc_msg, const signal_t * can_
 			if (0xFF == mask) {
 				if (0 == rotate) {
 					if (0 == position) {
-						printf("data[%d] = static_cast<int>(value) & 0xFF;\n", work_byte);
+						snprintf(buff, sizeof(buff)-1, "data[%d] = static_cast<int>(value) & 0xFF;", work_byte);
 					} else {
-						printf("data[%d] = (static_cast<int>(value) >> %d) & 0xFF;\n", work_byte, position);
+						snprintf(buff, sizeof(buff)-1, "data[%d] = (static_cast<int>(value) >> %d) & 0xFF;", work_byte, position);
 					}
 				} else {
 					if (0 == position) {
-						printf("data[%d] = (static_cast<int>(value) << %d) & 0xFF\n", work_byte, rotate);
+						snprintf(buff, sizeof(buff)-1, "data[%d] = (static_cast<int>(value) << %d) & 0xFF;", work_byte, rotate);
 					} else {
-						printf("data[%d] = ((static_cast<int>(value) >> %d) << %d) & 0xFF\n", work_byte, position, rotate);
+						snprintf(buff, sizeof(buff)-1, "data[%d] = ((static_cast<int>(value) >> %d) << %d) & 0xFF;", work_byte, position, rotate);
 					}
 				}
 			} else {
 				if (0 == rotate) {
 					if (0 == position) {
-						printf("data[%d] = (0x%02X & data[%d]) | (0x%02X & static_cast<int>(value))\n", work_byte, (~mask) & 0xFF, work_byte, mask & 0xFF);
+						snprintf(buff, sizeof(buff)-1, "data[%d] = (0x%02X & data[%d]) | (0x%02X & static_cast<int>(value));", work_byte, (~mask) & 0xFF, work_byte, mask & 0xFF);
 					} else {
-						printf("data[%d] = (0x%02X & data[%d]) | (0x%02X & (static_cast<int>(value) >> %d))\n", work_byte, (~mask) & 0xFF, work_byte, mask & 0xFF, position);
+						snprintf(buff, sizeof(buff)-1, "data[%d] = (0x%02X & data[%d]) | (0x%02X & (static_cast<int>(value) >> %d));", work_byte, (~mask) & 0xFF, work_byte, mask & 0xFF, position);
 					}
 				} else {
 					if (0 == position) {
-						printf("data[%d] = (0x%02X & data[%d]) | (0x%02X & (static_cast<int>(value) << %d))\n", work_byte, (~mask) & 0xFF, work_byte, mask & 0xFF, rotate);
+						snprintf(buff, sizeof(buff)-1, "data[%d] = (0x%02X & data[%d]) | (0x%02X & (static_cast<int>(value) << %d));", work_byte, (~mask) & 0xFF, work_byte, mask & 0xFF, rotate);
 					} else {
-						printf("data[%d] = (0x%02X & data[%d]) | (0x%02X & ((static_cast<int>(value) >> %d) << %d))\n", work_byte, (~mask) & 0xFF, work_byte, mask & 0xFF, position, rotate);
+						snprintf(buff, sizeof(buff)-1, "data[%d] = (0x%02X & data[%d]) | (0x%02X & ((static_cast<int>(value) >> %d) << %d));", work_byte, (~mask) & 0xFF, work_byte, mask & 0xFF, position, rotate);
 					}
 				}
 			}
+			if ('\0' == cstr[0]) {
+				strncpy(cstr, "\t\t",   sizeof(cstr)-1);
+			} else {
+				strncat(cstr, "\n\t\t", sizeof(cstr)-1);
+			}
+			strncat(cstr, buff, sizeof(cstr)-1);
 		}
 		assert(0 == position);
 
@@ -491,7 +513,7 @@ std::string getCanSignalEncoder(const message_t * dbc_msg, const signal_t * can_
 		uint8  position     = 0;
 		char   buff[100];
 
-		printf("%u:%u -> %u:%u (le)\n", start_byte, start_offset, end_byte, end_offset);
+		//printf("%u:%u -> %u:%u (le)\n", start_byte, start_offset, end_byte, end_offset);
 
 		for (int work_byte = start_byte; work_byte <= end_byte; ++work_byte) {
 			if (work_byte == end_byte && work_byte == start_byte && (start_offset != 0 || end_offset != 7)) {
@@ -518,40 +540,46 @@ std::string getCanSignalEncoder(const message_t * dbc_msg, const signal_t * can_
 			if (0xFF == mask) {
 				if (0 == rotate) {
 					if (0 == position) {
-						printf("data[%d] = static_cast<int>(value) & 0xFF;\n", work_byte);
+						snprintf(buff, sizeof(buff)-1, "data[%d] = static_cast<int>(value) & 0xFF;", work_byte);
 					} else {
-						printf("data[%d] = (static_cast<int>(value) >> %d) & 0xFF;\n", work_byte, position);
+						snprintf(buff, sizeof(buff)-1, "data[%d] = (static_cast<int>(value) >> %d) & 0xFF;", work_byte, position);
 					}
 				} else {
 					if (0 == position) {
-						printf("data[%d] = (static_cast<int>(value) << %d) & 0xFF\n", work_byte, rotate);
+						snprintf(buff, sizeof(buff)-1, "data[%d] = (static_cast<int>(value) << %d) & 0xFF;", work_byte, rotate);
 					} else {
-						printf("data[%d] = ((static_cast<int>(value) >> %d) << %d) & 0xFF\n", work_byte, position, rotate);
+						snprintf(buff, sizeof(buff)-1, "data[%d] = ((static_cast<int>(value) >> %d) << %d) & 0xFF;", work_byte, position, rotate);
 					}
 				}
 			} else {
 				if (0 == rotate) {
 					if (0 == position) {
-						printf("data[%d] = (0x%02X & data[%d]) | (0x%02X & static_cast<int>(value))\n", work_byte, (~mask) & 0xFF, work_byte, mask & 0xFF);
+						snprintf(buff, sizeof(buff)-1, "data[%d] = (0x%02X & data[%d]) | (0x%02X & static_cast<int>(value));", work_byte, (~mask) & 0xFF, work_byte, mask & 0xFF);
 					} else {
-						printf("data[%d] = (0x%02X & data[%d]) | (0x%02X & (static_cast<int>(value) >> %d))\n", work_byte, (~mask) & 0xFF, work_byte, mask & 0xFF, position);
+						snprintf(buff, sizeof(buff)-1, "data[%d] = (0x%02X & data[%d]) | (0x%02X & (static_cast<int>(value) >> %d));", work_byte, (~mask) & 0xFF, work_byte, mask & 0xFF, position);
 					}
 				} else {
 					if (0 == position) {
-						printf("data[%d] = (0x%02X & data[%d]) | (0x%02X & (static_cast<int>(value) << %d))\n", work_byte, (~mask) & 0xFF, work_byte, mask & 0xFF, rotate);
+						snprintf(buff, sizeof(buff)-1, "data[%d] = (0x%02X & data[%d]) | (0x%02X & (static_cast<int>(value) << %d));", work_byte, (~mask) & 0xFF, work_byte, mask & 0xFF, rotate);
 					} else {
-						printf("data[%d] = (0x%02X & data[%d]) | (0x%02X & ((static_cast<int>(value) >> %d) << %d))\n", work_byte, (~mask) & 0xFF, work_byte, mask & 0xFF, position, rotate);
+						snprintf(buff, sizeof(buff)-1, "data[%d] = (0x%02X & data[%d]) | (0x%02X & ((static_cast<int>(value) >> %d) << %d));", work_byte, (~mask) & 0xFF, work_byte, mask & 0xFF, position, rotate);
 					}
 				}
 			}
+			if ('\0' == cstr[0]) {
+				strncpy(cstr, "\t\t",   sizeof(cstr)-1);
+			} else {
+				strncat(cstr, "\n\t\t", sizeof(cstr)-1);
+			}
+			strncat(cstr, buff, sizeof(cstr)-1);
+
 			position += shift;
 		}
 		assert(can_sgn->bit_len == position);
 
 	}
 
-	print_bits(dbc_msg->len, msg_mask); printf("\n");
-
-	printf("%s\n", cstr);
+	//print_bits(dbc_msg->len, msg_mask); printf("\n");
+	//printf("%s\n", cstr);
 	return cstr;
 }
