@@ -27,6 +27,9 @@ struct CanMessageInfo {
 typedef std::map<std::string, CanMessageInfo >                                  CanMessageMap;
 typedef std::map<std::string, CanMessageInfo >::iterator                        CanMessageMapIterator;
 
+typedef std::vector<std::pair<uint32_t,std::string> >                           CanMessageIdList;
+typedef std::vector<std::pair<uint32_t,std::string> >::iterator                 CanMessageIdListIterator;
+
 struct CanSignalInfo {
 	double       Scale;
 	double       Offset;
@@ -70,8 +73,9 @@ int main(int argc, const char * argv[]) {
 	if (dbcout != NULL) {
 
 		if (NULL != (dbc = dbc_read_file(inFilename))) {
-			CanMessageMap can_msg_map;
-			CanSignalMap  can_sgn_map;
+			CanMessageMap    can_msg_map;
+			CanMessageIdList can_msg_list;
+			CanSignalMap     can_sgn_map;
 
 			message_list_t * ml;
 			for (ml = dbc->message_list; ml != NULL; ml = ml->next) {
@@ -80,6 +84,7 @@ int main(int argc, const char * argv[]) {
 				CanMessageInfo & mi = can_msg_map[can_msg->name];
 				mi.Id  = can_msg->id;
 				mi.Dlt = can_msg->len;
+				can_msg_list.push_back(std::make_pair(can_msg->id, can_msg->name));
 				signal_list_t * sl;
 				for(sl = can_msg->signal_list; sl != NULL; sl = sl->next) {
 					signal_t * can_sgn = sl->signal;
@@ -137,20 +142,16 @@ int main(int argc, const char * argv[]) {
 			dbc_free(dbc);
 			dbc = NULL;
 
+			std::sort(can_msg_list.begin(), can_msg_list.end());
+
 			CanSignalMapElementIterator v;
 			CanSignalMapGroupIterator g;
 			for (g = can_sgn_map.begin(); g != can_sgn_map.end(); g++) {
 				printf("#pragma pack(1)\n");
 				printf("struct CanMsg_%s {\n", (*g).first.c_str());
+				printf("\tstatic const uint8_t id  = 0x%04X;\n",  can_msg_map[(*g).first].Id);
+				printf("\tstatic const uint8_t dlt = %d;\n", can_msg_map[(*g).first].Dlt);
 				printf("\tuint8_t data[%d];\n", can_msg_map[(*g).first].Dlt);
-
-				printf("\tinline static int getId() {\n\t\treturn 0x%X;\n\t}\n",
-					can_msg_map[(*g).first].Id
-				);
-
-				printf("\tinline static int getDlt() {\n\t\treturn %u;\n\t}\n",
-					can_msg_map[(*g).first].Dlt
-				);
 
 				for (v = (*g).second.begin(); v != (*g).second.end(); v++) {
 					if (0 != (*v).second.Offset) {
@@ -196,6 +197,27 @@ int main(int argc, const char * argv[]) {
 				printf("} __attribute__((packed)); /* CanMsg_%s */\n", (*g).first.c_str());
 				printf("#pragma pack()\n\n");
 			}
+
+			printf("struct CanDb {\n");
+			for (CanMessageIdListIterator it = can_msg_list.begin(); it != can_msg_list.end(); it++) {
+				printf("\tCanMsg_%s Msg_%s;\n", (*it).second.c_str(), (*it).second.c_str());
+			}
+			printf("\n");
+
+			printf("\tuint8_t * getCanMessageBuffer(uint32_t id, uint8_t dlt) {\n");
+			printf("\t\tswitch(id) {\n");
+			for (CanMessageIdListIterator it = can_msg_list.begin(); it != can_msg_list.end(); it++) {
+				printf("\t\t\tcase Msg_%s.id:  /* 0x%04X or %u */\n\t\t\t\treturn (Msg_%s.dlt == dlt ? Msg_%s.data : NULL);\n",
+					(*it).second.c_str(),
+					(*it).first,
+					(*it).first,
+					(*it).second.c_str(),
+					(*it).second.c_str()
+				);
+			}
+			printf("\t\t\tdefault:\n\t\t\t\treturn NULL;\n");
+			printf("\t\t}\n");
+			printf("\t}\n\n");
 
 		} else {
 			fprintf(stderr, "can't open input file '%s'\n", inFilename);
