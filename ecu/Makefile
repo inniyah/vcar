@@ -3,7 +3,7 @@ PROGRAM=test
 all: $(PROGRAM)
 
 HEADERS = \
-	os/os.h \
+	os.h \
 	can01.dbc.h
 
 OBJS = \

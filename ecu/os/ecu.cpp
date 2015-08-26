@@ -1,4 +1,4 @@
-#include "os.h"
+#include "../os.h"
 #include "can.h"
 
 #include "tinythread.h"

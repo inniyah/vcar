@@ -1,8 +1,13 @@
 #ifndef COM_H_8AE693A2_4C11_11E5_95E1_10FEED04CD1C
 #define COM_H_8AE693A2_4C11_11E5_95E1_10FEED04CD1C
 
-#include "os/os.h"
+#include "os.h"
 
+class ComSystem {
+public:
+
+private:
+};
 
 #endif /* COM_H_8AE693A2_4C11_11E5_95E1_10FEED04CD1C */
 
