@@ -6,5 +6,6 @@
 *.tab.h
 *.tab.c
 *.yy.c
+*.dbc.h
 obj/*
 tmp/*
