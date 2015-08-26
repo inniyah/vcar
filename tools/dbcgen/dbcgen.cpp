@@ -472,13 +472,11 @@ std::string getCanSignalEncoder(const message_t * dbc_msg, const signal_t * can_
 	uint8  rotate;
 	uint8  shift;
 
-#if 0
-	/* TODO perform sign extension */
-	if (can_sgn->signedness && (bit_len < 32)) {
-		sint32 m = 1<< (bit_len-1);
-		rawValue = ((sint32)rawValue + m) ^ m;
+	if (can_sgn->signedness && (bit_len < 32)) { /* perform sign extension */
+		char buff[100];
+		snprintf(buff, sizeof(buff)-1, "\t\tint32_t m = 1 << %d;\n\t\tvalue = ((int32_t)value + m) ^ m;", bit_len - 1);
+		strncpy(cstr, buff, sizeof(cstr)-1);
 	}
-#endif
 
 	if (can_sgn->endianess == 0) { /* 0 = Big Endian */
 	/*
