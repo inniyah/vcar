@@ -62,10 +62,10 @@ void CanBusHandler::receiveLoop() {
 		bool ignore = false;
 
 		if (receiver.getSysId() == msg.getSysId()) {
-			fputs("* Msg Ign: ", stderr); msg.fprint(stderr); fputs("\n", stderr);
+			//fputs("* Msg Ign: ", stderr); msg.fprint(stderr); fputs("\n", stderr);
 			ignore = true;
 		} else {
-			fputs("* Msg Rcv: ", stderr); msg.fprint(stderr); fputs("\n", stderr);
+			//fputs("* Msg Rcv: ", stderr); msg.fprint(stderr); fputs("\n", stderr);
 			ignore = false;
 		}
 
@@ -74,7 +74,7 @@ void CanBusHandler::receiveLoop() {
 				if (!ignore) {
 					intercom::DataMessage::CanMsg * can_msg = msg.getCanInfo();
 					if ((NULL != can_msg) && (can_msg->Bus >= 0) && (can_msg->Bus < CanDevice::NUM_CAN_DEVICES)) {
-						CanDevice::m_CanDevices[can_msg->Bus].insertRxMessage(can_msg->Id, can_msg->Dlc, can_msg->Payload);
+						CanDevice::m_CanDevices[can_msg->Bus].insertRxMessage(ntohl(can_msg->Id), can_msg->Dlc, can_msg->Payload);
 					}
 				}
 				break;
@@ -123,7 +123,7 @@ int main(int argc, const char * argv[]) {
 
 	CanBusHandler can_bus_handler;
 
-	struct event ev_hb;
+	event ev_hb;
 	addEventEverySec(ev_hb, 5, heartbeat, NULL);
 
 	while (!isExitRequested()) {

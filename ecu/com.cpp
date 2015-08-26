@@ -1,3 +1,4 @@
+#include "com.h"
 #include "can01.dbc.h"
 
 CanBus_can01::SndMsgs can01_snd;

@@ -1,5 +1,5 @@
-#ifndef OSCAN_H_
-#define OSCAN_H_
+#ifndef OSCAN_H_8AE69370_4C11_11E5_95E0_10FEED04CD1C
+#define OSCAN_H_8AE69370_4C11_11E5_95E0_10FEED04CD1C
 
 #include "os.h"
 #include "fast_mutex.h"
@@ -22,6 +22,9 @@ struct CanDevice {
 	} CanTransceiverState;
 
 	static CanDevice m_CanDevices[CanDevice::NUM_CAN_DEVICES];
+	static CanDevId CurrentDevId;
+
+	CanDevId getDevId() const;
 
 	CanTransceiverState m_CanTransceiverState;
 
@@ -34,6 +37,7 @@ struct CanDevice {
 	int m_CanRxCnt;
 
 	tthread::fast_mutex m_Mutex;
+	tthread::fast_mutex m_IsrMutex;
 };
 
-#endif
+#endif // OSCAN_H_8AE69370_4C11_11E5_95E0_10FEED04CD1C

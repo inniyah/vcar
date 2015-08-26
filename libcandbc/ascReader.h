@@ -1,5 +1,5 @@
-#ifndef INCLUDE_ASCREAD_H
-#define INCLUDE_ASCREAD_H
+#ifndef INCLUDE_ASCREAD_H_8AE69578_4C11_11E5_95EC_10FEED04CD1C
+#define INCLUDE_ASCREAD_H_8AE69578_4C11_11E5_95EC_10FEED04CD1C
 
 /*  ascReader.h --  declarations for ascReader
 	Copyright (C) 2007-2011 Andreas Heitmann
@@ -23,14 +23,14 @@
 #include "messageDecoder.h"
 
 #ifdef __cplusplus
-extern "C"
-{
-	#endif
+extern "C" {
+#endif
 
 	/* ascRead function */
 	void ascReader_processFile(FILE *fp, msgRxCb_t msgRxCb, void *cbData);
 
-	#ifdef __cplusplus
+#ifdef __cplusplus
 }
 #endif
-#endif
+
+#endif /* INCLUDE_ASCREAD_H_8AE69578_4C11_11E5_95EC_10FEED04CD1C */

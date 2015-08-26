@@ -1,5 +1,5 @@
-#ifndef INCLUDE_SIGNALFORMAT_H
-#define INCLUDE_SIGNALFORMAT_H
+#ifndef INCLUDE_SIGNALFORMAT_H_8AE69500_4C11_11E5_95E9_10FEED04CD1C
+#define INCLUDE_SIGNALFORMAT_H_8AE69500_4C11_11E5_95E9_10FEED04CD1C
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -21,4 +21,4 @@ char *signalFormat_stringAppend(const char * in, const char * app);
 }
 #endif
 
-#endif
+#endif /* INCLUDE_SIGNALFORMAT_H_8AE69500_4C11_11E5_95E9_10FEED04CD1C */

@@ -5,8 +5,8 @@
  * See the accompanying LICENSE.txt for details.
  */
 
-#ifndef WORKQUEUE_H
-#define WORKQUEUE_H
+#ifndef WORKQUEUE_H_8AE693D4_4C11_11E5_95E2_10FEED04CD1C
+#define WORKQUEUE_H_8AE693D4_4C11_11E5_95E2_10FEED04CD1C
 
 #include <pthread.h>
 
@@ -38,4 +38,4 @@ void workqueue_shutdown(workqueue_t *workqueue);
 
 void workqueue_add_job(workqueue_t *workqueue, job_t *job);
 
-#endif	/* #ifndef WORKQUEUE_H */
+#endif /* WORKQUEUE_H_8AE693D4_4C11_11E5_95E2_10FEED04CD1C */

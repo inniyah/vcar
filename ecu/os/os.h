@@ -1,5 +1,5 @@
-#ifndef OSOS_H_
-#define OSOS_H_
+#ifndef OSOS_H_8AE691F4_4C11_11E5_95DF_10FEED04CD1C
+#define OSOS_H_8AE691F4_4C11_11E5_95DF_10FEED04CD1C
 
 #include <stdint.h>
 #include <event.h>
@@ -8,17 +8,15 @@
 
 #define ISR(x) extern "C" void isr_##x(int, short , void *)
 #define TASK(x) extern "C" void task_##x(int, short , void *)
-#define DEF_EVENT(x) extern "C" { struct event ev_##x; }
 
 #else
 
 #define ISR(x) void isr_##x(int, short , void *)
 #define TASK(x) void task_##x(int, short , void *)
-#define EVENT(x) struct event ev_##x;
 
 #endif
 
-#define EVENT(x) ev_##x
+typedef struct event event;
 
 // Task Functions
 
@@ -58,6 +56,8 @@ void addEventEverySec (struct event & ev, uint64_t s,  void (*fn)(int, short, vo
 typedef uint8_t  CanDevId;
 typedef uint32_t CanMsgId;
 
+#define INVALID_CAN_DEVICE ((CanDevId)~0)
+
 typedef struct CanMessageS {
 	CanMsgId Id;                   /* 32 bit CAN_ID + EFF/RTR/ERR flags */
 	uint8_t Dlc;                   /* frame payload length in byte (0 .. CAN_MAX_DLEN) */
@@ -89,6 +89,7 @@ typedef enum {
 	CanDriverError_TxHwQueueFull,
 	CanDriverError_TxOffline,
 	CanDriverError_TxFail,
+	CanDriverError_RxEmptyQueue,
 	CanDriverError_IllegalState,
 	CanDriverError_WrongDevice,
 } CanDriverError;
@@ -98,6 +99,7 @@ extern "C" {
 #endif
 
 uint8_t              CanSystem_getNumberOfDevices();
+CanDevId             CanSystem_getIsrCurrentDevId();
 
 CanTransceiverStatus CanTransceiver_getStatus(CanDevId can_id);
 CanTransceiverError  CanTransceiver_init(CanDevId can_id);
@@ -109,9 +111,11 @@ CanDriverError       CanDriver_open(CanDevId can_id);
 CanDriverError       CanDriver_close(CanDevId can_id);
 CanDriverError       CanDriver_mute(CanDevId can_id);
 CanDriverError       CanDriver_unmute(CanDevId can_id);
+CanMessage *         CanDriver_getRxMessage(CanDevId can_id);
+CanDriverError       CanDriver_delRxMessage(CanDevId can_id);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif
+#endif // OSOS_H_8AE691F4_4C11_11E5_95DF_10FEED04CD1C

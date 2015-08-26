@@ -32,8 +32,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __HASHTABLE_CWC22_H__
-#define __HASHTABLE_CWC22_H__
+#ifndef HASHTABLE_CWC22_H_8AE694CE_4C11_11E5_95E8_10FEED04CD1C
+#define HASHTABLE_CWC22_H_8AE694CE_4C11_11E5_95E8_10FEED04CD1C
 
 #ifdef __cplusplus
 extern "C" {
@@ -197,4 +197,4 @@ void hashtable_destroy(struct hashtable *h, int free_values);
 }
 #endif
 
-#endif /* __HASHTABLE_CWC22_H__ */
+#endif /* HASHTABLE_CWC22_H_8AE694CE_4C11_11E5_95E8_10FEED04CD1C */

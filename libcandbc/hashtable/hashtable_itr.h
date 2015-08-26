@@ -31,8 +31,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __HASHTABLE_ITR_CWC22__
-#define __HASHTABLE_ITR_CWC22__
+#ifndef HASHTABLE_ITR_CWC22_H_8AE694A6_4C11_11E5_95E7_10FEED04CD1C
+#define HASHTABLE_ITR_CWC22_H_8AE694A6_4C11_11E5_95E7_10FEED04CD1C
+
 #include "hashtable.h"
 #include "hashtable_private.h"	 /* needed to enable inlining */
 
@@ -114,4 +115,4 @@ struct hashtable *h, void *k);
 }
 #endif
 
-#endif /* __HASHTABLE_ITR_CWC22__*/
+#endif /* HASHTABLE_ITR_CWC22_H_8AE694A6_4C11_11E5_95E7_10FEED04CD1C */
