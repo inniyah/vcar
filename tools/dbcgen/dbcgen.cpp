@@ -147,16 +147,46 @@ int main(int argc, const char * argv[]) {
 				);
 
 				for (v = (*g).second.begin(); v != (*g).second.end(); v++) {
-					printf("\tinline int getSignal_%s() {\n%s\n\t}\n",
-						(*v).first.c_str(),
+					if (0 != (*v).second.Offset) {
+						printf("\tinline int getSignal_%s() { /* Real Value = Raw Value * %lf + %lf",
+							(*v).first.c_str(),
+							(*v).second.Scale,
+							(*v).second.Offset
+						);
+					} else {
+						printf("\tinline int getSignal_%s() { /* Real Value = Raw Value * %lf",
+							(*v).first.c_str(),
+							(*v).second.Scale
+						);
+					}
+					printf("%s%s */\n%s\n\t}\n",
+						(*v).second.Units.c_str()[0] != '\0' ? " " : "",
+						(*v).second.Units.c_str(),
 						(*v).second.GetValueCode.c_str()
 					);
 					printf("\tinline void setSignal_%s(int value) {\n%s\n\t}\n",
 						(*v).first.c_str(),
 						(*v).second.SetValueCode.c_str()
 					);
-
+					printf("\tinline void setDefaultSignal_%s() {\n\t\tsetSignal_%s(%ld); /* %lf%s%s */\n\t}\n",
+						(*v).first.c_str(),
+						(*v).first.c_str(),
+						(*v).second.StartRawValue,
+						(double) (long signed int) (*v).second.StartRawValue * (*v).second.Scale + (*v).second.Offset,
+						(*v).second.Units.c_str()[0] != '\0' ? " " : "",
+						(*v).second.Units.c_str()
+					);
 				}
+
+				printf("\tinline void setDefaultSignals() {\n");
+				printf("\t\tmemset(data, 0, sizeof(data));\n");
+				for (v = (*g).second.begin(); v != (*g).second.end(); v++) {
+					printf("\t\tsetDefaultSignal_%s();\n",
+						(*v).first.c_str()
+					);
+				}
+				printf("\t}\n");
+
 				printf("} __attribute__((packed)); /* CanMsg_%s */\n", (*g).first.c_str());
 				printf("#pragma pack()\n\n");
 			}
