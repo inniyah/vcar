@@ -3,6 +3,7 @@ PROGRAM=dbcgen
 all: ../../libcandbc/libCanDbc.a $(PROGRAM)
 
 OBJS = \
+	argvparser.o \
 	dbcgen.o
 
 PKG_CONFIG=
@@ -11,7 +12,7 @@ PKG_CONFIG_LIBS=`pkg-config --libs $(PKG_CONFIG) 2>/dev/null` `fltk-config --ldf
 
 CFLAGS= -O2 -g -Wall
 DEFS= 
-INCS=  -I../../libcandbc/
+INCS= -I../../libcandbc/ -I../../argvparser/
 
 LDFLAGS= -Wl,-z,defs -Wl,--as-needed -Wl,--no-undefined
 LIBS= -L../../libcandbc -lCanDbc -luuid
@@ -26,6 +27,12 @@ $(PROGRAM): $(OBJS)
 	g++ -o $@ -c $+ $(DEFS) $(INCS) $(CFLAGS) $(PKG_CONFIG_CFLAGS)
 
 %.o: %.c
+	gcc -o $@ -c $+ $(DEFS) $(INCS) $(CFLAGS) $(PKG_CONFIG_CFLAGS)
+
+%.o: ../../argvparser/%.cpp
+	g++ -o $@ -c $+ $(DEFS) $(INCS) $(CFLAGS) $(PKG_CONFIG_CFLAGS)
+
+%.o: ../../argvparser/%.c
 	gcc -o $@ -c $+ $(DEFS) $(INCS) $(CFLAGS) $(PKG_CONFIG_CFLAGS)
 
 %.h %.cpp: %.fl

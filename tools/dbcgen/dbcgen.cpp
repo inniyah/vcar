@@ -4,6 +4,7 @@
 
 #include "model/dbcReader.h"
 #include "model/dbcWriter.h"
+#include "argvparser.h"
 
 #include <stdint.h>
 
@@ -104,9 +105,23 @@ std::string getCanSignalEncoder(const message_t * dbc_msg, const signal_t * can_
 
 int main(int argc, const char * argv[]) {
 	dbc_t      * dbc;
-	const char * inFilename  = (argc>1 ? argv[1] : NULL);
-	const char * outFilename = (argc>2 ? argv[2] : NULL);
+	const char * inFilename  = NULL;
+	const char * outFilename = NULL;
 	int ret = EXIT_SUCCESS;
+
+	CommandLineProcessing::ArgvParser argv_parser;
+
+	if (argv_parser.parse(argc, argv) != CommandLineProcessing::ArgvParser::NoParserError) {
+		return EXIT_FAILURE;
+	}
+
+	if (argv_parser.arguments() >= 1) {
+		inFilename = argv_parser.argument(0).c_str();
+	}
+
+	if (argv_parser.arguments() >= 2) {
+		outFilename = argv_parser.argument(1).c_str();
+	}
 
 	FILE * dbcout;
 
