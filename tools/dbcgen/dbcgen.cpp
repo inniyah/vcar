@@ -20,6 +20,7 @@
 #include <vector>
 
 struct CanMessageInfo {
+	uint32_t     Id;
 	uint8_t      Dlt;
 };
 
@@ -77,7 +78,8 @@ int main(int argc, const char * argv[]) {
 				message_t * can_msg = ml->message;
 				fprintf(stderr, "  CAN MSG 0x%lX (%s)\n", (unsigned long)can_msg->id, can_msg->name);
 				CanMessageInfo & mi = can_msg_map[can_msg->name];
-				mi.Dlt      = can_msg->len;
+				mi.Id  = can_msg->id;
+				mi.Dlt = can_msg->len;
 				signal_list_t * sl;
 				for(sl = can_msg->signal_list; sl != NULL; sl = sl->next) {
 					signal_t * can_sgn = sl->signal;
@@ -142,19 +144,23 @@ int main(int argc, const char * argv[]) {
 				printf("struct CanMsg_%s {\n", (*g).first.c_str());
 				printf("\tuint8_t data[%d];\n", can_msg_map[(*g).first].Dlt);
 
-				printf("\tinline int getDlt() {\n\t\treturn %d;\n\t}\n",
+				printf("\tinline static int getId() {\n\t\treturn 0x%X;\n\t}\n",
+					can_msg_map[(*g).first].Id
+				);
+
+				printf("\tinline static int getDlt() {\n\t\treturn %u;\n\t}\n",
 					can_msg_map[(*g).first].Dlt
 				);
 
 				for (v = (*g).second.begin(); v != (*g).second.end(); v++) {
 					if (0 != (*v).second.Offset) {
-						printf("\tinline int getSignal_%s() { /* Real Value = Raw Value * %lf + %lf",
+						printf("\tinline int getSignal_%s() const { /* Real Value = Raw Value * %lf + %lf",
 							(*v).first.c_str(),
 							(*v).second.Scale,
 							(*v).second.Offset
 						);
 					} else {
-						printf("\tinline int getSignal_%s() { /* Real Value = Raw Value * %lf",
+						printf("\tinline int getSignal_%s() const { /* Real Value = Raw Value * %lf",
 							(*v).first.c_str(),
 							(*v).second.Scale
 						);
