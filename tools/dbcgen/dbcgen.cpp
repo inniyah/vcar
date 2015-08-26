@@ -129,7 +129,7 @@ int main(int argc, const char * argv[]) {
 			message_list_t * ml;
 			for (ml = dbc->message_list; ml != NULL; ml = ml->next) {
 				message_t * can_msg = ml->message;
-				fprintf(stderr, "  CAN MSG 0x%lX (%s)\n", (unsigned long)can_msg->id, can_msg->name);
+				fprintf(stderr, "  CAN MSG 0x%lX (%s) [sent by %s]\n", (unsigned long)can_msg->id, can_msg->name, can_msg->sender);
 				CanMessageInfo & mi = can_msg_map[can_msg->name];
 				mi.Id  = can_msg->id;
 				mi.Dlt = can_msg->len;
@@ -184,6 +184,13 @@ int main(int argc, const char * argv[]) {
 								break;
 						}
 					}
+
+					fprintf(stderr, "      RECEIVERS:");
+					for(string_list_t * rl = sl->signal->receiver_list; rl != NULL; rl = rl->next) {
+						fprintf(stderr, " %s", rl->string);
+					}
+					fprintf(stderr, "\n");
+
 					si.GetValueCode = getCanSignalDecoder(can_msg, can_sgn);
 					si.SetValueCode = getCanSignalEncoder(can_msg, can_sgn);
 				}
