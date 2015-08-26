@@ -402,6 +402,8 @@ std::string getCanSignalDecoder(const message_t * dbc_msg, const signal_t * can_
 
 	}
 
+	strncat(cstr, ";", sizeof(cstr)-1);
+
 	//print_bits(dbc_msg->len, msg_mask); printf("\n");
 	//printf("%s\n", cstr);
 	return cstr;
