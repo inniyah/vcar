@@ -11,6 +11,9 @@
 #include <assert.h>
 #include <sys/time.h>
 
+ISR(CAN_MSG_RECV);
+ISR(CAN_MSG_SENT);
+
 CanDevice CanDevice::m_CanDevices[CanDevice::NUM_CAN_DEVICES];
 
 CanDevice::CanDevice() :
@@ -46,9 +49,33 @@ bool CanDevice::insertTxMessage(CanMsgId msg_id, uint8_t dlc, uint8_t * payload)
 	memcpy(m_CanTxMessages[pos].Payload, payload, dlc);
 	++m_CanTxCnt;
 	m_Mutex.unlock();
+	isr_CAN_MSG_RECV(0, 0, NULL);
 	return true;
 }
 
+bool CanDevice::insertRxMessage(CanMsgId msg_id, uint8_t dlc, uint8_t * payload) {
+	if ((dlc > CAN_MAX_SIZE) || (NULL == payload)) {
+		return false;
+	}
+	m_Mutex.lock();
+	if ((Tr_Active != m_CanTransceiverState)) {
+		m_Mutex.unlock();
+		fprintf(stderr, "Can Transceiver Not Active\n");
+		return false;
+	}
+	if (m_CanRxCnt >= NUM_CAN_RXBUFFERS) {
+		m_Mutex.unlock();
+		fprintf(stderr, "Can Rx Buffer Full\n");
+		return false;
+	}
+	int pos = ((m_CanRxPos + m_CanRxCnt) % NUM_CAN_RXBUFFERS);
+	m_CanRxMessages[pos].Id = msg_id;
+	m_CanRxMessages[pos].Dlc = dlc;
+	memcpy(m_CanRxMessages[pos].Payload, payload, dlc);
+	++m_CanRxCnt;
+	m_Mutex.unlock();
+	return true;
+}
 
 // Public API
 

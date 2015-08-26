@@ -9,7 +9,7 @@ HEADERS = \
 OBJS = \
 	tinythread.o \
 	intercom.o \
-	main.o \
+	ecu.o \
 	can.o \
 	com.o \
 	os.o \

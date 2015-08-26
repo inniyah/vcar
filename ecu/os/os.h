@@ -2,18 +2,23 @@
 #define OSOS_H_
 
 #include <stdint.h>
+#include <event.h>
 
 #ifdef __cplusplus
 
 #define ISR(x) extern "C" void isr_##x(int, short , void *)
 #define TASK(x) extern "C" void task_##x(int, short , void *)
+#define DEF_EVENT(x) extern "C" { struct event ev_##x; }
 
 #else
 
 #define ISR(x) void isr_##x(int, short , void *)
 #define TASK(x) void task_##x(int, short , void *)
+#define EVENT(x) struct event ev_##x;
 
 #endif
+
+#define EVENT(x) ev_##x
 
 // Task Functions
 

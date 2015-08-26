@@ -5,6 +5,9 @@
 #include <time.h>
 #include <unistd.h>
 
+DEF_EVENT(100ms);
+DEF_EVENT(10ms);
+
 TASK(init) {
 	fprintf(stderr, "<init>\n");
 	if (CanTransceiverError_Ok != CanTransceiver_init(0)) {
@@ -13,6 +16,10 @@ TASK(init) {
 	if (CanTransceiverError_Ok != CanTransceiver_start(0)) {
 		fprintf(stderr, "Can't start CAN Transceiver #0\n");
 	}
+
+	addEventEveryMs(EVENT(100ms), 100, task_100ms, NULL);
+	addEventEveryMs(EVENT(10ms),  10,  task_10ms, NULL);
+
 	fprintf(stderr, "</init>\n");
 }
 
