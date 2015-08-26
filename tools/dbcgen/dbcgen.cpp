@@ -532,7 +532,7 @@ std::string getCanSignalDecoder(const message_t * dbc_msg, const signal_t * can_
 
 			if ('\0' == cstr[0]) {
 				if (can_sgn->signedness && (bit_len < 32)) { /* perform sign extension */
-					strncpy(cstr, "\t\treturn (((int32_t)", sizeof(cstr)-1);
+					strncpy(cstr, "\t\treturn (((static_cast<int32_t>(\n\t\t\t", sizeof(cstr)-1);
 				} else {
 					strncpy(cstr, "\t\treturn ", sizeof(cstr)-1);
 				}
@@ -549,7 +549,7 @@ std::string getCanSignalDecoder(const message_t * dbc_msg, const signal_t * can_
 
 	if (can_sgn->signedness && (bit_len < 32)) { /* perform sign extension */
 		char buff[256];
-		snprintf(buff, sizeof(buff)-1, " ^ (1 << %d)) - (1 << %d));", bit_len - 1, bit_len - 1);
+		snprintf(buff, sizeof(buff)-1, "\n\t\t)) ^ (1 << %d)) - (1 << %d));", bit_len - 1, bit_len - 1);
 		strncat(cstr, buff, sizeof(cstr)-1);
 	} else {
 		strncat(cstr, ";", sizeof(cstr)-1);
