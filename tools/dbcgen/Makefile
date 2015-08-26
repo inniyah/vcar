@@ -14,7 +14,7 @@ DEFS=
 INCS=  -I../../libcandbc/
 
 LDFLAGS= -Wl,-z,defs -Wl,--as-needed -Wl,--no-undefined
-LIBS= -L../../libcandbc -lCanDbc
+LIBS= -L../../libcandbc -lCanDbc -luuid
 
 $(PROGRAM): $(OBJS)
 	g++ $(LDFLAGS) $+ -o $@ $(LIBS) $(PKG_CONFIG_LIBS)
