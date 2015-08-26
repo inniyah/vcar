@@ -58,7 +58,7 @@ $(PROGRAM): $(OBJS)
 	gcc -o $@ -c $< $(DEFS) $(INCS) $(CFLAGS)
 
 %.dbc.h: ../panel/dbc/%.dbc ../tools/dbcgen/dbcgen
-	../tools/dbcgen/dbcgen -o $@ $<
+	../tools/dbcgen/dbcgen -o $@ -e Car $<
 
 clean:
 	rm -f $(OBJS)
