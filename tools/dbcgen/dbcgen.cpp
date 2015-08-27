@@ -280,6 +280,7 @@ int main(int argc, const char * argv[]) {
 			fprintf(out_file, "#ifndef DBCGEN_H_%s\n", uuid_str.c_str());
 			fprintf(out_file, "#define DBCGEN_H_%s\n\n", uuid_str.c_str());
 
+			fprintf(out_file, "#include \"AbstractCanMsgHandler.h\"\n");
 			fprintf(out_file, "#include <stdint.h>\n");
 			fprintf(out_file, "#include <stdlib.h>\n");
 			fprintf(out_file, "#include <string.h>\n\n");
@@ -358,46 +359,46 @@ int main(int argc, const char * argv[]) {
 
 			// Messages that can be sent
 
-			fprintf(out_file, "struct SndMsgs {\n");
+			fprintf(out_file, "struct TxMsgs : public AbstractCanTxMsgHandler {\n");
 			for (CanMessageIdListIterator it = can_snd_msg_list.begin(); it != can_snd_msg_list.end(); it++) {
 				fprintf(out_file, "\tCanMsg_%s Msg_%s;\n", (*it).second.c_str(), (*it).second.c_str());
 			}
 			fprintf(out_file, "\n");
 
-			fprintf(out_file, "\tuint8_t * getCanMessageBuffer(uint32_t id, uint8_t dlt) {\n");
+			fprintf(out_file, "\tuint8_t * getCanMessageBuffer(uint32_t id, uint8_t * dlt = NULL) {\n");
 			fprintf(out_file, "\t\tswitch(id) {\n");
 			for (CanMessageIdListIterator it = can_snd_msg_list.begin(); it != can_snd_msg_list.end(); it++) {
-				fprintf(out_file, "\t\t\tcase 0x%04X: /* %u */\n\t\t\t\treturn (Msg_%s.dlt == dlt ? Msg_%s.data : NULL);\n",
+				fprintf(out_file, "\t\t\tcase 0x%04X: /* %u */\n\t\t\t\tif (dlt) *dlt = Msg_%s.dlt; return Msg_%s.data;\n",
 					(*it).first,
 					(*it).first,
 					(*it).second.c_str(),
 					(*it).second.c_str()
 				);
 			}
-			fprintf(out_file, "\t\t\tdefault:\n\t\t\t\treturn NULL;\n");
+			fprintf(out_file, "\t\t\tdefault:\n\t\t\t\tif (dlt) *dlt = 0; return NULL;\n");
 			fprintf(out_file, "\t\t}\n");
 			fprintf(out_file, "\t}\n");
 			fprintf(out_file, "};\n\n");
 
 			// Messages that can be received
 
-			fprintf(out_file, "struct RcvMsgs {\n");
+			fprintf(out_file, "struct RxMsgs : public AbstractCanRxMsgHandler {\n");
 			for (CanMessageIdListIterator it = can_rcv_msg_list.begin(); it != can_rcv_msg_list.end(); it++) {
 				fprintf(out_file, "\tCanMsg_%s Msg_%s;\n", (*it).second.c_str(), (*it).second.c_str());
 			}
 			fprintf(out_file, "\n");
 
-			fprintf(out_file, "\tuint8_t * getCanMessageBuffer(uint32_t id, uint8_t dlt) {\n");
+			fprintf(out_file, "\tuint8_t * getCanMessageBuffer(uint32_t id, uint8_t * dlt = NULL) {\n");
 			fprintf(out_file, "\t\tswitch(id) {\n");
 			for (CanMessageIdListIterator it = can_rcv_msg_list.begin(); it != can_rcv_msg_list.end(); it++) {
-				fprintf(out_file, "\t\t\tcase 0x%04X: /* %u */\n\t\t\t\treturn (Msg_%s.dlt == dlt ? Msg_%s.data : NULL);\n",
+				fprintf(out_file, "\t\t\tcase 0x%04X: /* %u */\n\t\t\t\tif (dlt) *dlt = Msg_%s.dlt; return Msg_%s.data;\n",
 					(*it).first,
 					(*it).first,
 					(*it).second.c_str(),
 					(*it).second.c_str()
 				);
 			}
-			fprintf(out_file, "\t\t\tdefault:\n\t\t\t\treturn NULL;\n");
+			fprintf(out_file, "\t\t\tdefault:\n\t\t\t\tif (dlt) *dlt = 0; return NULL;\n");
 			fprintf(out_file, "\t\t}\n");
 			fprintf(out_file, "\t}\n");
 			fprintf(out_file, "};\n\n");

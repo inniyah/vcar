@@ -1,5 +1,5 @@
 #include "../os.h"
-#include "can.h"
+#include "emu_can.h"
 
 #include "tinythread.h"
 #include "intercom.h"

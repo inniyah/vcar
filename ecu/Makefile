@@ -6,18 +6,19 @@ HEADERS = \
 	os.h \
 	can01.dbc.h
 
-EMU_OBJS= \
+SYS_OBJS= \
 	tinythread.o \
 	intercom.o \
-	os.o \
-	ecu.o \
-	can.o
+	emu_os.o \
+	emu_ecu.o \
+	emu_can.o
 
 OBJS = \
-	$(EMU_OBJS) \
-	system.o \
-	task_handlers.o \
-	isr_handlers.o
+	$(SYS_OBJS) \
+	CanDriver.o \
+	System.o \
+	TaskHandlers.o \
+	IsrHandlers.o
 
 PKG_CONFIG=
 PKG_CONFIG_CFLAGS=`pkg-config --cflags $(PKG_CONFIG) 2>/dev/null`
@@ -42,10 +43,10 @@ $(PROGRAM): $(OBJS)
 %.o: %.c $(HEADERS)
 	gcc -o $@ -c $< $(DEFS) $(INCS) $(CFLAGS) $(PKG_CONFIG_CFLAGS)
 
-%.o: os/%.cpp $(HEADERS)
+%.o: emu/%.cpp $(HEADERS)
 	g++ -o $@ -c $< $(DEFS) $(INCS) $(CFLAGS) $(PKG_CONFIG_CFLAGS)
 
-%.o: os/%.c $(HEADERS)
+%.o: emu/%.c $(HEADERS)
 	gcc -o $@ -c $< $(DEFS) $(INCS) $(CFLAGS) $(PKG_CONFIG_CFLAGS)
 
 %.o: ../tinythreadpp/source/%.cpp

@@ -1,5 +1,6 @@
 #include "../os.h"
-#include "can.h"
+#include "emu_ecu.h"
+#include "emu_can.h"
 
 #include "tinythread.h"
 #include "intercom.h"
@@ -113,18 +114,11 @@ void CanBusHandler::sendThreadFunc(void * arg) {
 
 // Main Function
 
-void heartbeat(int fd, short event, void *arg) {
-  printf("Heart Beat!\n");
-}
-
 int main(int argc, const char * argv[]) {
 	event_init();
 	task_init(0, 0, NULL);
 
 	CanBusHandler can_bus_handler;
-
-	event ev_hb;
-	addEventEverySec(ev_hb, 5, heartbeat, NULL);
 
 	while (!isExitRequested()) {
 		event_dispatch();

@@ -1,5 +1,5 @@
-#ifndef STATIC_CHECKS_H_
-#define STATIC_CHECKS_H_
+#ifndef STATIC_CHECKS_H_8AE6967C_4C11_11E5_95F2_10FEED04CD1C
+#define STATIC_CHECKS_H_8AE6967C_4C11_11E5_95F2_10FEED04CD1C
 
 #include <cassert>
 #include <cstdlib>
@@ -61,4 +61,4 @@ struct CanCompare {
 
 } // namespace common
 
-#endif /* STATIC_CHECKS_H_ */
+#endif // STATIC_CHECKS_H_8AE6967C_4C11_11E5_95F2_10FEED04CD1C

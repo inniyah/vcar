@@ -1,5 +1,6 @@
 #include "os.h"
-#include "system.h"
+#include "System.h"
+#include "ICanDriver.h"
 
 #include "common/Delegate.h"
 
@@ -15,8 +16,10 @@ ISR(CAN_MSG_RECV) {
 	printf("CAN_MSG_RECV (%u)\n", CanSystem_getIsrCurrentDevId());
 	CanMessage * can_msg = CanDriver_getRxMessage(CanSystem_getIsrCurrentDevId());
 	if (can_msg) {
-		Singleton<System>::getInstance();
-		printf("  0x%04X %d\n", can_msg->Id, can_msg->Dlc);
+		ICanDriver * drv = Singleton<System>::getInstance().getCanDriver(CanSystem_getIsrCurrentDevId());
+		if (drv) {
+			drv->processMessage(can_msg);
+		}
 		CanDriver_delRxMessage(CanSystem_getIsrCurrentDevId());
 	}
 }

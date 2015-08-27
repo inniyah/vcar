@@ -1,7 +1,10 @@
-#ifndef OSCAN_H_8AE69370_4C11_11E5_95E0_10FEED04CD1C
-#define OSCAN_H_8AE69370_4C11_11E5_95E0_10FEED04CD1C
+#ifndef EMU_CAN_H_8AE69370_4C11_11E5_95E0_10FEED04CD1C
+#define EMU_CAN_H_8AE69370_4C11_11E5_95E0_10FEED04CD1C
 
 #include "../os.h"
+#include "emu_ecu.h"
+#include "emu_can.h"
+
 #include "fast_mutex.h"
 
 struct CanDevice {
@@ -40,4 +43,4 @@ struct CanDevice {
 	tthread::fast_mutex m_IsrMutex;
 };
 
-#endif // OSCAN_H_8AE69370_4C11_11E5_95E0_10FEED04CD1C
+#endif // EMU_CAN_H_8AE69370_4C11_11E5_95E0_10FEED04CD1C

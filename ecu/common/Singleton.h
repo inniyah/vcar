@@ -1,5 +1,5 @@
-#ifndef SINGLETON_H_
-#define SINGLETON_H_
+#ifndef SINGLETON_H_8AE696A4_4C11_11E5_95F3_10FEED04CD1C
+#define SINGLETON_H_8AE696A4_4C11_11E5_95F3_10FEED04CD1C
 
 #include <cassert>
 #include <cstdlib>
@@ -41,4 +41,4 @@ template<typename T> T * Singleton<T>::spInstance(NULL);
 
 } // namespace common
 
-#endif /* SINGLETON_H_ */
+#endif // SINGLETON_H_8AE696A4_4C11_11E5_95F3_10FEED04CD1C

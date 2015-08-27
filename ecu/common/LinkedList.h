@@ -1,5 +1,5 @@
-#ifndef LINKEDLIST_H_
-#define LINKEDLIST_H_
+#ifndef LINKED_LIST_H_8AE6964A_4C11_11E5_95F1_10FEED04CD1C
+#define LINKED_LIST_H_8AE6964A_4C11_11E5_95F1_10FEED04CD1C
 
 #include <cassert>
 #include <cstdlib>
@@ -110,6 +110,12 @@ public:
 	LinkedList() : m_First(NULL), m_Last(NULL) {
 		clear();
 	}
+
+	typedef T                           Type;
+	typedef LinkedListIterator<T>       Iterator;
+	typedef LinkedListIterator<const T> ConstIterator;
+	typedef LinkedListNode<T>           Node;
+	typedef LinkedListNode<const T>     ConstNode;
 
 	unsigned int size() const {
 		unsigned int size = (NULL != m_First) ? 1 : 0;
@@ -308,4 +314,4 @@ void LinkedList<T>::pop_back() {
 
 } // namespace common
 
-#endif /* LINKEDLIST_H_ */
+#endif // LINKED_LIST_H_8AE6964A_4C11_11E5_95F1_10FEED04CD1C
