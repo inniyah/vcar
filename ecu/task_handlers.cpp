@@ -1,9 +1,12 @@
 #include "os.h"
+#include "system.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
+
+using namespace common;
 
 event ev_100ms;
 event ev_10ms;

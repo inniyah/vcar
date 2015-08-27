@@ -6,13 +6,16 @@ HEADERS = \
 	os.h \
 	can01.dbc.h
 
-OBJS = \
+EMU_OBJS= \
 	tinythread.o \
 	intercom.o \
-	ecu.o \
-	can.o \
-	com.o \
 	os.o \
+	ecu.o \
+	can.o
+
+OBJS = \
+	$(EMU_OBJS) \
+	system.o \
 	task_handlers.o \
 	isr_handlers.o
 
