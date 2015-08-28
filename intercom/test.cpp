@@ -16,9 +16,18 @@ void do_send(void * arg) {
 		msg.createTextMsg("Hello, World!");
 		sender.send(msg);
 
+		sleep(1);
+
 		const uint8_t can_data[] = { 1, 2, 3, 4, 5, 6, 7, 8 };
 		msg.createCanMsg(0x100, sizeof(can_data), can_data);
 		sender.send(msg);
+
+		sleep(1);
+
+		intercom::DataMessage::PwmSignal pwm_signal('Miry', 300, 10000);
+		msg.createPwmMsg(pwm_signal);
+		sender.send(msg);
+
 	}
 }
 
@@ -27,6 +36,9 @@ void do_receive(void * arg) {
 	while (true) {
 		intercom::DataMessage msg;
 		receiver.receive(msg);
+		fputs("Msg Rcv: ", stderr);
+		msg.fprint(stderr);
+		fputs("\n", stderr);
 	}
 }
 

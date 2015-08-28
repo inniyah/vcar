@@ -10,6 +10,28 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/*
+ * Typically, on little-endian architectures, the rightmost character of a multi-char will
+ * become the least significant byte of the resulting integer. On big-endian architectures,
+ * it is the other way around.
+ */
+
+#if (defined(__BYTE_ORDER) && (__BYTE_ORDER == __BIG_ENDIAN)) || defined(__BIG_ENDIAN__) || \
+        (defined(__BYTE_ORDER__) && (__BYTE_ORDER__ ==  __ORDER_BIG_ENDIAN__)) || \
+        defined(__ARMEB__) || defined(__THUMBEB__) || defined(__AARCH64EB__) || \
+        defined(_MIBSEB) || defined(__MIBSEB) || defined(__MIBSEB__)
+    // It's a big-endian architecture
+    #define FIX_MULTICHAR_STR4(C) ( C )
+#elif (defined(__BYTE_ORDER) && (__BYTE_ORDER == __LITTLE_ENDIAN)) || defined(__LITTLE_ENDIAN__) || \
+        (defined(__BYTE_ORDER__) && (__BYTE_ORDER__ ==  __ORDER_LITTLE_ENDIAN__)) || \
+        defined(__ARMEL__) || defined(__THUMBEL__) || defined(__AARCH64EL__) || \
+        defined(_MIPSEL) || defined(__MIPSEL) || defined(__MIPSEL__)
+    // It's a little-endian architecture
+    #define FIX_MULTICHAR_STR4(C) ( (((C) & 0x000000FFu) << 24) | (((C) & 0x0000FF00u) <<  8) | (((C) & 0x00FF0000u) >> 8) | (((C) & 0xFF000000u) >> 24) )
+#else
+    #error "I don't know what architecture this is!"
+#endif
+
 namespace intercom {
 
 void DataMessage::destroyMsg(void) {
@@ -47,12 +69,35 @@ void DataMessage::createCanMsg(CanId id, uint8_t dlc, const uint8_t * payload, u
 	m_Message.Header.Type = MsgCan;
 }
 
+void DataMessage::createPwmMsg(const PwmMsg::Signal & signal) {
+	destroyMsg();
+	m_Message.Data.Pwm.Count = htons(1);
+	memset(m_Message.Data.Pwm.Signals, 0, sizeof(m_Message.Data.Pwm.Signals));
+	m_Message.Data.Pwm.Signals[0] = signal;
+	m_Message.Header.Type = MsgPwm;
+}
+
+void DataMessage::createPwmMsg(uint16_t count, const PwmMsg::Signal signals[]) {
+	destroyMsg();
+	if (count > 0 && count < PwmMsg::MAX_COUNT) {
+		m_Message.Data.Pwm.Count = htonl(count);
+		memset(m_Message.Data.Pwm.Signals, 0, sizeof(m_Message.Data.Pwm.Signals));
+		for (int i = 0; i < count; ++i) {
+			m_Message.Data.Pwm.Signals[i] = signals[i];
+		}
+	} else {
+		m_Message.Data.Pwm.Count = 0;
+	}
+	m_Message.Header.Type = MsgPwm;
+}
+
 void DataMessage::fprint(FILE *stream) const {
 	switch(m_Message.Header.Type) {
 		case MsgText:
-			fprintf(stream, "[Text: \"%s\" (%lu) Src=%8lX]",
+			fprintf(stream, "[Text: \"%s\" (%lu/%lu) Src=%8lX]",
 				m_Message.Data.Text.Message,
 				(unsigned long)ntohs(m_Message.Data.Text.Length),
+				(unsigned long)m_Message.Data.Text.MAX_LENGTH,
 				(unsigned long)ntohl(m_Message.Header.SourceSys)
 			);
 			break;
@@ -61,9 +106,26 @@ void DataMessage::fprint(FILE *stream) const {
 			for (int i = 0; i < m_Message.Data.Can.Dlc; ++i) {
 				fprintf(stream, " 0x%02X", m_Message.Data.Can.Payload[i]);
 			}
-			fprintf(stream, " } (%u) Bus=%d Src=%8lX]",
+			fprintf(stream, " } (%u/%u) Bus=%d Src=%8lX]",
 				m_Message.Data.Can.Dlc,
+				m_Message.Data.Can.MAX_DLC,
 				m_Message.Data.Can.Bus,
+				(unsigned long)ntohl(m_Message.Header.SourceSys)
+			);
+			break;
+		case MsgPwm:
+			fprintf(stream, "[PWM: {");
+			for (int i = 0; i < ntohs(m_Message.Data.Pwm.Count); ++i) {
+				uint32_t id = FIX_MULTICHAR_STR4(ntohl(m_Message.Data.Pwm.Signals[i].Id));
+				fprintf(stream, " %.*s=%u/%u",
+					4, reinterpret_cast<const char *>(&id),
+					ntohs(m_Message.Data.Pwm.Signals[i].PulseWidth),
+					ntohs(m_Message.Data.Pwm.Signals[i].Period)
+				);
+			}
+			fprintf(stream, " } (%u/%u) Src=%8lX]",
+				ntohs(m_Message.Data.Pwm.Count),
+				m_Message.Data.Pwm.MAX_COUNT,
 				(unsigned long)ntohl(m_Message.Header.SourceSys)
 			);
 			break;
@@ -181,6 +243,14 @@ bool Sender::send(DataMessage & msg_to_send) {
 				- sizeof(DataMessage::CanMsgStruct::Payload)
 				+ msg_info.Data.Can.Dlc;
 			break;
+		case DataMessage::MsgPwm:
+			msg_len =
+				sizeof(DataMessage::MsgHeader)
+				+ sizeof(DataMessage::PwmMsgStruct)
+				- sizeof(DataMessage::PwmMsgStruct::Signal) * (
+						msg_info.Data.Pwm.MAX_COUNT - ntohs(msg_info.Data.Pwm.Count)
+					);
+			break;
 		default:
 			return true;
 	}
@@ -190,7 +260,7 @@ bool Sender::send(DataMessage & msg_to_send) {
 
 		fputs("Snd Msg: ", stderr);
 		msg_to_send.fprint(stderr);
-		fputs("\n", stderr);
+		fprintf(stderr," (size=%lu)\n", (unsigned long)msg_len);
 
 		/* now just sendto() our destination! */
 		if (sendto(fd, msg_buffer, msg_len, 0, (struct sockaddr *) &addr, sizeof(addr)) < 0) {

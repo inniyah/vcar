@@ -1,6 +1,6 @@
 all: ../libcandbc/libCanDbc.a test snd_test rcv_test can_test
 
-CFLAGS= -O2 -g -Wall
+CFLAGS= -O2 -g -Wall -Wno-multichar
 LDFLAGS= -Wl,-z,defs -Wl,--as-needed -Wl,--no-undefined
 DEFS = 
 
