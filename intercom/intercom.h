@@ -1,5 +1,5 @@
-#ifndef INTERCOM_H_
-#define INTERCOM_H_
+#ifndef INTERCOM_H_8AE6979E_4C11_11E5_95F9_10FEED04CD1C
+#define INTERCOM_H_8AE6979E_4C11_11E5_95F9_10FEED04CD1C
 
 #define INTERCOM_PORT         12345
 #define INTERCOM_GROUP        "225.0.0.37"
@@ -161,5 +161,4 @@ private:
 
 }; // namespace intercom
 
-#endif // INTERCOM_H_
-
+#endif // INTERCOM_H_8AE6979E_4C11_11E5_95F9_10FEED04CD1C
