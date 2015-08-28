@@ -80,6 +80,7 @@ void CarSvgBox::graphic(cairo_t * cr, double x, double y, double w, double h) {
 		}
 
 		rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_car_upper");
+		rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_car_windshield");
 
 		if (flags & FlagRoofClosed) {
 			rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_top");
