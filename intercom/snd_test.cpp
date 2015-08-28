@@ -5,7 +5,7 @@
 #include <unistd.h>
 
 int main(int argc, char *argv[]) {
-	intercom::Sender sender;
+	intercom::Sender sender(1);
 	while (true) {
 		intercom::DataMessage msg;
 		msg.createTextMsg("Hello, World!");
