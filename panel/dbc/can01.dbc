@@ -51,7 +51,7 @@ BO_ 272 engine: 4 Car
 BA_DEF_ SG_  "GenSigStartValue" INT -2147483648 2147483647;
 BA_DEF_DEF_  "GenSigStartValue" 0;
 BA_ "GenSigStartValue" SG_ 256 brake 250;
-BA_ "GenSigStartValue" SG_ 256 gear 1;
+BA_ "GenSigStartValue" SG_ 256 gear 0;
 BA_ "GenSigStartValue" SG_ 272 temperature -70;
 BA_ "GenSigStartValue" SG_ 272 rpm 20000;
 
