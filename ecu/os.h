@@ -1,5 +1,7 @@
-#ifndef OSOS_H_8AE691F4_4C11_11E5_95DF_10FEED04CD1C
-#define OSOS_H_8AE691F4_4C11_11E5_95DF_10FEED04CD1C
+#ifndef OS_H_8AE691F4_4C11_11E5_95DF_10FEED04CD1C
+#define OS_H_8AE691F4_4C11_11E5_95DF_10FEED04CD1C
+
+#include "os_cfg.h"
 
 #include <stdint.h>
 #include <event.h>
@@ -71,7 +73,7 @@ typedef enum {
 } CanTransceiverStatus;
 
 typedef enum {
-	CanTransceiverError_Ok,
+	CanTransceiverError_Ok = 0,
 	CanTransceiverError_IllegalState,
 	CanTransceiverError_WrongDevice,
 } CanTransceiverError;
@@ -85,7 +87,7 @@ typedef enum {
 } CanDriverStatus;
 
 typedef enum {
-	CanDriverError_Ok,
+	CanDriverError_Ok = 0,
 	CanDriverError_TxHwQueueFull,
 	CanDriverError_TxOffline,
 	CanDriverError_TxFail,
@@ -118,4 +120,27 @@ CanDriverError       CanDriver_delRxMessage(CanDevId can_id);
 }
 #endif
 
-#endif // OSOS_H_8AE691F4_4C11_11E5_95DF_10FEED04CD1C
+// PWM Output
+
+typedef uint8_t  PwmDevId;
+
+typedef enum {
+	PwmOutputError_Ok = 0,
+	PwmOutputError_InvalidValue,
+	PwmOutputError_WrongDevice,
+} PwmOutputError;
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+uint8_t              PwmOut_getNumberOfDevices();
+PwmOutputError       PwmOut_setPeriod(PwmDevId pwm_id, uint16_t period);
+PwmOutputError       PwmOut_setDuty(PwmDevId pwm_id, uint16_t duty);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // OS_H_8AE691F4_4C11_11E5_95DF_10FEED04CD1C

@@ -11,7 +11,8 @@ SYS_OBJS= \
 	intercom.o \
 	emu_os.o \
 	emu_ecu.o \
-	emu_can.o
+	emu_can.o \
+	emu_pwm.o
 
 OBJS = \
 	$(SYS_OBJS) \

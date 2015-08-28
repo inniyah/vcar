@@ -3,7 +3,6 @@
 
 #include "../os.h"
 #include "emu_ecu.h"
-#include "emu_can.h"
 
 #include "fast_mutex.h"
 
@@ -14,7 +13,7 @@ struct CanDevice {
 	bool insertTxMessage(CanMsgId msg_id, uint8_t dlc, uint8_t * payload);
 	bool insertRxMessage(CanMsgId msg_id, uint8_t dlc, uint8_t * payload);
 
-	static const int NUM_CAN_DEVICES = 1;
+	static const int NUM_CAN_DEVICES = NUMBER_OF_CAN_DEVICES;
 	static const int NUM_CAN_TXBUFFERS = 8;
 	static const int NUM_CAN_RXBUFFERS = 8;
 
