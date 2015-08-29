@@ -22,9 +22,12 @@ struct AnalogValue {
 	const char * Units;
 };
 
-typedef std::map<std::string, std::map<std::string, AnalogValue > > AnalogMap;
-typedef std::map<std::string, AnalogValue >::iterator AnalogMapVarIterator;
-typedef std::map<std::string, std::map<std::string, AnalogValue > >::iterator AnalogMapGroupIterator;
+typedef std::map<std::string, std::map<std::string, AnalogValue > >             AnalogMap;
+typedef std::map<std::string, AnalogValue >::iterator                           AnalogMapVarIterator;
+typedef std::map<std::string, std::map<std::string, AnalogValue > >::iterator   AnalogMapGroupIterator;
+
+typedef std::map<std::string, intercom::DataMessage::PwmMsg::Signal >           PwmMap;
+typedef std::map<std::string, intercom::DataMessage::PwmMsg::Signal >::iterator PwmMapIterator;
 
 class CarState {
 	friend class CanMsgParser;
@@ -36,6 +39,7 @@ public:
 	void printAnalogData();
 
 	AnalogMap analog_data;
+	PwmMap    pwm_data;
 
 private:
 	bool stop;

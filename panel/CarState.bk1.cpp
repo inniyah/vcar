@@ -67,7 +67,7 @@ public:
 // CarState
 
 static void can_bus_msg_cb(int can_bus, message_t * can_msg, void * arg) {
-	//CarState * car_state = reinterpret_cast<CarState *>(arg);
+	CarState * car_state = reinterpret_cast<CarState *>(arg);
 	printf("  CAN MSG 0x%lX (%s) on bus %d\n", (unsigned long)can_msg->id, can_msg->name, can_bus);
 }
 
@@ -99,29 +99,27 @@ static void can_bus_msg_sgn_att_cb(int can_bus, message_t * can_msg, signal_t * 
 	CarState * car_state = reinterpret_cast<CarState *>(arg);
 	if (NULL != car_state && NULL != sgn_att && NULL != sgn_att->value) {
 		AnalogValue & av = car_state->analog_data[can_msg->name][can_sgn->name];
-		if (!strcmp(sgn_att->name, "GenSigStartValue")) {
-			switch (sgn_att->value->value_type) {
-				case vt_integer:
-					av.StartRawValue = (sgn_att->value->value.int_val) & (0xFFFFFFFFu & ((uint32)~0 >> (32 - can_sgn->bit_len)));
-					break;
-				case vt_float:
-					break;
-				case vt_string:
-					break;
-				case vt_enum:
-					break;
-				case vt_hex:
-					break;
-				default:
-					break;
-			}
-			av.RawValue = av.StartRawValue;
-
-			printf("      ATTRIBUTE %s -> %lu\n",
-				sgn_att->name,
-				av.StartRawValue
-			);
+		switch (sgn_att->value->value_type) {
+			case vt_integer:
+				av.StartRawValue = (sgn_att->value->value.int_val) & (0xFFFFFFFFu & ((uint32)~0 >> (32 - can_sgn->bit_len)));
+				break;
+			case vt_float:
+				break;
+			case vt_string:
+				break;
+			case vt_enum:
+				break;
+			case vt_hex:
+				break;
+			default:
+				break;
 		}
+		av.RawValue = av.StartRawValue;
+
+		printf("      ATTRIBUTE %s -> %lu\n",
+			sgn_att->name,
+			av.StartRawValue
+		);
 	}
 }
 
@@ -163,39 +161,20 @@ void CarState::receiveLoop() {
 		intercom::DataMessage msg;
 		receiver.receive(msg);
 
-		bool rcv_from_self = false;
+		bool just_check = false;
 		if (receiver.getSysId() == msg.getSysId()) {
 			//fputs("* Msg Ign: ", stderr); msg.fprint(stderr); fputs("\n", stderr);
-			rcv_from_self = true;
+			just_check = true;
 		} else {
 			//fputs("* Msg Rcv: ", stderr); msg.fprint(stderr); fputs("\n", stderr);
 		}
 
-		if (intercom::DataMessage::MsgPwm == msg.getMsgType()) {
-			intercom::DataMessage::PwmMsg * pwm_msg = msg.getPwmInfo();
-			if (NULL != pwm_msg) {
-				for (int i = 0; i < ntohs(pwm_msg->Count); ++i) {
-					char pwm_id_str[5];
-					uint32_t pwm_id = FIX_MULTICHAR_STR4(ntohl(pwm_msg->Signals[i].Id));
-					snprintf(pwm_id_str, sizeof(pwm_id_str),
-						"%.*s", 4, reinterpret_cast<const char *>(&pwm_id)
-					);
-					pwm_data[pwm_id_str] = pwm_msg->Signals[i];
-
-					fprintf(stderr, "PWM Rcv: %s=%u/%u\n",
-						pwm_id_str,
-						ntohs(pwm_data[pwm_id_str].PulseWidth),
-						ntohs(pwm_data[pwm_id_str].Period)
-					);
-				}
-			}
-		} else if ((NULL != car_msg_parser) && (intercom::DataMessage::MsgCan == msg.getMsgType())) {
+		if ((NULL != car_msg_parser) && (intercom::DataMessage::MsgCan == msg.getMsgType())) {
 			intercom::DataMessage::CanMsg * can_msg = msg.getCanInfo();
 			if (NULL != can_msg) {
-				car_msg_parser->processCanMessage(can_msg, rcv_from_self);
+				car_msg_parser->processCanMessage(can_msg, just_check);
 			}
 		}
-
 	}
 }
 
@@ -366,7 +345,7 @@ void CanMsgParser::decodeCanMessage(const message_t * dbc_msg, const intercom::D
 	}
 
 	/* iterate over all signals */
-	for (signal_list_t * sitem = dbc_msg->signal_list; sitem != NULL; sitem = sitem->next) {
+	for(signal_list_t * sitem = dbc_msg->signal_list; sitem != NULL; sitem = sitem->next) {
 		/*
 		 * The "raw value" of a signal is the value as it is transmitted
 		 * over the network.
@@ -411,7 +390,7 @@ void CanMsgParser::decodeCanMessage(const message_t * dbc_msg, const intercom::D
 
 		/* align signal into ulong32 */
 
-		if (sgn->endianess == 0) { /* 0 = Big Endian */
+		if(sgn->endianess == 0) { /* 0 = Big Endian */
 			/*
 			 *     7  6  5  4  3  2  1  0      offset
 			 *
@@ -426,20 +405,22 @@ void CanMsgParser::decodeCanMessage(const message_t * dbc_msg, const intercom::D
 
 			/* loop over all source bytes from start_byte to end_byte */
 			for (int work_byte = start_byte; work_byte <= end_byte; ++work_byte) {
-				data = can_msg->Payload[work_byte]; /* fetch source byte */
+				/* fetch source byte */
+				data = can_msg->Payload[work_byte];
 
-				if (work_byte == start_byte && work_byte == end_byte && start_offset != 7 && end_offset != 0) {
-					data &= (uint8)~0 >> (7 - start_offset);
-					data >>= end_offset;
-					shift = start_offset - end_offset + 1;
-				} else if (work_byte == start_byte && start_offset != 7) {
+				/* process source byte */
+				if (work_byte == start_byte && start_offset != 7) {
+					/* less that 8 bits in start byte? mask out unused bits */
 					data &= (uint8)~0 >> (7 - start_offset);
 					shift = start_offset + 1;
-				} else if (work_byte == end_byte && end_offset != 0) {
-					data >>= end_offset;
-					shift = 8 - end_offset;
 				} else {
-					shift = 8;
+					shift = 8; /* use all eight bits */
+				}
+
+				if (work_byte == end_byte && end_offset != 0) {
+					/* less that 8 bits in end byte? shift out unused bits */
+					data >>= end_offset;
+					shift -= end_offset;
 				}
 
 				/* store processed byte */
@@ -460,23 +441,18 @@ void CanMsgParser::decodeCanMessage(const message_t * dbc_msg, const intercom::D
 			uint8  end_offset   = (start_offset + bit_len - 1) & 7;
 
 			for (int work_byte = end_byte; work_byte >= start_byte; --work_byte) {
-				data = can_msg->Payload[work_byte]; /* fetch source byte */
-
-				if (work_byte == start_byte && work_byte == end_byte && start_offset != 0 && end_offset != 7) {
-					data &= (uint8)~0 >> (7 - end_offset);
-					data >>= start_offset;
-					shift = end_offset - start_offset + 1;
-				} else if (work_byte == end_byte && end_offset != 7) {
+				data = can_msg->Payload[work_byte];
+				if(work_byte == end_byte && end_offset != 7) {
 					data &= (uint8)~0 >> (7 - end_offset);
 					shift = end_offset + 1;
-				} else if (work_byte == start_byte && start_offset != 0) {
-					data >>= start_offset;
-					shift = 8 - start_offset;
 				} else {
 					shift = 8;
 				}
 
-				/* store processed byte */
+				if (work_byte == start_byte && start_offset != 0) {
+					data >>= start_offset;
+					shift -= start_offset;
+				}
 				rawValue <<= shift;
 				rawValue |= data;
 			}
@@ -590,9 +566,7 @@ void CanMsgParser::encodeCanMessage(const message_t * dbc_msg, intercom::DataMes
 		 * start_byte
 		 */
 
-	memset(can_msg->Payload, 0xFF, sizeof(can_msg->Payload));
-
-	for (signal_list_t * sitem = dbc_msg->signal_list; sitem != NULL; sitem = sitem->next) {
+	for(signal_list_t * sitem = dbc_msg->signal_list; sitem != NULL; sitem = sitem->next) {
 
 		const signal_t *const sgn = sitem->signal;
 		uint8  bit_len            = sgn->bit_len;

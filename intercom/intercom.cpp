@@ -10,28 +10,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-/*
- * Typically, on little-endian architectures, the rightmost character of a multi-char will
- * become the least significant byte of the resulting integer. On big-endian architectures,
- * it is the other way around.
- */
-
-#if (defined(__BYTE_ORDER) && (__BYTE_ORDER == __BIG_ENDIAN)) || defined(__BIG_ENDIAN__) || \
-        (defined(__BYTE_ORDER__) && (__BYTE_ORDER__ ==  __ORDER_BIG_ENDIAN__)) || \
-        defined(__ARMEB__) || defined(__THUMBEB__) || defined(__AARCH64EB__) || \
-        defined(_MIBSEB) || defined(__MIBSEB) || defined(__MIBSEB__)
-    // It's a big-endian architecture
-    #define FIX_MULTICHAR_STR4(C) ( C )
-#elif (defined(__BYTE_ORDER) && (__BYTE_ORDER == __LITTLE_ENDIAN)) || defined(__LITTLE_ENDIAN__) || \
-        (defined(__BYTE_ORDER__) && (__BYTE_ORDER__ ==  __ORDER_LITTLE_ENDIAN__)) || \
-        defined(__ARMEL__) || defined(__THUMBEL__) || defined(__AARCH64EL__) || \
-        defined(_MIPSEL) || defined(__MIPSEL) || defined(__MIPSEL__)
-    // It's a little-endian architecture
-    #define FIX_MULTICHAR_STR4(C) ( (((C) & 0x000000FFu) << 24) | (((C) & 0x0000FF00u) <<  8) | (((C) & 0x00FF0000u) >> 8) | (((C) & 0xFF000000u) >> 24) )
-#else
-    #error "I don't know what architecture this is!"
-#endif
-
 namespace intercom {
 
 void DataMessage::destroyMsg(void) {

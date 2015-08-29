@@ -18,9 +18,14 @@ void RtVarsTree::buildTree() {
 	if (p_CarState) {
 		char buffer[64];
 		buffer[sizeof(buffer)-1] = '\0';
+
+		begin();
+
+		// Can Values
+
 		AnalogMapVarIterator v;
 		AnalogMapGroupIterator g;
-		begin();
+
 		for (g = p_CarState->analog_data.begin(); g != p_CarState->analog_data.end(); g++) {
 			for (v = (*g).second.begin(); v != (*g).second.end(); v++) {
 				Fl_Tree_Item *item;
@@ -45,8 +50,28 @@ void RtVarsTree::buildTree() {
 				item->user_data((void*)NULL);
 				printf(">> %s\n", buffer);
 			}
-		end();
 		}
+
+		// Pwm Values
+		PwmMapIterator p;
+		for (p = p_CarState->pwm_data.begin(); p != p_CarState->pwm_data.end(); p++) {
+				Fl_Tree_Item *item;
+				snprintf(buffer, sizeof(buffer)-1, "PWM/%s = %lu of %lu (%.2lf%%)",
+					(*p).first.c_str(),
+					(long unsigned)(*p).second.PulseWidth,
+					(long unsigned)(*p).second.Period,
+					(long unsigned)(*p).second.Period == 0 ? 0.0 :
+						100.0
+							* static_cast<double>((long unsigned)(*p).second.PulseWidth)
+							/ static_cast<double>((long unsigned)(*p).second.Period)
+				);
+				item = add(buffer);
+				item->user_data((void*)NULL);
+				printf(">> %s\n", buffer);
+		}
+
+		end();
+
 	}
 }
 
