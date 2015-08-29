@@ -17,14 +17,16 @@ struct CanDevice {
 	static const int NUM_CAN_TXBUFFERS = 8;
 	static const int NUM_CAN_RXBUFFERS = 8;
 
+	static void resetAllDevices();
+
 	typedef enum CanTransceiverStateE {
 		Tr_Undefined,
 		Tr_Standby,
 		Tr_Active,
 	} CanTransceiverState;
 
-	static CanDevice m_CanDevices[CanDevice::NUM_CAN_DEVICES];
-	static CanDevId CurrentDevId;
+	static CanDevice s_CanDevices[CanDevice::NUM_CAN_DEVICES];
+	static CanDevId s_CurrentDevId;
 
 	CanDevId getDevId() const;
 

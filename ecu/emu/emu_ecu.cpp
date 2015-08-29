@@ -76,7 +76,7 @@ void CanBusHandler::receiveLoop() {
 				if (!ignore) {
 					intercom::DataMessage::CanMsg * can_msg = msg.getCanInfo();
 					if ((NULL != can_msg) && (can_msg->Bus >= 0) && (can_msg->Bus < CanDevice::NUM_CAN_DEVICES)) {
-						CanDevice::m_CanDevices[can_msg->Bus].insertRxMessage(ntohl(can_msg->Id), can_msg->Dlc, can_msg->Payload);
+						CanDevice::s_CanDevices[can_msg->Bus].insertRxMessage(ntohl(can_msg->Id), can_msg->Dlc, can_msg->Payload);
 					}
 				}
 				break;
@@ -116,6 +116,8 @@ void CanBusHandler::sendThreadFunc(void * arg) {
 // Main Function
 
 int main(int argc, const char * argv[]) {
+	CanDevice::resetAllDevices();
+	PwmDevice::resetAllDevices();
 	event_init();
 	task_init(0, 0, NULL);
 

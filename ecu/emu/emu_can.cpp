@@ -14,8 +14,8 @@
 ISR(CAN_MSG_RECV);
 ISR(CAN_MSG_SENT);
 
-CanDevice CanDevice::m_CanDevices[CanDevice::NUM_CAN_DEVICES];
-CanDevId CanDevice::CurrentDevId = INVALID_CAN_DEVICE;
+CanDevice CanDevice::s_CanDevices[CanDevice::NUM_CAN_DEVICES];
+CanDevId CanDevice::s_CurrentDevId = INVALID_CAN_DEVICE;
 
 CanDevice::CanDevice() :
 	m_CanTransceiverState(Tr_Undefined),
@@ -30,7 +30,7 @@ CanDevice::~CanDevice() {
 }
 
 CanDevId CanDevice::getDevId() const {
-	CanDevId dev_id = (this - m_CanDevices) / sizeof(m_CanDevices[0]);
+	CanDevId dev_id = (this - s_CanDevices) / sizeof(s_CanDevices[0]);
 	if (dev_id >= 0 && dev_id < NUM_CAN_DEVICES) {
 		return dev_id;
 	} else {
@@ -61,9 +61,9 @@ bool CanDevice::insertTxMessage(CanMsgId msg_id, uint8_t dlc, uint8_t * payload)
 	m_Mutex.unlock();
 	// Trigger Interruption
 	m_IsrMutex.lock();
-	CurrentDevId = getDevId();
+	s_CurrentDevId = getDevId();
 	isr_CAN_MSG_SENT(0, 0, NULL);
-	CurrentDevId = INVALID_CAN_DEVICE;
+	s_CurrentDevId = INVALID_CAN_DEVICE;
 	m_IsrMutex.unlock();
 	return true;
 }
@@ -91,11 +91,21 @@ bool CanDevice::insertRxMessage(CanMsgId msg_id, uint8_t dlc, uint8_t * payload)
 	m_Mutex.unlock();
 	// Trigger Interruption
 	m_IsrMutex.lock();
-	CurrentDevId = getDevId();
+	s_CurrentDevId = getDevId();
 	isr_CAN_MSG_RECV(0, 0, NULL);
-	CurrentDevId = INVALID_CAN_DEVICE;
+	s_CurrentDevId = INVALID_CAN_DEVICE;
 	m_IsrMutex.unlock();
 	return true;
+}
+
+void CanDevice::resetAllDevices() {
+	for (int can_id = 0; can_id < CanDevice::NUM_CAN_DEVICES; ++can_id) {
+		CanDevice::s_CanDevices[can_id].m_CanTransceiverState = CanDevice::Tr_Undefined;
+		CanDevice::s_CanDevices[can_id].m_CanTxPos = 0;
+		CanDevice::s_CanDevices[can_id].m_CanTxCnt = 0;
+		CanDevice::s_CanDevices[can_id].m_CanRxPos = 0;
+		CanDevice::s_CanDevices[can_id].m_CanRxCnt = 0;
+	}
 }
 
 // Public API
@@ -105,14 +115,14 @@ extern "C" uint8_t CanSystem_getNumberOfDevices() {
 }
 
 extern "C" CanDevId CanSystem_getIsrCurrentDevId() {
-	return CanDevice::CurrentDevId;
+	return CanDevice::s_CurrentDevId;
 }
 
 extern "C" CanTransceiverStatus CanTransceiver_getStatus(CanDevId can_id) {
 	if ((can_id < 0) || (can_id >= CanDevice::NUM_CAN_DEVICES)) {
 		return CanTransceiverStatus_Undefined;
 	}
-	switch (CanDevice::m_CanDevices[can_id].m_CanTransceiverState) {
+	switch (CanDevice::s_CanDevices[can_id].m_CanTransceiverState) {
 		case CanDevice::Tr_Standby:
 			return CanTransceiverStatus_Standby;
 		case CanDevice::Tr_Active:
@@ -126,7 +136,7 @@ extern "C" CanTransceiverError  CanTransceiver_init(CanDevId can_id) {
 	if ((can_id < 0) || (can_id >= CanDevice::NUM_CAN_DEVICES)) {
 		return CanTransceiverError_WrongDevice;
 	}
-	CanDevice::m_CanDevices[can_id].m_CanTransceiverState = CanDevice::Tr_Standby;
+	CanDevice::s_CanDevices[can_id].m_CanTransceiverState = CanDevice::Tr_Standby;
 	return CanTransceiverError_Ok;
 }
 
@@ -134,10 +144,10 @@ extern "C" CanTransceiverError  CanTransceiver_start(CanDevId can_id) {
 	if ((can_id < 0) || (can_id >= CanDevice::NUM_CAN_DEVICES)) {
 		return CanTransceiverError_WrongDevice;
 	}
-	if (CanDevice::m_CanDevices[can_id].m_CanTransceiverState != CanDevice::Tr_Standby) {
+	if (CanDevice::s_CanDevices[can_id].m_CanTransceiverState != CanDevice::Tr_Standby) {
 		return CanTransceiverError_IllegalState;
 	}
-	CanDevice::m_CanDevices[can_id].m_CanTransceiverState = CanDevice::Tr_Active;
+	CanDevice::s_CanDevices[can_id].m_CanTransceiverState = CanDevice::Tr_Active;
 	return CanTransceiverError_Ok;
 }
 
@@ -145,10 +155,10 @@ extern "C" CanTransceiverError  CanTransceiver_stop(CanDevId can_id) {
 	if ((can_id < 0) || (can_id >= CanDevice::NUM_CAN_DEVICES)) {
 		return CanTransceiverError_WrongDevice;
 	}
-	if (CanDevice::m_CanDevices[can_id].m_CanTransceiverState != CanDevice::Tr_Active) {
+	if (CanDevice::s_CanDevices[can_id].m_CanTransceiverState != CanDevice::Tr_Active) {
 		return CanTransceiverError_IllegalState;
 	}
-	CanDevice::m_CanDevices[can_id].m_CanTransceiverState = CanDevice::Tr_Standby;
+	CanDevice::s_CanDevices[can_id].m_CanTransceiverState = CanDevice::Tr_Standby;
 	return CanTransceiverError_Ok;
 }
 
@@ -191,20 +201,20 @@ extern "C" CanMessage * CanDriver_getRxMessage(CanDevId can_id) {
 	if ((can_id < 0) || (can_id >= CanDevice::NUM_CAN_DEVICES)) {
 		return NULL;
 	}
-	if (0 == CanDevice::m_CanDevices[can_id].m_CanRxCnt) {
+	if (0 == CanDevice::s_CanDevices[can_id].m_CanRxCnt) {
 		return NULL;
 	}
-	return & CanDevice::m_CanDevices[can_id].m_CanRxMessages[CanDevice::m_CanDevices[can_id].m_CanRxPos];
+	return & CanDevice::s_CanDevices[can_id].m_CanRxMessages[CanDevice::s_CanDevices[can_id].m_CanRxPos];
 }
 
 extern "C" CanDriverError CanDriver_delRxMessage(CanDevId can_id) {
 	if ((can_id < 0) || (can_id >= CanDevice::NUM_CAN_DEVICES)) {
 		return CanDriverError_WrongDevice;
 	}
-	if (0 == CanDevice::m_CanDevices[can_id].m_CanRxCnt) {
+	if (0 == CanDevice::s_CanDevices[can_id].m_CanRxCnt) {
 		return CanDriverError_RxEmptyQueue;
 	}
-	CanDevice::m_CanDevices[can_id].m_CanRxPos = ((CanDevice::m_CanDevices[can_id].m_CanRxPos + 1) % CanDevice::NUM_CAN_RXBUFFERS);
-	CanDevice::m_CanDevices[can_id].m_CanRxCnt--;
+	CanDevice::s_CanDevices[can_id].m_CanRxPos = ((CanDevice::s_CanDevices[can_id].m_CanRxPos + 1) % CanDevice::NUM_CAN_RXBUFFERS);
+	CanDevice::s_CanDevices[can_id].m_CanRxCnt--;
 	return CanDriverError_Ok;
 }

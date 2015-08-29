@@ -25,7 +25,7 @@ PKG_CONFIG=
 PKG_CONFIG_CFLAGS=`pkg-config --cflags $(PKG_CONFIG) 2>/dev/null`
 PKG_CONFIG_LIBS=`pkg-config --libs $(PKG_CONFIG) 2>/dev/null`
 
-CFLAGS= -O2 -g -Wall
+CFLAGS= -O2 -g -Wall -Wno-multichar
 DEFS=
 INCS=-I../tinythreadpp/source/ -I../intercom/
 
