@@ -80,7 +80,7 @@ void DataMessage::createPwmMsg(const PwmMsg::Signal & signal) {
 void DataMessage::createPwmMsg(uint16_t count, const PwmMsg::Signal signals[]) {
 	destroyMsg();
 	if (count > 0 && count < PwmMsg::MAX_COUNT) {
-		m_Message.Data.Pwm.Count = htonl(count);
+		m_Message.Data.Pwm.Count = htons(count);
 		memset(m_Message.Data.Pwm.Signals, 0, sizeof(m_Message.Data.Pwm.Signals));
 		for (int i = 0; i < count; ++i) {
 			m_Message.Data.Pwm.Signals[i] = signals[i];

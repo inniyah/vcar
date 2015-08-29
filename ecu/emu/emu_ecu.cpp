@@ -96,6 +96,9 @@ void CanBusHandler::sendLoop() {
 
 	while (!stop) {
 		sleep(1);
+
+		msg.createPwmMsg(PwmDevice::NUM_PWM_DEVICES, PwmDevice::s_PwmSignals);
+		sender.send(msg);
 	}
 }
 
