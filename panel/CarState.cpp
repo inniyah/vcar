@@ -171,6 +171,7 @@ void CarState::receiveLoop() {
 			//fputs("* Msg Rcv: ", stderr); msg.fprint(stderr); fputs("\n", stderr);
 		}
 
+		bool data_added = false;
 		if (intercom::DataMessage::MsgPwm == msg.getMsgType()) {
 			intercom::DataMessage::PwmMsg * pwm_msg = msg.getPwmInfo();
 			if (NULL != pwm_msg) {
@@ -188,14 +189,25 @@ void CarState::receiveLoop() {
 						ntohs(pwm_data[pwm_id_str].Period)
 					);
 				}
+				if (!rcv_from_self) {
+					data_added = true;
+				}
 			}
 		} else if ((NULL != car_msg_parser) && (intercom::DataMessage::MsgCan == msg.getMsgType())) {
 			intercom::DataMessage::CanMsg * can_msg = msg.getCanInfo();
 			if (NULL != can_msg) {
 				car_msg_parser->processCanMessage(can_msg, rcv_from_self);
+				if (!rcv_from_self) {
+					data_added = true;
+				}
 			}
 		}
 
+		if (data_added) {
+			for (std::list<ICarStateListener*>::iterator it = listeners.begin(); it != listeners.end(); ++it) {
+				(*it)->eventCarStateChanged();
+			}
+		}
 	}
 }
 

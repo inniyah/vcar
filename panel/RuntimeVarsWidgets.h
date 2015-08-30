@@ -8,16 +8,18 @@
 #include <FL/Fl.H>
 #include <FL/Fl_Tree.H>
 
-class RtVarsTree : public Fl_Tree {
+class RtVarsTree : public Fl_Tree, public ICarStateListener {
 public:
-	RtVarsTree(int X,int Y,int W,int H,const char*L=0) : Fl_Tree(X,Y,W,H,L), p_CarState(NULL) { }
-	virtual ~RtVarsTree() { }
+	RtVarsTree(int X, int Y, int W, int H, const char * L = 0);
+	virtual ~RtVarsTree();
 
 	virtual void draw(void);
 
 	void buildTree();
 
 	void setCarState(CarState * car_state);
+
+	virtual void eventCarStateChanged(void); // ICarStateListener
 
 private:
 	CarState * p_CarState;

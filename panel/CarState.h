@@ -7,6 +7,7 @@
 #include <unistd.h>
 
 #include <map>
+#include <list>
 
 #include "tinythread.h"
 #include "intercom.h"
@@ -29,6 +30,10 @@ typedef std::map<std::string, std::map<std::string, AnalogValue > >::iterator   
 typedef std::map<std::string, intercom::DataMessage::PwmMsg::Signal >           PwmMap;
 typedef std::map<std::string, intercom::DataMessage::PwmMsg::Signal >::iterator PwmMapIterator;
 
+struct ICarStateListener {
+	virtual void eventCarStateChanged(void) = 0;
+};
+
 class CarState {
 	friend class CanMsgParser;
 
@@ -38,6 +43,7 @@ public:
 
 	void printAnalogData();
 
+	std::list<ICarStateListener*> listeners;
 	AnalogMap analog_data;
 	PwmMap    pwm_data;
 

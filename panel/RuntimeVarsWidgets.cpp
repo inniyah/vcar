@@ -8,6 +8,16 @@
 #include <stdio.h>
 #include <math.h>
 
+RtVarsTree::RtVarsTree(int X, int Y, int W, int H, const char * L) : Fl_Tree(X,Y,W,H,L), p_CarState(NULL) {
+}
+
+RtVarsTree::~RtVarsTree() {
+	if (p_CarState) {
+		p_CarState->listeners.remove(this);
+		p_CarState = NULL;
+	}
+}
+
 void RtVarsTree::draw(void) {
 	buildTree();
 	Fl_Tree::draw();
@@ -76,6 +86,17 @@ void RtVarsTree::buildTree() {
 }
 
 void RtVarsTree::setCarState(CarState * car_state) {
+	if (p_CarState) {
+		p_CarState->listeners.remove(this);
+	}
 	p_CarState = car_state;
+	if (p_CarState) {
+		p_CarState->listeners.push_back(this);
+	}
+	redraw();
+}
+
+void RtVarsTree::eventCarStateChanged(void) { // ICarStateListener
+	//printf("eventCarStateChanged\n");
 	redraw();
 }
