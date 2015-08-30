@@ -27,6 +27,18 @@ TASK(init) {
 		fprintf(stderr, "Can't start CAN Transceiver #0\n");
 	}
 
+	if (PwmOutputError_Ok != PwmOut_init(PWM_INTERIOR_LIGHT)) {
+		fprintf(stderr, "Can't init PWM Output #%d\n", PWM_INTERIOR_LIGHT);
+	}
+
+	if (PwmOutputError_Ok != PwmOut_setPeriod(PWM_INTERIOR_LIGHT, 255)) {
+		fprintf(stderr, "Can't set PWM Output #%d Period\n", PWM_INTERIOR_LIGHT);
+	}
+
+	if (PwmOutputError_Ok != PwmOut_setDuty(PWM_INTERIOR_LIGHT, 255)) {
+		fprintf(stderr, "Can't set PWM Output #%d Duty\n", PWM_INTERIOR_LIGHT);
+	}
+
 	addEventEveryMs(ev_100ms, 100, task_100ms, NULL);
 	addEventEveryMs(ev_10ms,  10,  task_10ms,  NULL);
 

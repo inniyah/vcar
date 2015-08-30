@@ -70,10 +70,7 @@ void RtVarsTree::buildTree() {
 					(*p).first.c_str(),
 					(long unsigned)(*p).second.PulseWidth,
 					(long unsigned)(*p).second.Period,
-					(long unsigned)(*p).second.Period == 0 ? 0.0 :
-						100.0
-							* static_cast<double>((long unsigned)(*p).second.PulseWidth)
-							/ static_cast<double>((long unsigned)(*p).second.Period)
+					(long unsigned)(*p).second.Period == 0 ? 0.0 : 100.0 * (*p).second.getIntensity()
 				);
 				item = add(buffer);
 				item->user_data((void*)NULL);

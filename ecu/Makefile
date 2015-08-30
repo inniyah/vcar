@@ -1,4 +1,4 @@
-PROGRAM=test
+PROGRAM=ecu
 
 all: $(PROGRAM)
 

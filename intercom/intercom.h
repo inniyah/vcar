@@ -88,6 +88,9 @@ public:
 			uint32_t Id;
 			uint16_t Period;
 			uint16_t PulseWidth;
+			inline double getIntensity() {
+				return static_cast<double>(PulseWidth) / static_cast<double>(Period);
+			}
 		} __attribute__((packed)) Signal;
 		static const int MAX_COUNT = (INTERCOM_MAXMSGSIZE - sizeof(MsgHeader) - sizeof(Count)) / sizeof(Signal);
 		Signal Signals[MAX_COUNT];

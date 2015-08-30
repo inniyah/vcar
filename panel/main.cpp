@@ -19,11 +19,13 @@ typedef void (*CarCmdFunction)(void);
 void CarCmdDoNothing() {
 };
 
+/*
 void CarCmdToggleHazard() {
 	fprintf(stderr, "Toggle Hazard\n");
 	wCarBox->LeftHazardLights(1.0 - wCarBox->LeftHazardLights());
 	wCarBox->RightHazardLights(1.0 - wCarBox->RightHazardLights());
 };
+*/
 
 void ChangeAccel(Fl_Widget *w, void *data) {
 	CarState * car_state = reinterpret_cast<CarState*>(data);
@@ -47,9 +49,9 @@ void ChangeBrake(Fl_Widget *w, void *data) {
 	fprintf(stderr, "Brake %lf\n", value);
 
 	if (slider->maximum() != slider->value()) {
-		wCarBox->BrakeLights(1.0);
+		//wCarBox->BrakeLights(1.0);
 	} else {
-		wCarBox->BrakeLights(0.0);
+		//wCarBox->BrakeLights(0.0);
 	}
 };
 
@@ -72,11 +74,11 @@ void ChangeBackGear(Fl_Widget *w, void *data) {
 	Fl_Slider * slider = reinterpret_cast<Fl_Slider *>(w);
 	if (slider->maximum() != slider->value()) {
 		car_state->analog_data["driving_controls"]["gear"].RawValue = 0;
-		wCarBox->BackwardsLights(0.0);
+		//wCarBox->BackwardsLights(0.0);
 		wGearSlider->activate();
 	} else {
 		car_state->analog_data["driving_controls"]["gear"].RawValue = 7;
-		wCarBox->BackwardsLights(1.0);
+		//wCarBox->BackwardsLights(1.0);
 		wGearSlider->deactivate();
 	}
 }
@@ -143,7 +145,12 @@ struct GlobalCarStateListener : public ICarStateListener {
 		m_CarState.listeners.remove(this);
 	}
 	virtual void eventCarStateChanged(void) {
-		//printf("eventCarStateChanged\n");
+		printf("eventCarStateChanged\n");
+		wCarBox->BrakeLights(m_CarState.pwm_data["BraL"].getIntensity());
+		wCarBox->BackwardsLights(m_CarState.pwm_data["BckL"].getIntensity());
+		wCarBox->LeftHazardLights(m_CarState.pwm_data["LHaz"].getIntensity());
+		wCarBox->RightHazardLights(m_CarState.pwm_data["RHaz"].getIntensity());
+		wCarBox->InteriorLights(m_CarState.pwm_data["IntL"].getIntensity());
 		wCarBox->redraw();
 	}
 private:
@@ -167,8 +174,8 @@ int main(int argc, char * argv[]) {
 	wCarCmdTree->begin();
 	{
 		Fl_Tree_Item *item;
-		item = wCarCmdTree->add("Lights/Toggle Hazard");
-		item->user_data((void*)CarCmdToggleHazard);
+		//item = wCarCmdTree->add("Lights/Toggle Hazard");
+		//item->user_data((void*)CarCmdToggleHazard);
 		item = wCarCmdTree->add("Doors/Open Left Door");
 		item->user_data((void*)CarCmdOpenLeftDoor);
 		item = wCarCmdTree->add("Doors/Close Left Door");
