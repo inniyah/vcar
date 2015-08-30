@@ -10,20 +10,23 @@ public:
 
 	virtual void graphic(cairo_t * cr, double, double, double, double);
 
-	bool RoofClosed()              { return (0 != (flags & FlagRoofClosed));        }
-	void RoofClosed(bool v)        { setFLag(FlagRoofClosed, v);                    }
-	bool LeftDoorClosed()          { return (0 != (flags & FlagLeftDoorClosed));    }
-	void LeftDoorClosed(bool v)    { setFLag(FlagLeftDoorClosed, v);                }
-	bool RightDoorClosed()         { return (0 != (flags & FlagRightDoorClosed));   }
-	void RightDoorClosed(bool v)   { setFLag(FlagRightDoorClosed, v);               }
-	bool BrakeLights()             { return (0 != (flags & FlagBrakeLights));       }
-	void BrakeLights(bool v)       { setFLag(FlagBrakeLights, v);                   }
-	bool BackwardsLights()         { return (0 != (flags & FlagBackwardsLights));   }
-	void BackwardsLights(bool v)   { setFLag(FlagBackwardsLights, v);               }
-	bool LeftHazardLights()        { return (0 != (flags & FlagLeftHazardLights));  }
-	void LeftHazardLights(bool v)  { setFLag(FlagLeftHazardLights, v);              }
-	bool RightHazardLights()       { return (0 != (flags & FlagRightHazardLights)); }
-	void RightHazardLights(bool v) { setFLag(FlagRightHazardLights, v);             }
+	bool  RoofClosed()               { return (0 != (flags & FlagRoofClosed));        }
+	void  RoofClosed(bool v)         { setFLag(FlagRoofClosed, v);      redraw();     }
+	bool  LeftDoorClosed()           { return (0 != (flags & FlagLeftDoorClosed));    }
+	void  LeftDoorClosed(bool v)     { setFLag(FlagLeftDoorClosed, v);  redraw();     }
+	bool  RightDoorClosed()          { return (0 != (flags & FlagRightDoorClosed));   }
+	void  RightDoorClosed(bool v)    { setFLag(FlagRightDoorClosed, v); redraw();     }
+
+	float BrakeLights()              { return brake_lights;                                                  }
+	void  BrakeLights(float v)       { brake_lights = ( v < 0.0 ? 0.0 : (v > 1.0 ? 1.0 : v) );     redraw(); }
+	float BackwardsLights()          { return backwards_lights;                                              }
+	void  BackwardsLights(float v)   { backwards_lights = ( v < 0.0 ? 0.0 : (v > 1.0 ? 1.0 : v) ); redraw(); }
+	float LeftHazardLights()         { return left_hazard;                                                   }
+	void  LeftHazardLights(float v)  { left_hazard = ( v < 0.0 ? 0.0 : (v > 1.0 ? 1.0 : v) );      redraw(); }
+	float RightHazardLights()        { return right_hazard;                                                  }
+	void  RightHazardLights(float v) { right_hazard = ( v < 0.0 ? 0.0 : (v > 1.0 ? 1.0 : v) );     redraw(); }
+	float InteriorLights()           { return interior_lights;                                               }
+	void  InteriorLights(float v)    { interior_lights = ( v < 0.0 ? 0.0 : (v > 1.0 ? 1.0 : v) );  redraw(); }
 
 private:
 	void setFLag(unsigned long f, bool v = true);
@@ -31,12 +34,14 @@ private:
 	static const long int FlagRoofClosed        = 1 << 0;
 	static const long int FlagLeftDoorClosed    = 1 << 1;
 	static const long int FlagRightDoorClosed   = 1 << 2;
-	static const long int FlagBrakeLights       = 1 << 3;
-	static const long int FlagBackwardsLights   = 1 << 4;
-	static const long int FlagLeftHazardLights  = 1 << 5;
-	static const long int FlagRightHazardLights = 1 << 6;
 
 	unsigned long flags;
+
+	float brake_lights;
+	float backwards_lights;
+	float left_hazard;
+	float right_hazard;
+	float interior_lights;
 };
 
 #endif // CARSVGBOX_H_

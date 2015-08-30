@@ -21,8 +21,8 @@ void CarCmdDoNothing() {
 
 void CarCmdToggleHazard() {
 	fprintf(stderr, "Toggle Hazard\n");
-	wCarBox->LeftHazardLights(!wCarBox->LeftHazardLights());
-	wCarBox->RightHazardLights(!wCarBox->RightHazardLights());
+	wCarBox->LeftHazardLights(1.0 - wCarBox->LeftHazardLights());
+	wCarBox->RightHazardLights(1.0 - wCarBox->RightHazardLights());
 };
 
 void ChangeAccel(Fl_Widget *w, void *data) {
@@ -47,9 +47,9 @@ void ChangeBrake(Fl_Widget *w, void *data) {
 	fprintf(stderr, "Brake %lf\n", value);
 
 	if (slider->maximum() != slider->value()) {
-		wCarBox->BrakeLights(true);
+		wCarBox->BrakeLights(1.0);
 	} else {
-		wCarBox->BrakeLights(false);
+		wCarBox->BrakeLights(0.0);
 	}
 };
 
@@ -72,11 +72,11 @@ void ChangeBackGear(Fl_Widget *w, void *data) {
 	Fl_Slider * slider = reinterpret_cast<Fl_Slider *>(w);
 	if (slider->maximum() != slider->value()) {
 		car_state->analog_data["driving_controls"]["gear"].RawValue = 0;
-		wCarBox->BackwardsLights(false);
+		wCarBox->BackwardsLights(0.0);
 		wGearSlider->activate();
 	} else {
-		car_state->analog_data["driving_controls"]["gear"].RawValue = -1;
-		wCarBox->BackwardsLights(true);
+		car_state->analog_data["driving_controls"]["gear"].RawValue = 7;
+		wCarBox->BackwardsLights(1.0);
 		wGearSlider->deactivate();
 	}
 }
@@ -135,11 +135,27 @@ void initCarState(CarState & car_state) {
 	car_state.analog_data["driving_controls"]["wheel"].RawValue = 1;
 }
 
+struct GlobalCarStateListener : public ICarStateListener {
+	GlobalCarStateListener(CarState & car_state) : m_CarState(car_state) {
+		m_CarState.listeners.push_back(this);
+	}
+	~GlobalCarStateListener() {
+		m_CarState.listeners.remove(this);
+	}
+	virtual void eventCarStateChanged(void) {
+		//printf("eventCarStateChanged\n");
+		wCarBox->redraw();
+	}
+private:
+	CarState & m_CarState;
+};
+
 int main(int argc, char * argv[]) {
 	Fl_Double_Window * panel_window = makePanelWindow();
 
 	CarState car_state;
 	initCarState(car_state);
+	GlobalCarStateListener car_state_listener(car_state);
 
 	wKeyState->add("Key Off",   0, cbKeyOff,   0, 0);
 	wKeyState->add("Key On",    0, cbKeyOn,    0, 0);

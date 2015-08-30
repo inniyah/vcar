@@ -23,7 +23,12 @@
 
 CarSvgBox::CarSvgBox(int x, int y, int w, int h, const char * l) :
 	AbstractSvgBox(x,y,w,h,l),
-	flags(0)
+	flags(0),
+	brake_lights(0.0),
+	backwards_lights(0.0),
+	left_hazard(0.0),
+	right_hazard(0.0),
+	interior_lights(0.0)
 {
 	const gchar * filename = "svg/BMW_Z4.svg";
 	GError **crap = NULL;
@@ -80,21 +85,33 @@ void CarSvgBox::graphic(cairo_t * cr, double x, double y, double w, double h) {
 		}
 
 		rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_car_upper");
+
+		if (interior_lights > (0.75 + 0.125)) {
+			rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_interior_lights");
+		} else 	if (interior_lights > (0.50 + 0.125)) {
+			rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_interior_lights_75");
+		} else 	if (interior_lights > (0.25 + 0.125)) {
+			rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_interior_lights_50");
+		} else 	if (interior_lights > (0.00 + 0.125)) {
+			rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_interior_lights_25");
+		}
+
+
 		rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_car_windshield");
 
 		if (flags & FlagRoofClosed) {
 			rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_top");
 		}
-		if (flags & FlagBrakeLights) {
+		if (brake_lights > (0.75 + 0.125)) {
 			rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_brake_lights");
 		}
-		if (flags & FlagBackwardsLights) {
+		if (backwards_lights > (0.75 + 0.125)) {
 			rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_backwards_lights");
 		}
-		if (flags & FlagLeftHazardLights) {
+		if (left_hazard > (0.75 + 0.125)) {
 			rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_hazard_left");
 		}
-		if (flags & FlagRightHazardLights) {
+		if (right_hazard > (0.75 + 0.125)) {
 			rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_hazard_right");
 		}
 	}
