@@ -1,5 +1,6 @@
 #include "os.h"
 #include "System.h"
+#include "rte.h"
 
 #include "can01.dbc.h"
 #include "CanDriver.h"
@@ -10,6 +11,7 @@
 #include <unistd.h>
 
 static System sys;
+static Rte rte;
 
 static CanBus_can01::TxMsgs can01_tx;
 static CanBus_can01::RxMsgs can01_rx;
@@ -25,6 +27,7 @@ System::System() : common::Singleton<System>(this) {
 	m_pCanTxMsgs[0] = &can01_tx;
 	m_pCanRxMsgs[0] = &can01_rx;
 	m_pCanDriver[0] = &can01_drv;
+	rte.init();
 }
 
 System::~System() {
@@ -67,4 +70,9 @@ void System::printCanBusRxSignals(CanDevId can_id) {
 		default:
 			break;
 	}
+}
+
+void System::updateSwc() {
+	rte.readInputs(can01_rx);
+	rte.writeOutputs(can01_tx);
 }

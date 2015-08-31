@@ -22,6 +22,7 @@ struct Rte {
 		uint8_t    LeftHazardLights;
 		uint8_t    RightHazardLights;
 	} Out;
+	void init();
 	void readInputs(CanBus_can01::RxMsgs & can01_rx);
 	void writeOutputs(CanBus_can01::TxMsgs & can01_tx);
 };
