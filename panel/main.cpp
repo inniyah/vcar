@@ -146,12 +146,15 @@ struct GlobalCarStateListener : public ICarStateListener {
 	}
 	virtual void eventCarStateChanged(void) {
 		printf("eventCarStateChanged\n");
+		Fl::lock();
 		wCarBox->BrakeLights(m_CarState.pwm_data["BraL"].getIntensity());
 		wCarBox->BackwardsLights(m_CarState.pwm_data["BckL"].getIntensity());
 		wCarBox->LeftHazardLights(m_CarState.pwm_data["LHaz"].getIntensity());
 		wCarBox->RightHazardLights(m_CarState.pwm_data["RHaz"].getIntensity());
 		wCarBox->InteriorLights(m_CarState.pwm_data["IntL"].getIntensity());
 		wCarBox->redraw();
+		Fl::unlock();
+		Fl::awake();
 	}
 private:
 	CarState & m_CarState;
@@ -214,5 +217,12 @@ int main(int argc, char * argv[]) {
 	wRuntimeVars->setCarState(&car_state);
 
 	panel_window->show(argc, argv);
+
+	// Enable multi-thread support by locking from the main
+	// thread.  Fl::wait() and Fl::run() call Fl::unlock() and
+	// Fl::lock() as needed to release control to the child threads
+	// when it is safe to do so...
+	Fl::lock();
+
 	return Fl::run();
 }

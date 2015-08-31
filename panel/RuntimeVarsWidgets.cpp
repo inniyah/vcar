@@ -95,5 +95,8 @@ void RtVarsTree::setCarState(CarState * car_state) {
 
 void RtVarsTree::eventCarStateChanged(void) { // ICarStateListener
 	//printf("eventCarStateChanged\n");
+	Fl::lock();
 	redraw();
+	Fl::unlock();
+	Fl::awake();
 }

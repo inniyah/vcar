@@ -4,7 +4,7 @@ header_name {.h}
 code_name {.cpp}
 Function {makePanelWindow()} {open
 } {
-  Fl_Window {} {open
+  Fl_Window wMainWindow {open selected
     xywh {141 439 750 550} type Double
     code0 {\#include "config.h"}
     code1 {\#include "panel_cb.h"} visible
@@ -103,7 +103,7 @@ Function {makePanelWindow()} {open
           xywh {105 330 35 80} type {Vert Knob}
         }
         Fl_Text_Display wGearText {
-          label Gear selected
+          label Gear
           xywh {100 475 45 40}
         }
       }
