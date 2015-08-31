@@ -28,6 +28,11 @@ void do_send(void * arg) {
 		msg.createPwmMsg(pwm_signal);
 		sender.send(msg);
 
+		sleep(1);
+
+		intercom::DataMessage::AdcSignal adc_signal('Miry', 31337);
+		msg.createAdcMsg(adc_signal);
+		sender.send(msg);
 	}
 }
 

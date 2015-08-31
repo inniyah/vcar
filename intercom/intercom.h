@@ -55,6 +55,7 @@ public:
 		MsgText,
 		MsgCan,
 		MsgPwm,
+		MsgAdc,
 	} MsgType;
 
 	typedef struct MsgHeaderStruct { // All fields in network endianness - use htonl or htons
@@ -105,12 +106,31 @@ public:
 		}
 	};
 
+	typedef struct AdcMsgStruct { // All fields in network endianness - use htonl or htons
+		uint16_t Count;
+		typedef struct SignalStruct { // All fields in network endianness - use htonl or htons
+			uint32_t Id;
+			uint32_t Value;
+		} __attribute__((packed)) Signal;
+		static const int MAX_COUNT = (INTERCOM_MAXMSGSIZE - sizeof(MsgHeader) - sizeof(Count)) / sizeof(Signal);
+		Signal Signals[MAX_COUNT];
+	} __attribute__((packed)) AdcMsg;
+
+	class AdcSignal : public AdcMsg::Signal {
+	public:
+		AdcSignal(uint32_t id, uint32_t value) {
+			Id = htonl(id);
+			Value = htonl(value);
+		}
+	};
+
 	typedef struct FullMsgStruct {
 		MsgHeader Header;
 		union {
 			TextMsg Text;
 			CanMsg  Can;
 			PwmMsg  Pwm;
+			AdcMsg  Adc;
 		} __attribute__((packed)) Data;
 	} __attribute__((packed)) FullMsg;
 
@@ -118,6 +138,8 @@ public:
 	void createCanMsg(CanId id, uint8_t dlc = 0, const uint8_t * payload = NULL, uint8_t bus = 0);
 	void createPwmMsg(const PwmMsg::Signal & signal);
 	void createPwmMsg(uint16_t count, const PwmMsg::Signal signals[]);
+	void createAdcMsg(const AdcMsg::Signal & signal);
+	void createAdcMsg(uint16_t count, const AdcMsg::Signal signals[]);
 
 	MsgType getMsgType() {
 		return m_Message.Header.Type;
@@ -138,6 +160,14 @@ public:
 	PwmMsg * getPwmInfo() {
 		if (MsgPwm == m_Message.Header.Type) {
 			return &m_Message.Data.Pwm;
+		} else {
+			return NULL;
+		}
+	}
+
+	AdcMsg * getAdcInfo() {
+		if (MsgAdc == m_Message.Header.Type) {
+			return &m_Message.Data.Adc;
 		} else {
 			return NULL;
 		}

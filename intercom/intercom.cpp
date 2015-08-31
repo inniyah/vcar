@@ -69,6 +69,28 @@ void DataMessage::createPwmMsg(uint16_t count, const PwmMsg::Signal signals[]) {
 	m_Message.Header.Type = MsgPwm;
 }
 
+void DataMessage::createAdcMsg(const AdcMsg::Signal & signal) {
+	destroyMsg();
+	m_Message.Data.Adc.Count = htons(1);
+	memset(m_Message.Data.Adc.Signals, 0, sizeof(m_Message.Data.Adc.Signals));
+	m_Message.Data.Adc.Signals[0] = signal;
+	m_Message.Header.Type = MsgAdc;
+}
+
+void DataMessage::createAdcMsg(uint16_t count, const AdcMsg::Signal signals[]) {
+	destroyMsg();
+	if (count > 0 && count < AdcMsg::MAX_COUNT) {
+		m_Message.Data.Adc.Count = htons(count);
+		memset(m_Message.Data.Adc.Signals, 0, sizeof(m_Message.Data.Adc.Signals));
+		for (int i = 0; i < count; ++i) {
+			m_Message.Data.Adc.Signals[i] = signals[i];
+		}
+	} else {
+		m_Message.Data.Adc.Count = 0;
+	}
+	m_Message.Header.Type = MsgAdc;
+}
+
 void DataMessage::fprint(FILE *stream) const {
 	switch(m_Message.Header.Type) {
 		case MsgText:
@@ -104,6 +126,21 @@ void DataMessage::fprint(FILE *stream) const {
 			fprintf(stream, " } (%u/%u) Src=%8lX]",
 				ntohs(m_Message.Data.Pwm.Count),
 				m_Message.Data.Pwm.MAX_COUNT,
+				(unsigned long)ntohl(m_Message.Header.SourceSys)
+			);
+			break;
+		case MsgAdc:
+			fprintf(stream, "[ADC: {");
+			for (int i = 0; i < ntohs(m_Message.Data.Adc.Count); ++i) {
+				uint32_t id = FIX_MULTICHAR_STR4(ntohl(m_Message.Data.Adc.Signals[i].Id));
+				fprintf(stream, " %.*s=%u",
+					4, reinterpret_cast<const char *>(&id),
+					ntohl(m_Message.Data.Adc.Signals[i].Value)
+				);
+			}
+			fprintf(stream, " } (%u/%u) Src=%8lX]",
+				ntohs(m_Message.Data.Adc.Count),
+				m_Message.Data.Adc.MAX_COUNT,
 				(unsigned long)ntohl(m_Message.Header.SourceSys)
 			);
 			break;
@@ -227,6 +264,14 @@ bool Sender::send(DataMessage & msg_to_send) {
 				+ sizeof(DataMessage::PwmMsgStruct)
 				- sizeof(DataMessage::PwmMsgStruct::Signal) * (
 						msg_info.Data.Pwm.MAX_COUNT - ntohs(msg_info.Data.Pwm.Count)
+					);
+			break;
+		case DataMessage::MsgAdc:
+			msg_len =
+				sizeof(DataMessage::MsgHeader)
+				+ sizeof(DataMessage::AdcMsgStruct)
+				- sizeof(DataMessage::AdcMsgStruct::Signal) * (
+						msg_info.Data.Adc.MAX_COUNT - ntohs(msg_info.Data.Adc.Count)
 					);
 			break;
 		default:
