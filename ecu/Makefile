@@ -19,7 +19,8 @@ OBJS = \
 	CanDriver.o \
 	System.o \
 	TaskHandlers.o \
-	IsrHandlers.o
+	IsrHandlers.o \
+	rte.o
 
 PKG_CONFIG=
 PKG_CONFIG_CFLAGS=`pkg-config --cflags $(PKG_CONFIG) 2>/dev/null`
