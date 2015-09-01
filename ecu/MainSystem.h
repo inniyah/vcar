@@ -37,6 +37,9 @@ public:
 
 	void printCanBusRxSignals(CanDevId can_id);
 
+	void swcCall(void (ISwc::*method)(Rte &));
+	template <void (ISwc::*TMethod)(Rte &)> void swcCall();
+
 private:
 	static const int NUM_CAN_BUSES = 1;
 	AbstractCanTxMsgHandler  * m_pCanTxMsgs[NUM_CAN_BUSES];

@@ -20,6 +20,7 @@ OBJS = \
 	MainSystem.o \
 	TaskHandlers.o \
 	IsrHandlers.o \
+	Swc.o \
 	rte.o
 
 PKG_CONFIG=

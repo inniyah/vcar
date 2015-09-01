@@ -192,7 +192,7 @@ int main(int argc, const char * argv[]) {
 				signal_list_t * sl;
 				for(sl = can_msg->signal_list; sl != NULL; sl = sl->next) {
 					signal_t * can_sgn = sl->signal;
-					fprintf(stderr, "    SIGNAL %s (msg=0x%lX): len=%d end=%s sign=%s [sc=%.2f,of=%.2f] (%.2f-%.2f) [%s]\n",
+					fprintf(stderr, "    SIGNAL %s (msg=0x%lX): len=%d end=%s sign=%s [sc=%.2f,of=%.2f] (%.2f..%.2f) [%s]\n",
 						can_sgn->name,
 						(unsigned long)can_msg->id,
 						can_sgn->bit_len,
