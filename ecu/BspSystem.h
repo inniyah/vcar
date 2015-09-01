@@ -9,13 +9,17 @@ class BspSystem : public common::Singleton<BspSystem> {
 public:
 	BspSystem();
 	~BspSystem();
+	void init();
+	void shutdown();
 
+	void addCanReceiveDelegate(CanDevId dev_id, common::DelegateListNode<CanMessage *> delegate);
+	void removeCanReceiveDelegate(CanDevId dev_id, common::DelegateListNode<CanMessage *> delegate);
 	void dispatchCanMessage(CanDevId dev_id, CanMessage * can_msg);
 
 private:
 	static BspSystem instance;
 
-	common::DelegateList<void, CanMessage *> m_CanReceivers[NUMBER_OF_CAN_DEVICES];
+	common::DelegateList<CanMessage *> m_CanRcvDelegates[NUMBER_OF_CAN_DEVICES];
 };
 
 #endif // BSP_SYSTEM_H_8AE696F4_4C11_11E5_95F5_10FEED04CD1C

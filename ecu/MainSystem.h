@@ -19,6 +19,8 @@ class MainSystem : public common::Singleton<MainSystem> {
 public:
 	MainSystem();
 	~MainSystem();
+	void init();
+	void shutdown();
 
 	AbstractCanTxMsgHandler * getCanTxMsgHandler(CanDevId can_id);
 	AbstractCanRxMsgHandler * getCanRxMsgHandler(CanDevId can_id);

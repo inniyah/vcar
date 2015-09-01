@@ -29,6 +29,14 @@ MainSystem::~MainSystem() {
 	fprintf(stderr, "~MainSystem::MainSystem()\n");
 }
 
+void MainSystem::init() {
+	fprintf(stderr, "MainSystem::init()\n");
+}
+
+void MainSystem::shutdown() {
+	fprintf(stderr, "MainSystem::shutdown()\n");
+}
+
 AbstractCanTxMsgHandler * MainSystem::getCanTxMsgHandler(CanDevId can_id) {
 	if ((can_id >= 0) && (can_id < NUM_CAN_BUSES)) {
 		return m_pCanTxMsgs[can_id];

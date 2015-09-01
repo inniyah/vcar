@@ -38,7 +38,7 @@ public:
 		return (NULL != m_List);
 	}
 
-private:
+protected:
 	void addToList(LinkedList<T> & list) {
 		assert(NULL == m_List);
 		m_List = &list;
@@ -94,7 +94,7 @@ private:
 
 template<typename T>
 inline bool operator==(const LinkedListIterator<T> & x, const LinkedListIterator<T> & y) {
-	return (x.fpValue == y.fpValue);
+	return (x.m_Current == y.m_Current);
 }
 
 template<typename T>
@@ -200,7 +200,7 @@ public:
 	}
 
 	LinkedListIterator<const T> begin() const {
-		return const_iterator(m_First);
+		return ConstIterator(m_First);
 	}
 
 	LinkedListIterator<T> end() {
