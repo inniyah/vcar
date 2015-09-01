@@ -10,12 +10,11 @@
 #include <time.h>
 #include <unistd.h>
 
-static System sys;
-static Rte rte;
-
-static CanBus_can01::TxMsgs can01_tx;
-static CanBus_can01::RxMsgs can01_rx;
-static CanDriver            can01_drv(0, &can01_tx, &can01_rx);
+System System::sys;
+Rte System::rte;
+CanBus_can01::TxMsgs System::can01_tx;
+CanBus_can01::RxMsgs System::can01_rx;
+CanDriver System::can01_drv(0, &System::can01_tx, &System::can01_rx);
 
 System::System() : common::Singleton<System>(this) {
 	fprintf(stderr, "System::System()\n");
