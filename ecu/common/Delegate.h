@@ -1,6 +1,8 @@
 #ifndef DELEGATE_H_8AE69622_4C11_11E5_95F0_10FEED04CD1C
 #define DELEGATE_H_8AE69622_4C11_11E5_95F0_10FEED04CD1C
 
+#include <cstdlib>
+
 // See: http://blog.coldflake.com/posts/C++-delegates-on-steroids/
 
 namespace common {
@@ -10,7 +12,7 @@ namespace common {
 // Usage:
 //     A a;
 //     typedef Delegate<int, int> IntDelegate;
-//     IntDelegate d = IntDelegate::from_function<A, &A::foo>(&a);
+//     IntDelegate d = IntDelegate::fromObjectMethod<A, &A::foo>(&a);
 
 template<typename return_type, typename param_type>
 class Delegate {
@@ -19,10 +21,15 @@ class Delegate {
 
 public:
 
+	Delegate() : fpCallee(NULL), fpCallbackFunction(Delegate::EmptyFunction) { }
 	Delegate(void * callee, Type function) : fpCallee(callee), fpCallbackFunction(function) { }
 
+	bool operator==(const Delegate & other) {
+		return ((fpCallee != other.fpCallee) && (fpCallbackFunction != other.fpCallbackFunction));
+	}
+
 	template <class T, return_type (T::*TMethod)(param_type)>
-	static Delegate from_function(T * callee) {
+	static Delegate fromObjectMethod(T * callee) {
 		Delegate d(callee, &methodCaller<T, TMethod>);
 		return d;
 	}
@@ -40,6 +47,8 @@ private:
 	static return_type methodCaller(void* callee, param_type x) {
 		T * p = static_cast<T*>(callee);
 		return (p->*TMethod)(x);
+	}
+	static return_type EmptyFunction(void * callee, param_type param) {
 	}
 };
 

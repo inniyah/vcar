@@ -43,14 +43,32 @@ void BspSystem::shutdown() {
 	fprintf(stderr, "BspSystem::shutdown()\n");
 }
 
-void BspSystem::addCanReceiveDelegate(CanDevId dev_id, common::DelegateListNode<CanMessage *> delegate) {
-	m_CanRcvDelegates[dev_id].insert(delegate);
+bool BspSystem::addCanReceiveDelegate(CanDevId dev_id, CanMessageDelegate delegate) {
+	if (m_NumCanRcvDelegates[dev_id] < MAX_CAN_DELEGATES) {
+		m_CanRcvDelegates[m_NumCanRcvDelegates[dev_id]][dev_id] = delegate;
+		++m_NumCanRcvDelegates[dev_id];
+		return true;
+	} else {
+		return false;
+	}
 }
 
-void BspSystem::removeCanReceiveDelegate(CanDevId dev_id, common::DelegateListNode<CanMessage *> delegate) {
-	m_CanRcvDelegates[dev_id].remove(delegate);
+bool BspSystem::removeCanReceiveDelegate(CanDevId dev_id, CanMessageDelegate delegate) {
+	for (int i = 0; i < m_NumCanRcvDelegates[dev_id]; ++i) {
+		if (m_CanRcvDelegates[i][dev_id] == delegate) {
+			for (int j = i + 1; j < m_NumCanRcvDelegates[dev_id]; ++j) {
+				m_CanRcvDelegates[j-1][dev_id] = m_CanRcvDelegates[j][dev_id];
+			}
+			--m_NumCanRcvDelegates[dev_id];
+			return true;
+		}
+	}
+	return false;
 }
 
 void BspSystem::dispatchCanMessage(CanDevId dev_id, CanMessage * can_msg) {
-	m_CanRcvDelegates[dev_id](can_msg);
+	for (int i = 0; i < m_NumCanRcvDelegates[dev_id]; ++i) {
+		m_CanRcvDelegates[i][dev_id].operator()(can_msg);
+	}
+
 }

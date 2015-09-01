@@ -1,4 +1,5 @@
 #include "os.h"
+#include "BspSystem.h"
 #include "MainSystem.h"
 #include "rte.h"
 
@@ -31,6 +32,7 @@ MainSystem::~MainSystem() {
 
 void MainSystem::init() {
 	fprintf(stderr, "MainSystem::init()\n");
+	Singleton<BspSystem>::getInstance().addCanReceiveDelegate(0, BspSystem::CanMessageDelegate::fromObjectMethod<MainSystem,&MainSystem::processCanMessage_can01>(this));
 }
 
 void MainSystem::shutdown() {
@@ -74,11 +76,12 @@ void MainSystem::updateSwc() {
 
 void MainSystem::processCanMessage_can01(CanMessage * can_msg) {
 	if (can_msg) {
-		printf("  0x%04X %d\n", can_msg->Id, can_msg->Dlc);
 		uint8_t * buff = can01_rx.getCanMessageBufferWithDlt(can_msg->Id, can_msg->Dlc);
 		if (buff) {
 			printf("  0x%04X %d -> %p\n", can_msg->Id, can_msg->Dlc, buff);
 			memcpy(buff, can_msg->Payload, can_msg->Dlc);
+		} else {
+			printf("  0x%04X %d -> Unknown\n", can_msg->Id, can_msg->Dlc);
 		}
 	}
 }
