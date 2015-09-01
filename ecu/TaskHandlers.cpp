@@ -1,5 +1,6 @@
 #include "os.h"
-#include "System.h"
+#include "BspSystem.h"
+#include "MainSystem.h"
 #include "AbstractCanMsgHandler.h"
 
 #include <stdio.h>
@@ -15,7 +16,7 @@ event ev_10ms;
 event ev_hb;
 void heartbeat(int fd, short event, void *arg) {
 	printf("Heart Beat!\n");
-	Singleton<System>::getInstance().printCanBusRxSignals(0);
+	Singleton<MainSystem>::getInstance().printCanBusRxSignals(0);
 }
 
 TASK(init) {

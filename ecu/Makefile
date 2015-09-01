@@ -16,8 +16,8 @@ SYS_OBJS= \
 
 OBJS = \
 	$(SYS_OBJS) \
-	CanDriver.o \
-	System.o \
+	BspSystem.o \
+	MainSystem.o \
 	TaskHandlers.o \
 	IsrHandlers.o \
 	rte.o

@@ -1,9 +1,0 @@
-#ifndef ICAN_DRIVER_H_8AE69776_4C11_11E5_95F8_10FEED04CD1C
-#define ICAN_DRIVER_H_8AE69776_4C11_11E5_95F8_10FEED04CD1C
-
-class ICanDriver {
-public:
-	virtual void processMessage(CanMessage * can_msg) = 0;
-};
-
-#endif // ICAN_DRIVER_H_8AE69776_4C11_11E5_95F8_10FEED04CD1C

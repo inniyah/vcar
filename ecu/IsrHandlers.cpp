@@ -1,8 +1,9 @@
 #include "os.h"
-#include "System.h"
-#include "ICanDriver.h"
+#include "BspSystem.h"
 
 #include "common/Delegate.h"
+#include "common/LinkedList.h"
+#include "common/DelegateList.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,10 +17,7 @@ ISR(CAN_MSG_RECV) {
 	printf("CAN_MSG_RECV (%u)\n", CanSystem_getIsrCurrentDevId());
 	CanMessage * can_msg = CanDriver_getRxMessage(CanSystem_getIsrCurrentDevId());
 	if (can_msg) {
-		ICanDriver * drv = Singleton<System>::getInstance().getCanDriver(CanSystem_getIsrCurrentDevId());
-		if (drv) {
-			drv->processMessage(can_msg);
-		}
+		Singleton<BspSystem>::getInstance().dispatchCanMessage(CanSystem_getIsrCurrentDevId(), can_msg);
 		CanDriver_delRxMessage(CanSystem_getIsrCurrentDevId());
 	}
 }
