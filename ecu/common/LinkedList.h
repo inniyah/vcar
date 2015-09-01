@@ -119,7 +119,7 @@ public:
 
 	unsigned int size() const {
 		unsigned int size = (NULL != m_First) ? 1 : 0;
-		for (const T * pNode = m_First; pNode != m_Last; pNode = pNode->getNext()) {
+		for (const T * node = m_First; node != m_Last; node = node->getNext()) {
 			++size;
 		}
 		return size;
@@ -196,7 +196,7 @@ public:
 	void pop_back();
 
 	LinkedListIterator<T> begin() {
-		return iterator(m_First);
+		return Iterator(m_First);
 	}
 
 	LinkedListIterator<const T> begin() const {
@@ -204,7 +204,7 @@ public:
 	}
 
 	LinkedListIterator<T> end() {
-		return LinkedListIterator<T>(NULL);
+		return Iterator(NULL);
 	}
 
 	LinkedListIterator<const T> end() const {
@@ -221,12 +221,12 @@ public:
 			pop_front();
 		} else {
 			pos->removeFromList(*this);
-			T * pNode = findPredecessor(pos.operator->());
-			assert(pNode);
-			if (pNode->getNext() == m_Last) {
-				m_Last = pNode;
+			T * node = findPredecessor(pos.operator->());
+			assert(node);
+			if (node->getNext() == m_Last) {
+				m_Last = node;
 			}
-			pNode->setNext(pos->getNext());
+			node->setNext(pos->getNext());
 		}
 		return next;
 	}

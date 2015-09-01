@@ -69,8 +69,13 @@ void MainSystem::printCanBusRxSignals(CanDevId can_id) {
 	}
 }
 
-void MainSystem::updateSwc() {
+void MainSystem::runSwcCyclic() {
 	rte.readInputs(can01_rx);
+
+	for (common::LinkedList<ISwc>::Iterator itr = m_SwcList.begin(); itr != m_SwcList.end(); ++itr) {
+		itr->cyclic(rte);
+	}
+
 	rte.writeOutputs(can01_tx);
 }
 

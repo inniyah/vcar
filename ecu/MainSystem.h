@@ -33,7 +33,7 @@ public:
 		m_SwcList.remove(swc);
 	}
 
-	void updateSwc();
+	void runSwcCyclic();
 
 	void printCanBusRxSignals(CanDevId can_id);
 
