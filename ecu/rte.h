@@ -1,5 +1,5 @@
-#ifndef RTE_H_
-#define RTE_H_
+#ifndef RTE_H_8AE69820_4C11_11E5_95FC_10FEED04CD1C
+#define RTE_H_8AE69820_4C11_11E5_95FC_10FEED04CD1C
 
 #include <stdint.h>
 
@@ -27,4 +27,4 @@ struct Rte {
 	void writeOutputs(CanBus_can01::TxMsgs & can01_tx);
 };
 
-#endif
+#endif // RTE_H_8AE69820_4C11_11E5_95FC_10FEED04CD1C

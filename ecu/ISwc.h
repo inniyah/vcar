@@ -1,5 +1,5 @@
-#ifndef ISWC_H_
-#define ISWC_H_
+#ifndef ISWC_H_8AE69848_4C11_11E5_95FD_10FEED04CD1C
+#define ISWC_H_8AE69848_4C11_11E5_95FD_10FEED04CD1C
 
 #include "common/LinkedList.h"
 
@@ -12,4 +12,4 @@ public:
 	virtual void shutdown() = 0;
 };
 
-#endif // ISWC_H_
+#endif // ISWC_H_8AE69848_4C11_11E5_95FD_10FEED04CD1C
