@@ -1,5 +1,9 @@
-#ifndef CARSTATE_H_
-#define CARSTATE_H_
+#ifndef CAR_STATE_H_
+#define CAR_STATE_H_
+
+#include "CarEngine.h"
+#include "tinythread.h"
+#include "intercom.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,9 +12,6 @@
 
 #include <map>
 #include <list>
-
-#include "tinythread.h"
-#include "intercom.h"
 
 class CanMsgParser;
 
@@ -44,23 +45,28 @@ public:
 	void printAnalogData();
 
 	std::list<ICarStateListener*> listeners;
-	AnalogMap analog_data;
-	PwmMap    pwm_data;
+
+	AnalogMap   analog_data;
+	CarEngine   engine;
+	PwmMap      pwm_data;
 
 private:
 	bool stop;
 
 	void receiveLoop();
 	void sendLoop();
+	void updateLoop();
 
 	intercom::Receiver receiver;
 
 	static void receiveThreadFunc(void * arg);
 	static void sendThreadFunc(void * arg);
+	static void updateThreadFunc(void * arg);
 
 	tthread::thread rcv_thread;
 	tthread::thread snd_thread;
+	tthread::thread upd_thread;
 	CanMsgParser * car_msg_parser;
 };
 
-#endif // CARSTATE_H_
+#endif // CAR_STATE_H_

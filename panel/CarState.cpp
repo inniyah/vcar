@@ -130,6 +130,7 @@ CarState::CarState() :
 	receiver(intercom::Sys_Panel),
 	rcv_thread(receiveThreadFunc, this),
 	snd_thread(sendThreadFunc, this),
+	upd_thread(updateThreadFunc, this),
 	car_msg_parser(NULL)
 {
 	car_msg_parser = new CanMsgParser("dbc/can01.dbc");
@@ -150,6 +151,7 @@ CarState::~CarState() {
 	receiver.shutdown();
 	snd_thread.join();
 	rcv_thread.join();
+	upd_thread.join();
 
 	if (car_msg_parser) {
 		delete car_msg_parser;
@@ -230,6 +232,15 @@ void CarState::sendLoop() {
 	}
 }
 
+void globalUpdate(CarState & car_state);
+
+void CarState::updateLoop() {
+	while (!stop) {
+		globalUpdate(*this);
+		usleep(1000lu * 100);
+	}
+}
+
 void CarState::receiveThreadFunc(void * arg) {
 	CarState * car_state = reinterpret_cast<CarState *>(arg);
 	if (NULL != car_state) {
@@ -241,6 +252,13 @@ void CarState::sendThreadFunc(void * arg) {
 	CarState * car_state = reinterpret_cast<CarState *>(arg);
 	if (NULL != car_state) {
 		car_state->sendLoop();
+	}
+}
+
+void CarState::updateThreadFunc(void * arg) {
+	CarState * car_state = reinterpret_cast<CarState *>(arg);
+	if (NULL != car_state) {
+		car_state->updateLoop();
 	}
 }
 

@@ -35,8 +35,6 @@ void ChangeAccel(Fl_Widget *w, void *data) {
 	double value = (slider->maximum() - slider->value()) / slider->maximum();
 	car_state->analog_data["driving_controls"]["acceleration"].RawValue = 250 * value;
 	fprintf(stderr, "Accel %lf\n", value);
-
-	wRpmDial->setDialValue(value);
 };
 
 void ChangeBrake(Fl_Widget *w, void *data) {
@@ -61,6 +59,7 @@ void ChangeGear(Fl_Widget *w, void *data) {
 	Fl_Slider * slider = reinterpret_cast<Fl_Slider *>(w);
 	double value = (slider->maximum() - slider->value());
 	car_state->analog_data["driving_controls"]["gear"].RawValue = value;
+	car_state->engine.setGear(value);
 	if (value != 0) {
 		wGearBackSlider->deactivate();
 	} else {
@@ -74,10 +73,12 @@ void ChangeBackGear(Fl_Widget *w, void *data) {
 	Fl_Slider * slider = reinterpret_cast<Fl_Slider *>(w);
 	if (slider->maximum() != slider->value()) {
 		car_state->analog_data["driving_controls"]["gear"].RawValue = 0;
+		car_state->engine.setGear(0);
 		//wCarBox->BackwardsLights(0.0);
 		wGearSlider->activate();
 	} else {
 		car_state->analog_data["driving_controls"]["gear"].RawValue = 7;
+		car_state->engine.setGear(7);
 		//wCarBox->BackwardsLights(1.0);
 		wGearSlider->deactivate();
 	}
@@ -156,6 +157,24 @@ struct GlobalCarStateListener : public ICarStateListener {
 private:
 	CarState & m_CarState;
 };
+
+void globalUpdate(CarState & car_state) {
+	Fl::lock();
+
+	double accel_value = (wAccelSlider->maximum() - wAccelSlider->value()) / wAccelSlider->maximum();
+	double brake_value = (wBrakeSlider->maximum() - wBrakeSlider->value()) / wBrakeSlider->maximum();
+	car_state.engine.update(1.0, accel_value, brake_value);
+
+
+	wRpmDial->setDialValue(car_state.engine.getRpm() / 8000.0);
+	wRpmDial->redraw();
+
+	wRG1Dial->setDialValue(car_state.engine.getV() / 250.0);
+	wRG1Dial->redraw();
+
+	Fl::unlock();
+	Fl::awake();
+}
 
 int main(int argc, char * argv[]) {
 	Fl_Double_Window * panel_window = makePanelWindow();
