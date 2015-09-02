@@ -7,6 +7,7 @@
 #include <unistd.h>
 
 SwcBackLight::SwcBackLight() {
+	fprintf(stderr, "SwcBackLight::SwcBackLight\n");
 }
 
 void SwcBackLight::init(Rte & rte) {
@@ -33,4 +34,5 @@ void SwcBackLight::cyclic(Rte & rte) {
 }
 
 void SwcBackLight::shutdown(Rte & rte) {
+	fprintf(stderr, "SwcBackLight::shutdown\n");
 }

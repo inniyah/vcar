@@ -24,6 +24,7 @@ void heartbeat(int fd, short event, void *arg) {
 }
 
 static SwcBackLight swc_backlight;
+static SwcIntLight  swc_intlight;
 
 TASK(init) {
 	fprintf(stderr, "<init>\n");
@@ -32,6 +33,7 @@ TASK(init) {
 	Singleton<LightSystem>::getInstance().init();
 	Singleton<MainSystem>::getInstance().init();
 	Singleton<MainSystem>::getInstance().insertSwc(swc_backlight);
+	Singleton<MainSystem>::getInstance().insertSwc(swc_intlight);
 	Singleton<MainSystem>::getInstance().swcCall(&ISwc::init);
 
 	addEventEveryMs(ev_100ms, 100, task_100ms, NULL);

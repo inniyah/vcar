@@ -21,7 +21,8 @@ OBJS = \
 	MainSystem.o \
 	TaskHandlers.o \
 	IsrHandlers.o \
-	Swc.o \
+	SwcBackLight.o \
+	SwcIntLight.o \
 	rte.o
 
 PKG_CONFIG=

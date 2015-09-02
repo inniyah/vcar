@@ -89,6 +89,22 @@ public:
 			uint32_t Id;
 			uint16_t Period;
 			uint16_t PulseWidth;
+			inline bool setPeriod(uint16_t period) {
+				uint16_t n_period = htons(period);
+				if (Period != n_period) {
+					Period = n_period;
+					return true;
+				}
+				return false;
+			}
+			inline bool setPulseWidth(uint16_t pulse_width) {
+				uint16_t n_pulse_width = htons(pulse_width);
+				if (PulseWidth != n_pulse_width) {
+					PulseWidth = n_pulse_width;
+					return true;
+				}
+				return false;
+			}
 			inline double getIntensity() {
 				return static_cast<double>(PulseWidth) / static_cast<double>(Period);
 			}
