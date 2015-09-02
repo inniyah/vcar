@@ -96,23 +96,51 @@ void CarSvgBox::graphic(cairo_t * cr, double x, double y, double w, double h) {
 			rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_interior_lights_25");
 		}
 
-
 		rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_car_windshield");
 
 		if (flags & FlagRoofClosed) {
 			rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_top");
 		}
+
 		if (brake_lights > (0.75 + 0.125)) {
 			rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_brake_lights");
+		} else 	if (brake_lights > (0.50 + 0.125)) {
+			rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_brake_lights_75");
+		} else 	if (brake_lights > (0.25 + 0.125)) {
+			rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_brake_lights_50");
+		} else 	if (brake_lights > (0.00 + 0.125)) {
+			rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_brake_lights_25");
 		}
+
 		if (backwards_lights > (0.75 + 0.125)) {
 			rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_backwards_lights");
+		} else 	if (backwards_lights > (0.50 + 0.125)) {
+			rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_backwards_lights_75");
+		} else 	if (backwards_lights > (0.25 + 0.125)) {
+			rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_backwards_lights_50");
+		} else 	if (backwards_lights > (0.00 + 0.125)) {
+			rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_backwards_lights_25");
 		}
+
 		if (left_hazard > (0.75 + 0.125)) {
 			rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_hazard_left");
+		} else 	if (left_hazard > (0.50 + 0.125)) {
+			rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_hazard_left_75");
+		} else 	if (left_hazard > (0.25 + 0.125)) {
+			rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_hazard_left_50");
+		} else 	if (left_hazard > (0.00 + 0.125)) {
+			rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_hazard_left_25");
 		}
+
 		if (right_hazard > (0.75 + 0.125)) {
 			rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_hazard_right");
+		} else 	if (right_hazard > (0.50 + 0.125)) {
+			rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_hazard_right_75");
+		} else 	if (right_hazard > (0.25 + 0.125)) {
+			rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_hazard_right_50");
+		} else 	if (right_hazard > (0.00 + 0.125)) {
+			rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_hazard_right_25");
 		}
+
 	}
 }
