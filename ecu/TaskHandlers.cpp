@@ -1,5 +1,5 @@
 #include "os.h"
-#include "BspSystem.h"
+#include "CanSystem.h"
 #include "MainSystem.h"
 #include "MainSystem.hpp"
 #include "AbstractCanMsgHandler.h"
@@ -27,7 +27,7 @@ static SwcBackLight swc_backlight;
 TASK(init) {
 	fprintf(stderr, "<init>\n");
 
-	Singleton<BspSystem>::getInstance().init();
+	Singleton<CanSystem>::getInstance().init();
 	Singleton<MainSystem>::getInstance().init();
 	Singleton<MainSystem>::getInstance().insertSwc(swc_backlight);
 	Singleton<MainSystem>::getInstance().swcCall(&ISwc::init);

@@ -16,7 +16,7 @@ SYS_OBJS= \
 
 OBJS = \
 	$(SYS_OBJS) \
-	BspSystem.o \
+	CanSystem.o \
 	MainSystem.o \
 	TaskHandlers.o \
 	IsrHandlers.o \

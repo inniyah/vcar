@@ -1,4 +1,4 @@
-#include "BspSystem.h"
+#include "CanSystem.h"
 #include "os.h"
 
 #include <stdio.h>
@@ -6,18 +6,18 @@
 #include <time.h>
 #include <unistd.h>
 
-BspSystem BspSystem::instance;
+CanSystem CanSystem::instance;
 
-BspSystem::BspSystem() : common::Singleton<BspSystem>(this) {
-	fprintf(stderr, "BspSystem::BspSystem()\n");
+CanSystem::CanSystem() : common::Singleton<CanSystem>(this) {
+	fprintf(stderr, "CanSystem::CanSystem()\n");
 }
 
-BspSystem::~BspSystem() {
-	fprintf(stderr, "~BspSystem::BspSystem()\n");
+CanSystem::~CanSystem() {
+	fprintf(stderr, "~CanSystem::CanSystem()\n");
 }
 
-void BspSystem::init() {
-	fprintf(stderr, "BspSystem::init()\n");
+void CanSystem::init() {
+	fprintf(stderr, "CanSystem::init()\n");
 
 	if (CanTransceiverError_Ok != CanTransceiver_init(0)) {
 		fprintf(stderr, "Can't init CAN Transceiver #0\n");
@@ -39,11 +39,11 @@ void BspSystem::init() {
 	}
 }
 
-void BspSystem::shutdown() {
-	fprintf(stderr, "BspSystem::shutdown()\n");
+void CanSystem::shutdown() {
+	fprintf(stderr, "CanSystem::shutdown()\n");
 }
 
-bool BspSystem::addCanReceiveDelegate(CanDevId dev_id, CanMessageDelegate delegate) {
+bool CanSystem::addCanReceiveDelegate(CanDevId dev_id, CanMessageDelegate delegate) {
 	if (m_NumCanRcvDelegates[dev_id] < MAX_CAN_DELEGATES) {
 		m_CanRcvDelegates[m_NumCanRcvDelegates[dev_id]][dev_id] = delegate;
 		++m_NumCanRcvDelegates[dev_id];
@@ -53,7 +53,7 @@ bool BspSystem::addCanReceiveDelegate(CanDevId dev_id, CanMessageDelegate delega
 	}
 }
 
-bool BspSystem::removeCanReceiveDelegate(CanDevId dev_id, CanMessageDelegate delegate) {
+bool CanSystem::removeCanReceiveDelegate(CanDevId dev_id, CanMessageDelegate delegate) {
 	for (int i = 0; i < m_NumCanRcvDelegates[dev_id]; ++i) {
 		if (m_CanRcvDelegates[i][dev_id] == delegate) {
 			for (int j = i + 1; j < m_NumCanRcvDelegates[dev_id]; ++j) {
@@ -66,7 +66,7 @@ bool BspSystem::removeCanReceiveDelegate(CanDevId dev_id, CanMessageDelegate del
 	return false;
 }
 
-void BspSystem::dispatchCanMessage(CanDevId dev_id, CanMessage * can_msg) {
+void CanSystem::dispatchCanMessage(CanDevId dev_id, CanMessage * can_msg) {
 	for (int i = 0; i < m_NumCanRcvDelegates[dev_id]; ++i) {
 		m_CanRcvDelegates[i][dev_id].operator()(can_msg);
 	}

@@ -1,5 +1,5 @@
 #include "os.h"
-#include "BspSystem.h"
+#include "CanSystem.h"
 #include "MainSystem.h"
 #include "rte.h"
 
@@ -32,7 +32,7 @@ MainSystem::~MainSystem() {
 
 void MainSystem::init() {
 	fprintf(stderr, "MainSystem::init()\n");
-	Singleton<BspSystem>::getInstance().addCanReceiveDelegate(0, BspSystem::CanMessageDelegate::fromObjectMethod<MainSystem,&MainSystem::processCanMessage_can01>(this));
+	Singleton<CanSystem>::getInstance().addCanReceiveDelegate(0, CanSystem::CanMessageDelegate::fromObjectMethod<MainSystem,&MainSystem::processCanMessage_can01>(this));
 }
 
 void MainSystem::shutdown() {

@@ -1,14 +1,14 @@
-#ifndef BSP_SYSTEM_H_8AE696F4_4C11_11E5_95F5_10FEED04CD1C
-#define BSP_SYSTEM_H_8AE696F4_4C11_11E5_95F5_10FEED04CD1C
+#ifndef CAN_SYSTEM_H_8AE696F4_4C11_11E5_95F5_10FEED04CD1C
+#define CAN_SYSTEM_H_8AE696F4_4C11_11E5_95F5_10FEED04CD1C
 
 #include "os.h"
 #include "common/Singleton.h"
 #include "common/Delegate.h"
 
-class BspSystem : public common::Singleton<BspSystem> {
+class CanSystem : public common::Singleton<CanSystem> {
 public:
-	BspSystem();
-	~BspSystem();
+	CanSystem();
+	~CanSystem();
 	void init();
 	void shutdown();
 
@@ -18,11 +18,11 @@ public:
 	void dispatchCanMessage(CanDevId dev_id, CanMessage * can_msg);
 
 private:
-	static BspSystem instance;
+	static CanSystem instance;
 
 	static const int MAX_CAN_DELEGATES = 4;
 	int m_NumCanRcvDelegates[NUMBER_OF_CAN_DEVICES];
 	CanMessageDelegate m_CanRcvDelegates[MAX_CAN_DELEGATES][NUMBER_OF_CAN_DEVICES];
 };
 
-#endif // BSP_SYSTEM_H_8AE696F4_4C11_11E5_95F5_10FEED04CD1C
+#endif // CAN_SYSTEM_H_8AE696F4_4C11_11E5_95F5_10FEED04CD1C
