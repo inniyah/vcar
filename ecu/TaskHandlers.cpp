@@ -46,10 +46,10 @@ TASK(100ms) {
 	//fprintf(stderr, "<100ms>\n");
 	//time_t now = time(NULL);
 	//fprintf(stderr, "Time: %s\n", ctime(&now));
-	//Singleton<MainSystem>::getInstance().swcCall(&ISwc::cyclic);
-	Singleton<MainSystem>::getInstance().swcCall<&ISwc::cyclic>();
 }
 
 TASK(10ms) {
 	//fprintf(stderr, "<10ms>\n");
+	//Singleton<MainSystem>::getInstance().swcCall(&ISwc::cyclic);
+	Singleton<MainSystem>::getInstance().swcCall<&ISwc::cyclic>();
 }

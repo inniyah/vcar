@@ -132,9 +132,6 @@ void CarCmdTreeCallback(Fl_Widget *w, void *data) {
 }
 
 void initCarState(CarState & car_state) {
-	car_state.analog_data["driving_controls"]["acceleration"].RawValue = 1;
-	car_state.analog_data["driving_controls"]["brake"].RawValue = 1;
-	car_state.analog_data["driving_controls"]["wheel"].RawValue = 1;
 }
 
 struct GlobalCarStateListener : public ICarStateListener {

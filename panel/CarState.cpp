@@ -619,7 +619,7 @@ void CanMsgParser::encodeCanMessage(const message_t * dbc_msg, intercom::DataMes
 
 		/* perform sign extension */
 		if (sgn->signedness && (bit_len < 32)) {
-			sint32 m = 1<< (bit_len-1);
+			sint32 m = 1 << (bit_len-1);
 			rawValue = ((sint32)rawValue + m) ^ m;
 		}
 

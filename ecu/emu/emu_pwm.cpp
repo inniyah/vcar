@@ -32,8 +32,8 @@ void PwmDevice::resetAllDevices() {
 	for (int pwm_id = 0; pwm_id < PwmDevice::NUM_PWM_DEVICES; ++pwm_id) {
 		PwmDevice::s_PwmDevices[pwm_id].m_State = PwmDevice::Pwm_Undefined;
 		PwmDevice::s_PwmSignals[pwm_id].Id = ntohl(PwmDevice::s_PwmIds[pwm_id]);
-		PwmDevice::s_PwmSignals[pwm_id].Period = 0;
-		PwmDevice::s_PwmSignals[pwm_id].PulseWidth = 0;
+		PwmDevice::s_PwmSignals[pwm_id].setPeriod(0);
+		PwmDevice::s_PwmSignals[pwm_id].setPulseWidth(0);
 	}
 }
 
@@ -63,8 +63,8 @@ extern "C" PwmOutputError PwmOut_init(PwmDevId pwm_id) {
 	}
 	PwmDevice::s_PwmDevices[pwm_id].m_State = PwmDevice::Pwm_Standby;
 	PwmDevice::s_PwmSignals[pwm_id].Id = ntohl(PwmDevice::s_PwmIds[pwm_id]);
-	PwmDevice::s_PwmSignals[pwm_id].Period = 0;
-	PwmDevice::s_PwmSignals[pwm_id].PulseWidth = 0;
+	PwmDevice::s_PwmSignals[pwm_id].setPeriod(0);
+	PwmDevice::s_PwmSignals[pwm_id].setPulseWidth(0);
 	return PwmOutputError_Ok;
 }
 
@@ -97,8 +97,13 @@ extern "C" PwmOutputError PwmOut_setPeriod(PwmDevId pwm_id, uint16_t period) {
 	if (PwmDevice::s_PwmDevices[pwm_id].m_State == PwmDevice::Pwm_Undefined) {
 		return PwmOutputError_IllegalState;
 	}
-	PwmDevice::s_PwmSignals[pwm_id].Period = htons(period);
-	PwmDevice::s_PwmSignals[pwm_id].PulseWidth = 0;
+	PwmDevice::s_PwmSignals[pwm_id].setPeriod(period);
+	if (PwmDevice::s_PwmSignals[pwm_id].setPulseWidth(0)) {
+		intercom::Sender sender(intercom::Sys_Ecu);
+		intercom::DataMessage msg;
+		msg.createPwmMsg(PwmDevice::s_PwmSignals[pwm_id]);
+		sender.send(msg);
+	}
 	return PwmOutputError_Ok;
 }
 
@@ -112,6 +117,11 @@ extern "C" PwmOutputError PwmOut_setDuty(PwmDevId pwm_id, uint16_t duty) {
 	if (duty > PwmDevice::s_PwmSignals[pwm_id].Period) {
 		duty = PwmDevice::s_PwmSignals[pwm_id].Period;
 	}
-	PwmDevice::s_PwmSignals[pwm_id].PulseWidth = htons(duty);
+	if (PwmDevice::s_PwmSignals[pwm_id].setPulseWidth(duty)) {
+		intercom::Sender sender(intercom::Sys_Ecu);
+		intercom::DataMessage msg;
+		msg.createPwmMsg(PwmDevice::s_PwmSignals[pwm_id]);
+		sender.send(msg);
+	}
 	return PwmOutputError_Ok;
 }

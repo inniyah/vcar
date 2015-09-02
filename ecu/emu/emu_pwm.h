@@ -11,9 +11,6 @@ struct PwmDevice {
 	PwmDevice();
 	virtual ~PwmDevice();
 
-	bool insertTxMessage(CanMsgId msg_id, uint8_t dlc, uint8_t * payload);
-	bool insertRxMessage(CanMsgId msg_id, uint8_t dlc, uint8_t * payload);
-
 	static const int NUM_PWM_DEVICES = NUMBER_OF_PWM_DEVICES;
 
 	static PwmDevice s_PwmDevices[PwmDevice::NUM_PWM_DEVICES];
