@@ -1,0 +1,28 @@
+VERSION ""
+
+
+NS_ :
+
+BS_:
+
+BU_:  
+
+
+BO_ 256 driving_controls: 6 Vector__XXX
+ SG_ gear : 34|4@1+ (1.0,0) [0|1] "" Vector__XXX
+ SG_ acceleration : 24|8@1+ (0.004,0) [0|1] "" Vector__XXX
+ SG_ brake : 16|8@1+ (0.004,0) [0|1] "" Vector__XXX
+ SG_ wheel : 0|16@1+ (0.02,0) [-600|600] "degrees" Vector__XXX
+
+BO_ 272 engine: 4 Vector__XXX
+ SG_ temperature : 16|8@1+ (0.5,-25) [-25|100] "ºC" Vector__XXX
+ SG_ rpm : 0|16@1+ (0.2,0) [0|13107] "rpm" Vector__XXX
+
+
+
+
+
+
+
+
+

@@ -147,7 +147,7 @@ struct GlobalCarStateListener : public ICarStateListener {
 	virtual void eventCarStateChanged(void) {
 		printf("eventCarStateChanged\n");
 		Fl::lock();
-		wCarBox->BrakeLights(m_CarState.pwm_data["BraL"].getIntensity());
+		wCarBox->BrakeLights(m_CarState.pwm_data["BrkL"].getIntensity());
 		wCarBox->BackwardsLights(m_CarState.pwm_data["BckL"].getIntensity());
 		wCarBox->LeftHazardLights(m_CarState.pwm_data["LHaz"].getIntensity());
 		wCarBox->RightHazardLights(m_CarState.pwm_data["RHaz"].getIntensity());

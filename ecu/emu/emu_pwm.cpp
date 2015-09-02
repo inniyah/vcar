@@ -16,7 +16,7 @@ intercom::DataMessage::PwmMsg::Signal PwmDevice::s_PwmSignals[PwmDevice::NUM_PWM
 
 const uint32_t PwmDevice::s_PwmIds[PwmDevice::NUM_PWM_DEVICES] = {
 	[PWM_INTERIOR_LIGHT]     = 'IntL',
-	[PWM_BRAKE_LIGHT]        = 'BraL',
+	[PWM_BRAKE_LIGHT]        = 'BrkL',
 	[PWM_BACKWARDS_LIGHT]    = 'BckL',
 	[PWM_LEFT_HAZARD_LIGHT]  = 'LHaz',
 	[PWM_RIGHT_HAZARD_LIGHT] = 'RHaz',
@@ -94,6 +94,9 @@ extern "C" PwmOutputError PwmOut_setPeriod(PwmDevId pwm_id, uint16_t period) {
 	if ((pwm_id < 0) || (pwm_id >= PwmDevice::NUM_PWM_DEVICES)) {
 		return PwmOutputError_WrongDevice;
 	}
+	if (PwmDevice::s_PwmDevices[pwm_id].m_State == PwmDevice::Pwm_Undefined) {
+		return PwmOutputError_IllegalState;
+	}
 	PwmDevice::s_PwmSignals[pwm_id].Period = htons(period);
 	PwmDevice::s_PwmSignals[pwm_id].PulseWidth = 0;
 	return PwmOutputError_Ok;
@@ -102,6 +105,9 @@ extern "C" PwmOutputError PwmOut_setPeriod(PwmDevId pwm_id, uint16_t period) {
 extern "C" PwmOutputError PwmOut_setDuty(PwmDevId pwm_id, uint16_t duty) {
 	if ((pwm_id < 0) || (pwm_id >= PwmDevice::NUM_PWM_DEVICES)) {
 		return PwmOutputError_WrongDevice;
+	}
+	if (PwmDevice::s_PwmDevices[pwm_id].m_State == PwmDevice::Pwm_Undefined) {
+		return PwmOutputError_IllegalState;
 	}
 	if (duty > PwmDevice::s_PwmSignals[pwm_id].Period) {
 		duty = PwmDevice::s_PwmSignals[pwm_id].Period;
