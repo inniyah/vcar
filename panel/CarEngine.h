@@ -27,15 +27,17 @@ public:
 		if (brk_pedal > 1.0) {
 			brk_pedal= 1.0;
 		}
-		double v = fabs(m_v);
-		double rpm = Rpm(v, m_gear);
-		double f_drag = F_drag(v);
-		double f_rr = F_rr(v);
-		double f_traction = acc_pedal * Max_F_traction(rpm, m_gear);
-		double f_brake = brk_pedal * Max_F_brake;
-		double force = f_traction - f_drag - f_rr - f_brake;
-		double acceleration = force / Mass;
-		v = v + acceleration * time_inc;
+
+		double v = fabs(m_v); /*km/h*/
+		double rpm = Rpm(v, m_gear); /*rev/m*/
+
+		double f_drag = F_drag(v); /*N*/
+		double f_rr = F_rr(v); /*N*/
+		double f_traction = acc_pedal * Max_F_traction(rpm, m_gear); /*N*/
+		double f_brake = brk_pedal * Max_F_brake; /*N*/
+		double force = f_traction - f_drag - f_rr - f_brake; /*N*/
+		double acceleration = force / Mass; /*m/s^2*/
+		v = v + (acceleration /*m/s^2*/ * time_inc /*s*/ * 3600.0 /*s/h*/ / 1000.0 /*km/m*/);
 		if (v < 0.0) {
 			v = 0.0;
 		}
@@ -71,6 +73,10 @@ public:
 		return m_rpm;
 	}
 
+	int getGear() {
+		return m_gear;
+	}
+
 private:
 	double m_v;
 	double m_rpm;
@@ -103,12 +109,12 @@ private:
 	 * This means Crr must be approximately 30 times the value of Cdrag
 	 */
 
-	static const double C_drag = (0.5 * 0.30 * 2.2 * 1.29);
+	static const double C_drag = (0.5 * 0.30 * 2.2 /*m^2*/ * 1.29 /*kg/m^3*/);
 	static inline double F_drag(double v) {
 		return (C_drag * v * v);
 	}
 
-	static const double C_rr = (12.8);
+	static const double C_rr = ((0.5 * 0.30 * 2.2 * 1.29) * 30.0);
 	static inline double F_rr(double v) {
 		return (C_rr * v);
 	}
@@ -126,7 +132,6 @@ private:
 	static const double Gear_Rev  = 2.90; // Reverse
 
 	static const double X_d       = 3.42; // Differential Ratio
-	static const double Tr_eff    = 0.7;  // Transmission Efficiency
 
 	static inline double GearTrCoeff(int gear) {
 		switch (gear) {
@@ -141,75 +146,56 @@ private:
 		}
 	}
 
+	static const double Tr_eff    = 0.7;  // Transmission Efficiency
+
 	/*
 	 * in the static situation, the weight on the rear wheels is half the
 	 * weight of the car and driver: (1500 kg / 2 ) * 9.8 m/s2 = 7350 N.
 	 * This means the maximum amount of traction the rear wheels can provide
 	 * if mu = 1.0 is 7350 N
 	 */
-	static const double Max_Tract = 7350; // Max Traction  [N]
+	static const double Max_Tract = 7350; // Max Traction per Wheel [N]
 
 	/*
 	 *   Rev [rpm]  Torque [N.m]
 	 *     1000       394
 	 *     2000       436
 	 *     3000       456
-	 *     4000       477
+	 *     4000       475
+	 *     4400       475
 	 *     5000       470
 	 *     6000       386
 	 */
-	static inline double Torque(double rpm) { // In N.m
-		return (
-			2.666666679e-16   * rpm*rpm*rpm*rpm*rpm
-			- 6.166666689e-12 * rpm*rpm*rpm*rpm
-			+ 4.816666681e-8  * rpm*rpm*rpm
-			- 1.698333338e-4  * rpm*rpm
-			+ 2.985666675e-1  * rpm
-			+ 222.9999995
-		);
-	}
-
-	/*
-	 *   Rev [rpm]  Power [kW]:
-	 *     1000       41
-	 *     2000       93
-	 *     3000      144
-	 *     4000      200
-	 *     5000      248
-	 *     6000      243
-	 */
-	static inline double Power(double rpm) { // In kW
-		return (
-			-1.083333335e-16  * rpm*rpm*rpm*rpm*rpm
-			+ 8.333333354e-13 * rpm*rpm*rpm*rpm
-			- 2.916666839e-10 * rpm*rpm*rpm
-			- 9.83333328e-6   * rpm*rpm
-			+ 7.440000005e-2  * rpm
-			- 24.00000043
-		);
-	}
-
-	static inline double Max_F_traction(double rpm, int gear) {
-		if (rpm < 1000.0) {
-			rpm = 1000.0;
-		} else if (rpm > 6000.0) {
-			rpm = 6000.0;
+	static inline double Max_Torque(double rpm) { /*N.m*/
+		if (rpm < 0.0) {
+			return 0.0;
+		} else if (rpm > 7000.0) {
+			return 0.0;
 		}
-		double max_torque = Torque(rpm);
+		return (
+			- 2.294544012e-12 * pow(rpm,4)
+			+ 2.628558309e-8  * pow(rpm,3)
+			- 1.045311629e-4  * pow(rpm,2)
+			+ 1.890208069e-1  * rpm
+			+ 296.4565158
+		);
+	}
+
+	static inline double Max_F_traction(double rpm /*rev/m*/ , int gear) { /*N = m.kg/s^2*/
+		double max_torque = Max_Torque(rpm); /*N.m*/
 		double gear_coeff = GearTrCoeff(gear);
-		double force = max_torque * gear_coeff * Tr_eff / R_wheel;
-		if (force > Max_Tract) {
-			force = Max_Tract;
-		}
-		return force;
+		double force = max_torque /*N.m*/ * gear_coeff * Tr_eff / R_wheel /*m*/; /*N*/
+		return force; /*N*/
 	}
 
-	static inline double Rpm(double v, int gear) {
-		double wheel_rot = (v * 1000.0 / 3600.0) / R_wheel; // in rad /sec
-		double rpm = wheel_rot * GearTrCoeff(gear) * 60.0 / (2 * M_PI);
+	static inline double Rpm(double v /*km/h*/, int gear) {
+		double wheel_rot /*rad/s*/ = (v /*km/h*/ * 1000.0 /*km/m*/ / 3600.0 /*s/h*/) / R_wheel /*m*/; /*rad /sec*/
+		double rpm /*rev/min*/ = wheel_rot /*rad/s*/ * GearTrCoeff(gear) * 60.0 /*s/m*/ / (2 * M_PI) /*rad/rev*/;
+		if( rpm < 1000 ) {
+			rpm = 1000;
+		}
 		return rpm;
 	}
-
 
 };
 

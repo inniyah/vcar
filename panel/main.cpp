@@ -165,11 +165,14 @@ void globalUpdate(CarState & car_state) {
 	double brake_value = (wBrakeSlider->maximum() - wBrakeSlider->value()) / wBrakeSlider->maximum();
 	car_state.engine.update(1.0, accel_value, brake_value);
 
-
-	wRpmDial->setDialValue(car_state.engine.getRpm() / 8000.0);
+	double rpm = car_state.engine.getRpm();
+	wRpmDial->setDialValue(rpm / 8000.0);
+	//car_state.analog_data["engine"]["rpm"].RawValue = rpm;
 	wRpmDial->redraw();
 
-	wRG1Dial->setDialValue(car_state.engine.getV() / 250.0);
+	double speed = car_state.engine.getV() * 60.0 / 1000.0;
+	wRG1Dial->setDialValue(speed / 250.0);
+	//car_state.analog_data["engine"]["speed"].RawValue = speed;
 	wRG1Dial->redraw();
 
 	Fl::unlock();
