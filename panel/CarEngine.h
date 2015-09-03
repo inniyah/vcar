@@ -14,7 +14,7 @@ public:
 	CarEngine() : m_v(0.0), m_rpm(0.0), m_gear(0) {
 	}
 
-	void update(double time_inc, double acc_pedal, double brk_pedal) {
+	void update(double time_inc /*s*/, double acc_pedal /*0..1*/, double brk_pedal /*0..1*/) {
 		if (acc_pedal < 0.0) {
 			acc_pedal= 0.0;
 		}
@@ -28,21 +28,26 @@ public:
 			brk_pedal= 1.0;
 		}
 
-		double v = fabs(m_v); /*km/h*/
-		double rpm = Rpm(v, m_gear); /*rev/m*/
+		double rpm = m_rpm; /*rev/m*/
+		if( rpm < 1000 ) {
+			rpm = 1000;
+		}
 
+		double v = fabs(m_v); /*km/h*/
 		double f_drag = F_drag(v); /*N*/
 		double f_rr = F_rr(v); /*N*/
 		double f_traction = acc_pedal * Max_F_traction(rpm, m_gear); /*N*/
 		double f_brake = brk_pedal * Max_F_brake; /*N*/
 		double force = f_traction - f_drag - f_rr - f_brake; /*N*/
 		double acceleration = force / Mass; /*m/s^2*/
-		v = v + (acceleration /*m/s^2*/ * time_inc /*s*/ * 3600.0 /*s/h*/ / 1000.0 /*km/m*/);
+
+		v = v /*km/h*/ + (acceleration /*m/s^2*/ * time_inc /*s*/ * 3600.0 /*s/h*/ / 1000.0 /*km/m*/);
 		if (v < 0.0) {
 			v = 0.0;
 		}
+
 		m_rpm = Rpm(v, m_gear);
-		if (m_v < 0) {
+		if (m_gear == 7) {
 			m_v = -v;
 		} else {
 			m_v = v;
@@ -51,11 +56,11 @@ public:
 
 	bool setGear(int gear) {
 		if (m_gear != gear) {
-			if (gear < 0 || gear > 7) {
+			if (gear < 0 || gear > 7) { /*invalid*/
 				m_gear = 0;
-			} else if (m_v >= 0 && gear <= 6) {
+			} else if (m_v >= 0 && gear <= 6) { /*direct*/
 				m_gear = gear;
-			} else if (m_v <= 0 && gear == 7) {
+			} else if (m_v <= 0 && gear == 7) { /*backwards*/
 				m_gear = gear;
 			} else {
 				m_gear = 0;
@@ -66,7 +71,7 @@ public:
 	}
 
 	double getV() {
-		return m_v;
+		return fabs(m_v);
 	}
 
 	double getRpm() {
@@ -84,7 +89,7 @@ private:
 
 	static const double R_wheel     = 0.34;  // Wheel Radius [m]
 	static const double Mass        = 1500;  // Mass [Kg]
-	static const double Max_F_brake = 7350;  // Max Brake [N]
+	static const double Max_F_brake = 4.0 * 7350;  // Max Brake [N]
 
 	/*
 	 * Flong =   Ftraction - Fdrag - Frr
@@ -110,12 +115,14 @@ private:
 	 */
 
 	static const double C_drag = (0.5 * 0.30 * 2.2 /*m^2*/ * 1.29 /*kg/m^3*/);
-	static inline double F_drag(double v) {
+	static inline double F_drag(double v /*km/h*/) {
+		v = v * 1000.0 /*km/m*/ / 3600.0 /*s/h*/; /*m/s*/
 		return (C_drag * v * v);
 	}
 
 	static const double C_rr = ((0.5 * 0.30 * 2.2 * 1.29) * 30.0);
-	static inline double F_rr(double v) {
+	static inline double F_rr(double v /*km/h*/) {
+		v = v * 1000.0 /*km/m*/ / 3600.0 /*s/h*/; /*m/s*/
 		return (C_rr * v);
 	}
 

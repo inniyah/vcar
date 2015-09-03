@@ -8,7 +8,6 @@ OBJS = \
 	AbstractSvgBox.o \
 	CarSvgBox.o \
 	CarState.o \
-	CarEngine.o \
 	DialSvgBox.o \
 	OilWaterSvgBox.o \
 	RuntimeVarsWidgets.o \
