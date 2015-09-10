@@ -331,7 +331,7 @@ int main(int argc, const char * argv[]) {
 						(*v).first.c_str(),
 						(*v).second.SetValueCode.c_str()
 					);
-					fprintf(out_file, "\tinline void setDefaultSignal_%s() {\n\t\tsetSignal_%s(%ld); /* %lf%s%s */\n\t}\n",
+					fprintf(out_file, "\tinline void setDefaultSignal_%s() {\n\t\tsetSignal_%s(%llu); /* %lf%s%s */\n\t}\n",
 						(*v).first.c_str(),
 						(*v).first.c_str(),
 						(*v).second.StartRawValue,
