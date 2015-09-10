@@ -117,7 +117,7 @@ static void can_bus_msg_sgn_att_cb(int can_bus, message_t * can_msg, signal_t * 
 			}
 			av.RawValue = av.StartRawValue;
 
-			printf("      ATTRIBUTE %s -> %lu\n",
+			printf("      ATTRIBUTE %s -> %llu\n",
 				sgn_att->name,
 				av.StartRawValue
 			);
@@ -342,7 +342,7 @@ void CanMsgParser::processCanSignal(const signal_t * sgn, const message_t * dbc_
 void CanMsgParser::checkCanSignal(const signal_t * sgn, const message_t * dbc_msg, const intercom::DataMessage::CanMsg * can_msg, uint32 raw_value, double phys_value) {
 	if (carState) {
 		if (carState->analog_data[dbc_msg->name][sgn->name].RawValue != raw_value) {
-			fprintf(stdout, "ERR: Signal %s.%s ([rcv]%ld != [exp]%ld)\n",
+			fprintf(stdout, "ERR: Signal %s.%s ([rcv]%ld != [exp]%llu)\n",
 				dbc_msg->name,
 				sgn->name,
 				raw_value,
