@@ -80,10 +80,9 @@ typedef enum {
 
 typedef enum {
 	CanDriverStatus_Undefined,
-	CanDriverStatus_Closed,
-	CanDriverStatus_Initialized,
+	CanDriverStatus_Close,
+	CanDriverStatus_Silent,
 	CanDriverStatus_Open,
-	CanDriverStatus_Muted,
 } CanDriverStatus;
 
 typedef enum {
@@ -109,10 +108,10 @@ CanTransceiverError  CanTransceiver_start(CanDevId can_id);
 CanTransceiverError  CanTransceiver_stop(CanDevId can_id);
 
 CanDriverStatus      CanDriver_getStatus(CanDevId can_id);
-CanDriverError       CanDriver_open(CanDevId can_id);
+CanDriverError       CanDriver_init(CanDevId can_id);
 CanDriverError       CanDriver_close(CanDevId can_id);
-CanDriverError       CanDriver_mute(CanDevId can_id);
-CanDriverError       CanDriver_unmute(CanDevId can_id);
+CanDriverError       CanDriver_open(CanDevId can_id);
+CanDriverError       CanDriver_silent(CanDevId can_id);
 CanMessage *         CanDriver_getRxMessage(CanDevId can_id);
 CanDriverError       CanDriver_delRxMessage(CanDevId can_id);
 

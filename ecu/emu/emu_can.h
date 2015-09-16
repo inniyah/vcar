@@ -25,12 +25,20 @@ struct CanDevice {
 		Tr_Active,
 	} CanTransceiverState;
 
+	typedef enum CanDriverStateE {
+		Drv_Undefined,
+		Drv_Closed,
+		Drv_Open,
+		Drv_Silent
+	} CanDriverState;
+
 	static CanDevice s_CanDevices[CanDevice::NUM_CAN_DEVICES];
 	static CanDevId s_CurrentDevId;
 
 	CanDevId getDevId() const;
 
 	CanTransceiverState m_CanTransceiverState;
+	CanDriverState      m_CanDriverState;
 
 	CanMessage m_CanTxMessages[NUM_CAN_TXBUFFERS];
 	int m_CanTxPos;
