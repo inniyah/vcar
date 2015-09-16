@@ -19,6 +19,7 @@ CanDevId CanDevice::s_CurrentDevId = INVALID_CAN_DEVICE;
 
 CanDevice::CanDevice() :
 	m_CanTransceiverState(Tr_Undefined),
+	m_CanDriverState(Drv_Undefined),
 	m_CanTxPos(0),
 	m_CanTxCnt(0),
 	m_CanRxPos(0),
@@ -166,13 +167,34 @@ extern "C" CanDriverStatus CanDriver_getStatus(CanDevId can_id) {
 	if ((can_id < 0) || (can_id >= CanDevice::NUM_CAN_DEVICES)) {
 		return CanDriverStatus_Undefined;
 	}
-	return CanDriverStatus_Undefined;
+	switch (CanDevice::s_CanDevices[can_id].m_CanDriverState) {
+		case CanDevice::Drv_Closed:
+			return CanDriverStatus_Close;
+		case CanDevice::Drv_Silent:
+			return CanDriverStatus_Silent;
+		case CanDevice::Drv_Open:
+			return CanDriverStatus_Open;
+		default:
+			return CanDriverStatus_Undefined;
+	}
+}
+
+extern "C" CanDriverError CanDriver_init(CanDevId can_id) {
+	if ((can_id < 0) || (can_id >= CanDevice::NUM_CAN_DEVICES)) {
+		return CanDriverError_WrongDevice;
+	}
+	CanDevice::s_CanDevices[can_id].m_CanDriverState = CanDevice::Drv_Closed;
+	return CanDriverError_Ok;
 }
 
 extern "C" CanDriverError CanDriver_open(CanDevId can_id) {
 	if ((can_id < 0) || (can_id >= CanDevice::NUM_CAN_DEVICES)) {
 		return CanDriverError_WrongDevice;
 	}
+	if (CanDevice::s_CanDevices[can_id].m_CanDriverState == CanDevice::Drv_Undefined) {
+		return CanDriverError_IllegalState;
+	}
+	CanDevice::s_CanDevices[can_id].m_CanDriverState = CanDevice::Drv_Open;
 	return CanDriverError_Ok;
 }
 
@@ -180,20 +202,21 @@ extern "C" CanDriverError CanDriver_close(CanDevId can_id) {
 	if ((can_id < 0) || (can_id >= CanDevice::NUM_CAN_DEVICES)) {
 		return CanDriverError_WrongDevice;
 	}
+	if (CanDevice::s_CanDevices[can_id].m_CanDriverState == CanDevice::Drv_Undefined) {
+		return CanDriverError_IllegalState;
+	}
+	CanDevice::s_CanDevices[can_id].m_CanDriverState = CanDevice::Drv_Closed;
 	return CanDriverError_Ok;
 }
 
-extern "C" CanDriverError CanDriver_mute(CanDevId can_id) {
+extern "C" CanDriverError CanDriver_silent(CanDevId can_id) {
 	if ((can_id < 0) || (can_id >= CanDevice::NUM_CAN_DEVICES)) {
 		return CanDriverError_WrongDevice;
 	}
-	return CanDriverError_Ok;
-}
-
-extern "C" CanDriverError CanDriver_unmute(CanDevId can_id) {
-	if ((can_id < 0) || (can_id >= CanDevice::NUM_CAN_DEVICES)) {
-		return CanDriverError_WrongDevice;
+	if (CanDevice::s_CanDevices[can_id].m_CanDriverState == CanDevice::Drv_Undefined) {
+		return CanDriverError_IllegalState;
 	}
+	CanDevice::s_CanDevices[can_id].m_CanDriverState = CanDevice::Drv_Silent;
 	return CanDriverError_Ok;
 }
 
