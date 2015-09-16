@@ -1,11 +1,11 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0302 
+version 1.0303 
 header_name {.h} 
 code_name {.cpp}
 Function {makePanelWindow()} {open
 } {
-  Fl_Window wMainWindow {open selected
-    xywh {141 439 750 550} type Double
+  Fl_Window wMainWindow {open
+    xywh {2192 236 750 550} type Double
     code0 {\#include "config.h"}
     code1 {\#include "panel_cb.h"} visible
   } {
@@ -15,20 +15,8 @@ Function {makePanelWindow()} {open
       Fl_Group {} {open
         xywh {0 10 750 540}
       } {
-        Fl_Light_Button wBatteryButton {
-          label Battery
-          xywh {0 10 110 35}
-        }
-        Fl_Light_Button wIgnitionButton {
-          label Ignition
-          xywh {0 45 110 35}
-        }
-        Fl_Choice wKeyState {
-          label {Key State} open
-          xywh {260 15 110 20} down_box BORDER_BOX
-        } {}
         Fl_Box wCarBox {
-          label Car
+          label Car selected
           xywh {500 10 250 379}
           code0 {\#include "CarSvgBox.h"}
           class CarSvgBox
@@ -80,19 +68,19 @@ Function {makePanelWindow()} {open
         }
         Fl_Box wRpmDial {
           label {Dial RPM}
-          xywh {395 444 100 100}
+          xywh {335 20 160 160}
           code0 {\#include "DialSvgBox.h"}
           class DialSvgBox
         }
         Fl_Box wRG1Dial {
           label {Dial RG1}
-          xywh {285 445 100 105}
+          xywh {170 20 160 160}
           code0 {\#include "DialSvgBox.h"}
           class DialSvgBox
         }
         Fl_Box wOilWaterDial {
           label {Dial OW}
-          xywh {170 445 100 105}
+          xywh {5 20 160 160}
           code0 {\#include "OilWaterSvgBox.h"}
           class OilWaterSvgBox
         }

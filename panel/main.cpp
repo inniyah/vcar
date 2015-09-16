@@ -186,11 +186,6 @@ int main(int argc, char * argv[]) {
 	initCarState(car_state);
 	GlobalCarStateListener car_state_listener(car_state);
 
-	wKeyState->add("Key Off",   0, cbKeyOff,   0, 0);
-	wKeyState->add("Key On",    0, cbKeyOn,    0, 0);
-	wKeyState->add("Engine On", 0, cbEngineOn, 0, 0);
-	wKeyState->value(0);
-
 	wCarCmdTree->root()->label("Commands");
 	wCarCmdTree->selectmode(FL_TREE_SELECT_SINGLE);
 	wCarCmdTree->begin();
