@@ -334,7 +334,7 @@ int main(int argc, const char * argv[]) {
 					fprintf(out_file, "\tinline void setDefaultSignal_%s() {\n\t\tsetSignal_%s(%llu); /* %lf%s%s */\n\t}\n",
 						(*v).first.c_str(),
 						(*v).first.c_str(),
-						(*v).second.StartRawValue,
+						(long long unsigned int)(*v).second.StartRawValue,
 						(double) (long signed int) (*v).second.StartRawValue * (*v).second.Scale + (*v).second.Offset,
 						(*v).second.Units.c_str()[0] != '\0' ? " " : "",
 						(*v).second.Units.c_str()

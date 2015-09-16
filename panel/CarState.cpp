@@ -119,7 +119,7 @@ static void can_bus_msg_sgn_att_cb(int can_bus, message_t * can_msg, signal_t * 
 
 			printf("      ATTRIBUTE %s -> %llu\n",
 				sgn_att->name,
-				av.StartRawValue
+				(long long unsigned int)av.StartRawValue
 			);
 		}
 	}
@@ -346,7 +346,7 @@ void CanMsgParser::checkCanSignal(const signal_t * sgn, const message_t * dbc_ms
 				dbc_msg->name,
 				sgn->name,
 				raw_value,
-				carState->analog_data[dbc_msg->name][sgn->name].RawValue
+				(long long unsigned int)carState->analog_data[dbc_msg->name][sgn->name].RawValue
 			);
 		}
 	}
