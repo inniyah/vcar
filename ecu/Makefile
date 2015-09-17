@@ -29,11 +29,11 @@ PKG_CONFIG=
 PKG_CONFIG_CFLAGS=`pkg-config --cflags $(PKG_CONFIG) 2>/dev/null`
 PKG_CONFIG_LIBS=`pkg-config --libs $(PKG_CONFIG) 2>/dev/null`
 
-CFLAGS= -O2 -g -Wall -Wno-multichar
+CFLAGS= -O2 -g -D_FORTIFY_SOURCE=2 -std=c++11 -Wall -Wno-multichar
 DEFS=
 INCS=-I../tinythreadpp/source/ -I../intercom/
 
-LDFLAGS= -Wl,-z,defs -Wl,--as-needed -Wl,--no-undefined
+LDFLAGS= -Wl,-z,defs -Wl,-z,relro -Wl,--as-needed -Wl,--no-undefined
 LIBS=-levent -lpthread
 
 $(PROGRAM): $(OBJS)
