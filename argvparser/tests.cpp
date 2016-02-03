@@ -1,3 +1,4 @@
+#include <cstdlib>
 #include <iostream>
 #include "argvparser.h"
 
@@ -21,7 +22,7 @@ bool testHelpOptionDetection()
     cout << "Detect help option -> ";
 
     int argc = 2;
-    char* argv[] = {"app","-h"};
+    const char* argv[] = {"app","-h"};
 
     ArgvParser parser;
     parser.setHelpOption("help", "h", "help descr.");
@@ -44,7 +45,7 @@ bool testUnknownOptionDetection()
     cout << "Detect unknown options -> ";
 
     int argc = 8;
-    char* argv[] = { "app","--first_long","value1","-fdev","--second_long","value2","arg1","arg2"};
+    const char* argv[] = { "app","--first_long","value1","-fdev","--second_long","value2","arg1","arg2"};
 
     ArgvParser parser;
 
@@ -59,7 +60,7 @@ bool testForbiddenOptionPosition()
     cout << "Detect forbidden option pos -> ";
 
     int argc = 8;
-    char* argv[] = { "app","--first_long","value1","-fdev","--second_long","value2","arg1","arg2"};
+    const char* argv[] = { "app","--first_long","value1","-fdev","--second_long","value2","arg1","arg2"};
 
     ArgvParser parser;
     parser.defineOption("first_long");
@@ -80,7 +81,7 @@ bool testMissingOptionValue()
     cout << "Detect missing values -> ";
 
     int argc = 7;
-    char* argv[] = { "app","--first_long","-fdev","--second_long","value2","arg1","arg2"};
+    const char* argv[] = { "app","--first_long","-fdev","--second_long","value2","arg1","arg2"};
 
     ArgvParser parser;
     parser.defineOption("first_long", "", ArgvParser::OptionRequiresValue);
@@ -100,7 +101,7 @@ bool testMalformedShortOptions()
     cout << "Detect malformed shorts -> ";
 
     int argc = 8;
-    char* argv[] = { "app","--first_long","value","-fdev=5","--second_long","value2","arg1","arg2"};
+    const char* argv[] = { "app","--first_long","value","-fdev=5","--second_long","value2","arg1","arg2"};
 
     ArgvParser parser;
     parser.defineOption("first_long", "", ArgvParser::OptionRequiresValue);
@@ -124,7 +125,7 @@ bool testCorrectParsing()
     cout << "Check for correct parsing return value -> ";
 
     int argc = 12;
-    char* argv[] = { "app","--first_long","value1","-fev","--second_long","value2",
+    const char* argv[] = { "app","--first_long","value1","-fev","--second_long","value2",
                      "-x=5","--third_long=0,1,2","-d","3","arg1","arg2"};
 
     ArgvParser parser;
@@ -174,7 +175,7 @@ bool testRequiredOptions()
     cout << "Check for required options -> ";
 
     int argc = 3;
-    char* argv[] = { "app","--first_long","-f"};
+    const char* argv[] = { "app","--first_long","-f"};
 
     ArgvParser parser;
     parser.defineOption("first_long");
@@ -192,7 +193,7 @@ bool testOptionalOptionValues()
     cout << "Check for optional option values -> ";
 
     int argc = 3;
-    char* argv[] = { "app","--first_long=check","-f"};
+    const char* argv[] = { "app","--first_long=check","-f"};
 
     ArgvParser parser;
     parser.defineOption("first_long");
@@ -223,7 +224,7 @@ bool testIDStringExpansion()
     return(ok());
 }
 
-int main(int, char*)
+int main(int, const char**)
 {
     cout << ">>> Running commandline parser tests >>>" << endl;
 
