@@ -47,7 +47,7 @@ $(LIBRARY).so: $(LIBRARY).so.$(MAJOR).$(MINOR)
 	ln -s $@.$(MAJOR) $@
 
 $(LIBRARY).a: $(STATIC_OBJS)
-	ar cru $@ $+
+	ar cr $@ $+
 
 %.so : %.o
 	g++ $(LDFLAGS) $(LIBS) -shared $^ -o $@
