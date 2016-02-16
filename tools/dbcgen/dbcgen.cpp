@@ -6,6 +6,7 @@
 #include "model/dbcWriter.h"
 #include "argvparser.h"
 
+#include <stdlib.h>
 #include <stdint.h>
 #include <libgen.h>
 #include <cstdlib>
@@ -112,9 +113,9 @@ std::string getCanSignalEncoder(const message_t * dbc_msg, const signal_t * can_
 
 int main(int argc, const char * argv[]) {
 	dbc_t      * dbc;
-	const char * inFilename  = NULL;
-	const char * outFilename = NULL;
-	const char * ecu_id      = "Vector__XXX";
+	char * inFilename  = NULL;
+	char * outFilename = NULL;
+	char * ecu_id      = NULL;
 	int ret = EXIT_SUCCESS;
 
 	// Command Line Processing
@@ -133,15 +134,18 @@ int main(int argc, const char * argv[]) {
 	}
 
 	if (argv_parser.arguments() >= 1) {
-		inFilename = argv_parser.argument(0).c_str();
+		if (inFilename) free(inFilename);
+		inFilename = strdup(argv_parser.argument(0).c_str());
 	}
 
 	if (argv_parser.foundOption("output")) {
-		outFilename = argv_parser.optionValue("output").c_str();
+		if (outFilename) free(outFilename);
+		outFilename = strdup(argv_parser.optionValue("output").c_str());
 	}
 
 	if (argv_parser.foundOption("ecu")) {
-		ecu_id = argv_parser.optionValue("ecu").c_str();
+		if (ecu_id) free(ecu_id);
+		ecu_id = strdup(argv_parser.optionValue("ecu").c_str());
 	}
 
 	std::string compName = "";
@@ -154,6 +158,11 @@ int main(int argc, const char * argv[]) {
 		compName = ::basename(fname);
 		free(fname);
 	}
+
+	if (!ecu_id) {
+		ecu_id = strdup("Vector__XXX");
+	}
+
 	std::transform(compName.begin(), compName.end(), compName.begin(), sanitizeVariableName);
 
 	// Open Files
@@ -420,6 +429,10 @@ int main(int argc, const char * argv[]) {
 			fclose(out_file);
 		}
 	}
+
+	if (inFilename) free(inFilename);
+	if (outFilename) free(outFilename);
+	if (ecu_id) free(ecu_id);
 
 	return ret;
 }
