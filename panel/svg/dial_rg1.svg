@@ -391,20 +391,20 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1"
-     inkscape:cx="141.69009"
-     inkscape:cy="188.06212"
+     inkscape:zoom="5.6568542"
+     inkscape:cx="153.00101"
+     inkscape:cy="85.8055"
      inkscape:document-units="px"
-     inkscape:current-layer="layer_hidden"
+     inkscape:current-layer="layer_low"
      showgrid="false"
      fit-margin-top="0"
      fit-margin-left="0"
      fit-margin-right="0"
      fit-margin-bottom="0"
      inkscape:window-width="1920"
-     inkscape:window-height="1041"
-     inkscape:window-x="1920"
-     inkscape:window-y="0"
+     inkscape:window-height="981"
+     inkscape:window-x="0"
+     inkscape:window-y="28"
      inkscape:window-maximized="1" />
   <metadata
      id="metadata6477">
@@ -423,9 +423,10 @@
      inkscape:groupmode="layer"
      id="layer_low"
      transform="translate(-161.42305,-68.070967)"
-     style="display:inline">
+     style="display:inline;opacity:0.97">
     <g
-       id="g8262">
+       id="g8262"
+       style="">
       <circle
          r="148.13916"
          cy="216.40659"
@@ -451,7 +452,8 @@
          style="fill:url(#radialGradient8176);fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:3.45895576;stroke-miterlimit:4;stroke-opacity:1" />
       <g
          transform="matrix(1.327506,-0.06006927,0.06006927,1.327506,1255.0168,-345.67097)"
-         id="g4117">
+         id="g4117"
+         style="">
         <path
            inkscape:connector-curvature="0"
            id="path2320"
@@ -465,10 +467,12 @@
       </g>
       <g
          transform="matrix(1.34377,0,0,1.34377,999.60732,-393.42838)"
-         id="g4034">
+         id="g4034"
+         style="">
         <g
            transform="matrix(0.06194705,0,0,0.06194705,-477.6065,358.9716)"
-           id="g3921">
+           id="g3921"
+           style="">
           <circle
              r="9.6240139"
              cy="444.24478"
@@ -485,7 +489,8 @@
         </g>
         <g
            transform="matrix(0,0.06194705,-0.06194705,0,-581.2158,487.124)"
-           id="g3931">
+           id="g3931"
+           style="">
           <circle
              r="9.6240139"
              cy="444.24478"
@@ -502,7 +507,8 @@
         </g>
         <g
            transform="matrix(0,0.06194705,-0.06194705,0,-414.4425,487.124)"
-           id="g3937">
+           id="g3937"
+           style="">
           <circle
              r="9.6240139"
              cy="444.24478"
@@ -519,7 +525,8 @@
         </g>
         <g
            transform="matrix(-0.03097353,0.05364772,-0.05364772,-0.03097353,-587.9353,447.2131)"
-           id="g3951">
+           id="g3951"
+           style="">
           <circle
              r="9.6240139"
              cy="444.24478"
@@ -536,7 +543,8 @@
         </g>
         <g
            transform="matrix(-0.03097353,0.05364772,-0.05364772,-0.03097353,-443.5054,530.5998)"
-           id="g3957">
+           id="g3957"
+           style="">
           <circle
              r="9.6240139"
              cy="444.24478"
@@ -553,7 +561,8 @@
         </g>
         <g
            transform="matrix(-0.05364772,0.03097352,-0.03097352,-0.05364772,-573.7991,409.2895)"
-           id="g3971">
+           id="g3971"
+           style="">
           <circle
              r="9.6240139"
              cy="444.24478"
@@ -570,7 +579,8 @@
         </g>
         <g
            transform="matrix(-0.05364772,-0.03097353,0.03097353,-0.05364772,-502.684,376.7953)"
-           id="g3991">
+           id="g3991"
+           style="">
           <circle
              r="9.6240139"
              cy="444.24478"
@@ -587,7 +597,8 @@
         </g>
         <g
            transform="matrix(-0.03097352,-0.05364772,0.05364772,-0.03097352,-464.7604,390.9315)"
-           id="g4011">
+           id="g4011"
+           style="">
           <circle
              r="9.6240139"
              cy="444.24478"
@@ -604,7 +615,8 @@
         </g>
         <g
            transform="matrix(-0.03097352,-0.05364772,0.05364772,-0.03097352,-609.1903,474.3181)"
-           id="g4017">
+           id="g4017"
+           style="">
           <circle
              r="9.6240139"
              cy="444.24478"
@@ -664,22 +676,5 @@
      inkscape:groupmode="layer"
      id="layer_hidden"
      inkscape:label="hidden"
-     style="display:inline">
-    <path
-       style="display:inline;fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.97623682px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="M 152.45437,149.2569 295.36989,285.00771"
-       id="pointer"
-       inkscape:connector-curvature="0"
-       sodipodi:nodetypes="cc" />
-    <path
-       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m 152.53303,321.72933 0,-315.1675969"
-       id="path8168"
-       inkscape:connector-curvature="0" />
-    <path
-       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m -27.14785,148.93011 345.97725,0.50507"
-       id="path8170"
-       inkscape:connector-curvature="0" />
-  </g>
+     style="display:inline" />
 </svg>

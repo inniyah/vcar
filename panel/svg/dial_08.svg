@@ -169,17 +169,17 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="2"
-     inkscape:cx="245.82407"
-     inkscape:cy="147.14286"
+     inkscape:cx="155.07407"
+     inkscape:cy="146.14286"
      inkscape:document-units="px"
-     inkscape:current-layer="g6585"
+     inkscape:current-layer="layer_hidden"
      showgrid="false"
      fit-margin-top="0"
      fit-margin-left="0"
      fit-margin-right="0"
      fit-margin-bottom="0"
      inkscape:window-width="1920"
-     inkscape:window-height="980"
+     inkscape:window-height="981"
      inkscape:window-x="0"
      inkscape:window-y="28"
      inkscape:window-maximized="1" />
@@ -464,22 +464,5 @@
      inkscape:groupmode="layer"
      id="layer_hidden"
      inkscape:label="hidden"
-     style="display:inline">
-    <path
-       style="display:inline;fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.97623682px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="M 149.8636,149.92938 292.77911,285.68019"
-       id="pointer"
-       inkscape:connector-curvature="0"
-       sodipodi:nodetypes="cc" />
-    <path
-       style="display:inline;fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m 149.94226,322.40181 0,-315.1676005"
-       id="path8168"
-       inkscape:connector-curvature="0" />
-    <path
-       style="display:inline;fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m -29.73863,149.60259 345.97726,0.50507"
-       id="path8170"
-       inkscape:connector-curvature="0" />
-  </g>
+     style="display:inline" />
 </svg>

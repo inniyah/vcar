@@ -84,22 +84,22 @@ void DialSvgBox::graphic(cairo_t * cr, double x, double y, double w, double h) {
 		rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_low");
 
 		cairo_save(cr);
-		RsvgPositionData pointer_position;
-		if (rsvg_handle_get_position_sub(rsvg_handle, &pointer_position, "#pointer")) {
-			double angle = max_angle * dial_value;
-			cairo_identity_matrix(cr);
-			cairo_scale(cr, scale, scale);
-			cairo_translate(cr,
-				x / scale + pointer_position.x,
-				y / scale + pointer_position.y
-			);
-			cairo_rotate(cr, angle);
-			cairo_translate(cr,
-				- pointer_position.x,
-				- pointer_position.y
-			);
-			rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_main");
-		}
+		double angle = max_angle * dial_value;
+		const double pivot_center_x = dimension_data.width / 2.0;
+		const double pivot_center_y = dimension_data.height / 2.0;
+		printf("Piot: %lf, %lf\n", pivot_center_x, pivot_center_y);
+		cairo_identity_matrix(cr);
+		cairo_scale(cr, scale, scale);
+		cairo_translate(cr,
+			x / scale + pivot_center_x,
+			y / scale + pivot_center_y
+		);
+		cairo_rotate(cr, angle);
+		cairo_translate(cr,
+			- pivot_center_x,
+			- pivot_center_y
+		);
+		rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_main");
 		cairo_restore(cr);
 
 		rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_high");
