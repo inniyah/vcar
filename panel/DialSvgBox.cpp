@@ -84,10 +84,9 @@ void DialSvgBox::graphic(cairo_t * cr, double x, double y, double w, double h) {
 		rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_low");
 
 		cairo_save(cr);
-		double angle = max_angle * dial_value;
+		const double angle = max_angle * dial_value;
 		const double pivot_center_x = dimension_data.width / 2.0;
 		const double pivot_center_y = dimension_data.height / 2.0;
-		printf("Piot: %lf, %lf\n", pivot_center_x, pivot_center_y);
 		cairo_identity_matrix(cr);
 		cairo_scale(cr, scale, scale);
 		cairo_translate(cr,

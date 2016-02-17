@@ -85,7 +85,7 @@ void OilWaterSvgBox::graphic(cairo_t * cr, double x, double y, double w, double 
 		if (scale_h < scale_w) {
 			scale = scale_h;
 		}
-
+			
 		cairo_identity_matrix(cr);
 		cairo_translate(cr,
 			x + w/2.0 - dimension_data.width * scale / 2.0,
@@ -96,38 +96,42 @@ void OilWaterSvgBox::graphic(cairo_t * cr, double x, double y, double w, double 
 		rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_low");
 
 		cairo_save(cr);
-		RsvgPositionData pointer_position_a;
-		if (rsvg_handle_get_position_sub(rsvg_handle, &pointer_position_a, "#pointer_a")) {
-			double angle = max_angle * oil_dial_value;
+		RsvgDimensionData dim_a;
+		if (FALSE != rsvg_handle_get_dimensions_sub(rsvg_handle, &dim_a, "#pointer_a")) {
+			const double angle_a = max_angle * oil_dial_value;
+			const double pivot_a_center_x = dim_a.width;
+			const double pivot_a_center_y = dim_a.height;
 			cairo_identity_matrix(cr);
 			cairo_scale(cr, scale, scale);
 			cairo_translate(cr,
-				x / scale + pointer_position_a.x,
-				y / scale + pointer_position_a.y
+				x / scale + pivot_a_center_x,
+				y / scale + pivot_a_center_y
 			);
-			cairo_rotate(cr, angle);
+			cairo_rotate(cr, angle_a);
 			cairo_translate(cr,
-				- pointer_position_a.x,
-				- pointer_position_a.y
+				- pivot_a_center_x,
+				- pivot_a_center_y
 			);
 			rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_main_a");
 		}
 		cairo_restore(cr);
 
 		cairo_save(cr);
-		RsvgPositionData pointer_position_b;
-		if (rsvg_handle_get_position_sub(rsvg_handle, &pointer_position_b, "#pointer_b")) {
-			double angle = - max_angle * water_dial_value;
+		RsvgDimensionData dim_b;
+		if (FALSE != rsvg_handle_get_dimensions_sub(rsvg_handle, &dim_b, "#pointer_b")) {
+			const double angle_b = - max_angle * water_dial_value;
+			const double pivot_b_center_x = dim_b.width;
+			const double pivot_b_center_y = dim_b.height;
 			cairo_identity_matrix(cr);
 			cairo_scale(cr, scale, scale);
 			cairo_translate(cr,
-				x / scale + pointer_position_b.x,
-				y / scale + pointer_position_b.y
+				x / scale + pivot_b_center_x,
+				y / scale + pivot_b_center_y
 			);
-			cairo_rotate(cr, angle);
+			cairo_rotate(cr, angle_b);
 			cairo_translate(cr,
-				- pointer_position_b.x,
-				- pointer_position_b.y
+				- pivot_b_center_x,
+				- pivot_b_center_y
 			);
 			rsvg_handle_render_cairo_sub(rsvg_handle, cr, "#layer_main_b");
 		}
