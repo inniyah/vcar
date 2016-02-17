@@ -5,15 +5,11 @@
 
 // See: http://blog.coldflake.com/posts/C++-delegates-on-steroids/
 
-namespace common {
-
-#include <cstdlib>
-
-// See: http://blog.coldflake.com/posts/C++-delegates-on-steroids/
-
 #if __cplusplus <= 199711L // not a C++11 compliant compiler
-#error At least a C++11 compliant compiler is needed
+#error A C++11 compliant compiler is needed
 #endif
+
+namespace common {
 
 // Usage:
 //     A a;
@@ -23,7 +19,7 @@ namespace common {
 template<typename return_type, typename... params>
 class Delegate {
 public:
-	typedef return_type (*Type)(void* callee, params...);
+	typedef return_type (*Type)(void * callee, params...);
 
 	Delegate(void * callee, Type function) : fpCallee(callee) , fpCallbackFunction(function) { }
 	Delegate(const Delegate & d) : fpCallee(d.fpCallee) , fpCallbackFunction(d.fpCallbackFunction) { }
@@ -48,7 +44,7 @@ public:
 		return d;
 	}
 
-private:
+protected:
 	void * fpCallee;
 	Type fpCallbackFunction;
 

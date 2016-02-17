@@ -12,10 +12,22 @@ public:
 	void init();
 	void shutdown();
 
-	typedef common::Delegate<void, CanMessage *> CanMessageDelegate;
+	struct CanMessageDelegate : public common::Delegate<void, CanMessage *> {
+		typedef common::Delegate<void, CanMessage *> BaseDelegate;
+		inline CanMessageDelegate() : BaseDelegate(BaseDelegate::fromObjectMethod<CanMessageDelegate,&CanMessageDelegate::EmptyEventReceiver>(this)) {
+		}
+		inline CanMessageDelegate(const BaseDelegate & delegate) : BaseDelegate(delegate) {
+		}
+		inline void clean() {
+			BaseDelegate::operator==(BaseDelegate::fromObjectMethod<CanMessageDelegate,&CanMessageDelegate::EmptyEventReceiver>(this));
+		}
+		void EmptyEventReceiver(CanMessage *);
+	};
+
 	bool addCanReceiveDelegate(CanDevId dev_id, CanMessageDelegate delegate);
 	bool removeCanReceiveDelegate(CanDevId dev_id, CanMessageDelegate delegate);
 	void dispatchCanMessage(CanDevId dev_id, CanMessage * can_msg);
+
 
 private:
 	static CanSystem instance;

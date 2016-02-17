@@ -16,6 +16,10 @@ CanSystem::~CanSystem() {
 	fprintf(stderr, "~CanSystem::CanSystem()\n");
 }
 
+void CanSystem::CanMessageDelegate::EmptyEventReceiver(CanMessage *) {
+	fprintf(stderr, "CanSystem::CanMessageDelegate::EmptyEventReceiver\n");
+}
+
 void CanSystem::init() {
 	fprintf(stderr, "CanSystem::init()\n");
 
@@ -30,6 +34,7 @@ void CanSystem::init() {
 void CanSystem::shutdown() {
 	fprintf(stderr, "CanSystem::shutdown()\n");
 }
+
 
 bool CanSystem::addCanReceiveDelegate(CanDevId dev_id, CanMessageDelegate delegate) {
 	if (m_NumCanRcvDelegates[dev_id] < MAX_CAN_DELEGATES) {
@@ -58,5 +63,4 @@ void CanSystem::dispatchCanMessage(CanDevId dev_id, CanMessage * can_msg) {
 	for (int i = 0; i < m_NumCanRcvDelegates[dev_id]; ++i) {
 		m_CanRcvDelegates[i][dev_id].operator()(can_msg);
 	}
-
 }
