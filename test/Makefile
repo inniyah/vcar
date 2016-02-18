@@ -16,6 +16,8 @@ SOURCES = \
 	sys_os.cpp \
 	sys_main.cpp\
 	sys_com.cpp \
+	sys_can.cpp \
+	sys_pwm.cpp \
 	TaskHandlers.cpp \
 	IsrHandlers.cpp \
 	SwcBackLight.cpp \
@@ -31,7 +33,7 @@ PKG_CONFIG_LIBS=`pkg-config --libs $(PKG_CONFIG) 2>/dev/null`
 
 CFLAGS= -O2 -g -D_FORTIFY_SOURCE=2 -Wall -Wno-multichar
 CPPFLAGS= -std=c++11 $(CFLAGS)
-DEFS= -DDEBUG
+DEFS= 
 INCS= -Itinythreadpp/ -I../intercom/
 
 LDFLAGS= -Wl,-z,defs -Wl,-z,relro -Wl,--as-needed -Wl,--no-undefined

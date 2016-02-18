@@ -3,6 +3,7 @@
 #include "sys_cfg.h"
 #include "tinythread.h"
 #include "intercom.h"
+#include "sys_can.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -51,7 +52,8 @@ void SysComHandler::receiveLoop() {
 			case intercom::DataMessage::MsgCan:
 				if (!ignore) {
 					intercom::DataMessage::CanMsg * can_msg = msg.getCanInfo();
-					if ((NULL != can_msg) && (can_msg->Bus >= 0)) {
+					if ((NULL != can_msg) && (can_msg->Bus >= 0) && (can_msg->Bus < CanDevice::NUM_CAN_DEVICES)) {
+						CanDevice::s_CanDevices[can_msg->Bus].insertRxMessage(ntohl(can_msg->Id), can_msg->Dlc, can_msg->Payload);
 					}
 				}
 				break;
