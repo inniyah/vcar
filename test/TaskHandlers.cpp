@@ -1,4 +1,5 @@
 #include "os.h"
+#include "ComSystem.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,6 +17,8 @@ void heartbeat(int fd, short event, void *arg) {
 
 TASK(init) {
 	fprintf(stderr, "<init>\n");
+
+	common::Singleton<ComSystem>::getInstance().init();
 
 	addEventEveryMs(ev_100ms, 100, task_100ms, NULL);
 	addEventEveryMs(ev_10ms,  10,  task_10ms,  NULL);

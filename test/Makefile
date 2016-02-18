@@ -3,11 +3,8 @@ PROGRAM=ecu
 all: $(PROGRAM)
 
 HEADERS = \
-	os.h \
 	os_cfg.h \
 	sys_cfg.h \
-	ISwc.h \
-	Swc.h \
 	can01.dbc.h
 
 SOURCES = \
@@ -20,6 +17,7 @@ SOURCES = \
 	sys_pwm.cpp \
 	TaskHandlers.cpp \
 	IsrHandlers.cpp \
+	ComSystem.cpp \
 	SwcBackLight.cpp \
 	SwcIntLight.cpp \
 	rte.cpp
