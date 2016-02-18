@@ -6,19 +6,24 @@ HEADERS = \
 	os.h \
 	os_cfg.h \
 	sys_cfg.h \
+	ISwc.h \
+	Swc.h \
 	can01.dbc.h
 
-SYS_OBJS= \
-	tinythreadpp/tinythread.o \
-	intercom.o \
-	sys_os.o \
-	sys_main.o
+SOURCES = \
+	tinythreadpp/tinythread.cpp \
+	intercom.cpp \
+	sys_os.cpp \
+	sys_main.cpp\
+	sys_com.cpp \
+	TaskHandlers.cpp \
+	IsrHandlers.cpp \
+	SwcBackLight.cpp \
+	SwcIntLight.cpp \
+	rte.cpp
 
-OBJS = \
-	$(SYS_OBJS) \
-	TaskHandlers.o \
-	IsrHandlers.o \
-	rte.o
+OBJS_DIR=./
+OBJS = $(addprefix $(OBJS_DIR)/,$(addsuffix .o,$(basename $(notdir $(SOURCES)))))
 
 PKG_CONFIG=
 PKG_CONFIG_CFLAGS=`pkg-config --cflags $(PKG_CONFIG) 2>/dev/null`
