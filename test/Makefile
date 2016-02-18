@@ -17,6 +17,7 @@ SOURCES = \
 	sys_pwm.cpp \
 	TaskHandlers.cpp \
 	IsrHandlers.cpp \
+	BusManager.cpp \
 	ComSystem.cpp \
 	SwcBackLight.cpp \
 	SwcIntLight.cpp \

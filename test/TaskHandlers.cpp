@@ -1,4 +1,5 @@
 #include "os.h"
+#include "BusManager.h"
 #include "ComSystem.h"
 
 #include <stdio.h>
@@ -13,12 +14,14 @@ event ev_hb;
 
 void heartbeat(int fd, short event, void *arg) {
 	printf("Heart Beat!\n");
+	common::Singleton<ComSystem>::getInstance().printCanBusRxSignals(0);
 }
 
 TASK(init) {
 	fprintf(stderr, "<init>\n");
 
 	common::Singleton<ComSystem>::getInstance().init();
+	common::Singleton<BusManager>::getInstance().init();
 
 	addEventEveryMs(ev_100ms, 100, task_100ms, NULL);
 	addEventEveryMs(ev_10ms,  10,  task_10ms,  NULL);
