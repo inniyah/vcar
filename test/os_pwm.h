@@ -1,5 +1,5 @@
-#ifndef OS_PWM_H_
-#define OS_PWM_H_
+#ifndef OS_PWM_H_7D9F1BD0_D666_11E5_86AD_10FEED04CD1C
+#define OS_PWM_H_7D9F1BD0_D666_11E5_86AD_10FEED04CD1C
 
 #include "os_cfg.h"
 #include "os_sched.h"
@@ -37,4 +37,4 @@ PwmOutputError       PwmOut_setDuty(PwmDevId pwm_id, uint16_t duty);
 }
 #endif
 
-#endif // OS_PWM_H_
+#endif // OS_PWM_H_7D9F1BD0_D666_11E5_86AD_10FEED04CD1C

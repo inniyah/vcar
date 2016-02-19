@@ -1,5 +1,5 @@
-#ifndef OS_CAN_H_
-#define OS_CAN_H_
+#ifndef OS_CAN_H_7D9F1C2A_D666_11E5_86AE_10FEED04CD1C
+#define OS_CAN_H_7D9F1C2A_D666_11E5_86AE_10FEED04CD1C
 
 #include "os_cfg.h"
 #include "os_sched.h"
@@ -72,4 +72,4 @@ CanDriverError       CanDriver_delRxMessage(CanDevId can_id);
 }
 #endif
 
-#endif // OS_CAN_H_
+#endif // OS_CAN_H_7D9F1C2A_D666_11E5_86AE_10FEED04CD1C

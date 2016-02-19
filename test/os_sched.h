@@ -1,5 +1,5 @@
-#ifndef OS_SCHED_H_
-#define OS_SCHED_H_
+#ifndef OS_SCHED_H_7D9F1B62_D666_11E5_86AC_10FEED04CD1C
+#define OS_SCHED_H_7D9F1B62_D666_11E5_86AC_10FEED04CD1C
 
 #include "os_cfg.h"
 
@@ -51,4 +51,4 @@ void addEventEverySec (struct event & ev, uint64_t s,  void (*fn)(int, short, vo
 }
 #endif
 
-#endif // OS_SCHED_H_
+#endif // OS_SCHED_H_7D9F1B62_D666_11E5_86AC_10FEED04CD1C

@@ -4,8 +4,6 @@
 #include <cstdlib>
 #include <atomic>
 
-namespace common {
-
 template <typename T>
 class SimpleQueue {
 private:
@@ -54,7 +52,5 @@ public:
 		return false; // The queue is empty
 	}
 };
-
-} // namespace common
 
 #endif // SIMPLE_QUEUE_H_5A11FEAE_D5CF_11E5_A970_10FEED04CD1C
